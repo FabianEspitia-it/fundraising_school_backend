@@ -114,7 +114,8 @@ def update_contact_user_info(contact_user: ContactUserReq, db: Session = Depends
     if not check_email(contact_user.email):
         raise HTTPException(status_code=400, detail="Invalid Email")
 
-    amount_rows = update_contact_info_user_by_email(db, contact_user.email, contact_user.contact_email, contact_user.nickname)
+    amount_rows = update_contact_info_user_by_email(
+        db, contact_user.email, contact_user.contact_email, contact_user.nickname)
 
     if amount_rows == 0:
         raise HTTPException(status_code=404, detail="Not Found")
@@ -140,7 +141,8 @@ def update_contact_user_info(image_user: ImageUserReq, db: Session = Depends(get
     if not check_email(image_user.email):
         raise HTTPException(status_code=400, detail="Invalid Email")
 
-    amount_rows = update_image_url_by_email(db, image_user.email, image_user.image)
+    amount_rows = update_image_url_by_email(
+        db, image_user.email, image_user.image)
 
     if amount_rows == 0:
         raise HTTPException(status_code=404, detail="Not Found")
@@ -167,7 +169,8 @@ def update_round_user_info(round_user: RoundUserReq, db: Session = Depends(get_d
     if not check_email(round_user.email):
         raise HTTPException(status_code=400, detail="Invalid Email")
 
-    amount_rows = update_round_info_user_by_email(db, round_user.email, round_user.seeking_capital, round_user.accept_terms_and_condition, round_user.round_name)
+    amount_rows = update_round_info_user_by_email(
+        db, round_user.email, round_user.seeking_capital, round_user.accept_terms_and_condition, round_user.round_name)
 
     if amount_rows == 0:
         raise HTTPException(status_code=404, detail="Not Found")
@@ -197,14 +200,13 @@ def user_new(new_user: NewUserReq, background_tasks: BackgroundTasks, db: Sessio
 
     if get_user_by_email(db=db, email=new_user.email):
         raise HTTPException(status_code=400, detail="Email registered")
-    
 
     background_tasks.add_task(user_scraper, db=db, req=new_user)
 
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
 
 
-@user.post("/user/favorite_fund" , tags=["users"])
+@user.post("/user/favorite_fund", tags=["users"])
 def add_favorite_fund(email: str, fund_id: int, db: Session = Depends(get_db)):
     """
     Add a favorite fund to a user's profile.
@@ -247,22 +249,22 @@ def get_favorite_fund_csv(email: str, db: Session = Depends(get_db)):
     user_record = get_user_by_email(db, email=email)
     if not user_record:
         raise HTTPException(status_code=404, detail="User not found")
-    
+
     favorite_funds = get_favorite_funds_by_user_id(db, email=email)
-    
+
     if not favorite_funds:
-        raise HTTPException(status_code=404, detail="No favorite funds found for this user.")
-    
+        raise HTTPException(
+            status_code=404, detail="No favorite funds found for this user.")
+
     df = pd.DataFrame([fund.__dict__ for fund in favorite_funds])
-    df = df.drop(columns=['_sa_instance_state'])  
-    
-    
+    df = df.drop(columns=['_sa_instance_state'])
+
     download_folder = os.path.join(os.path.expanduser("~"), "Descargas")
     os.makedirs(download_folder, exist_ok=True)
     file_path = os.path.join(download_folder, "favorite_funds.csv")
-    
+
     df.to_csv(file_path, index=False)
-    
+
     return FileResponse(path=file_path, filename="favorite_funds.csv", media_type="text/csv")
 
 
@@ -286,5 +288,91 @@ def delete_favorite_fund(email: str, fund_id: int, db: Session = Depends(get_db)
         raise HTTPException(status_code=400, detail="Invalid Email")
 
     delete_favorite_fund_by_user_id(db, email, fund_id)
+
+    return JSONResponse(content={"response": "deleted"}, status_code=status.HTTP_200_OK)
+
+
+@user.post("/user/favorite_startup", tags=["users"])
+def add_favorite_startup(email: str, startup_id: int, db: Session = Depends(get_db)):
+    """
+    Add a favorite startup to a user's profile.
+
+    Args:
+        email (str): The email address of the user.
+        startup_id (int): The unique identifier of the startup to add to the user's profile.
+        db (Session): The database session dependency.
+
+    Returns:
+        JSONResponse: A JSON response indicating that the favorite startup was added.
+
+    """
+
+    add_favorite_startup_to_user(db, email, startup_id)
+
+    return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
+
+
+@user.get("/user/favorite_startup/csv/{email}", tags=["users"])
+def get_favorite_startup_csv(email: str, db: Session = Depends(get_db)):
+    """
+    Retrieve a CSV file containing the favorite startups of a user.
+
+    Args:
+        email (str): The email address of the user.
+        db (Session): The database session dependency.
+
+    Returns:
+        FileResponse: A CSV file containing the favorite startups of the user.
+
+    Raises:
+        HTTPException: If the email is invalid (status code 400).
+        HTTPException: If the user is not found (status code 404).
+        HTTPException: If no favorite startups are found for the user (status code 404).
+    """
+    if not check_email(email):
+        raise HTTPException(status_code=400, detail="Invalid Email")
+
+    user_record = get_user_by_email(db, email=email)
+    if not user_record:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    favorite_startups = get_favorite_startups_by_user_id(db, email=email)
+
+    if not favorite_startups:
+        raise HTTPException(
+            status_code=404, detail="No favorite startups found for this user.")
+
+    df = pd.DataFrame([startup.__dict__ for startup in favorite_startups])
+    df = df.drop(columns=['_sa_instance_state'])
+
+    download_folder = os.path.join(os.path.expanduser("~"), "Descargas")
+    os.makedirs(download_folder, exist_ok=True)
+    file_path = os.path.join(download_folder, "favorite_startups.csv")
+
+    df.to_csv(file_path, index=False)
+
+    return FileResponse(path=file_path, filename="favorite_startups.csv", media_type="text/csv")
+
+
+@user.delete("/user/favorite_startup/{email}/{startup_id}", tags=["users"])
+def delete_favorite_startup(email: str, startup_id: int, db: Session = Depends(get_db)):
+    """
+    Delete a favorite startup from a user's profile.
+
+    Args:
+        email (str): The email address of the user.
+        startup_id (int): The unique identifier of the startup to delete from the user's profile.
+        db (Session): The database session dependency.
+
+    Returns:
+        JSONResponse: A JSON response indicating that the favorite startup was deleted.
+
+    Raises:
+        HTTPException: If the email is invalid (status code 400).
+    """
+    if not check_email(email):
+        raise HTTPException(status_code=400, detail="Invalid Email")
+
+    delete_favorite_startup_by_user_id(db, email, startup_id)
 
     return JSONResponse(content={"response": "deleted"}, status_code=status.HTTP_200_OK)

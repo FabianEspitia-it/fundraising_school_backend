@@ -258,8 +258,6 @@ def get_all_funds(db: Session, page: int, limit: int, user_email: str, country: 
     favorite_funds = get_favorite_funds_by_user_id(db, user_email)
     favorite_fund_ids = {fund.id for fund in favorite_funds}
 
-    print(favorite_funds)
-
     # Create the initial query with joinedload options
     query = db.query(Fund).options(
         joinedload(Fund.rounds),

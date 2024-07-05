@@ -5,7 +5,7 @@ from fastapi import FastAPI
 
 from src.users.router import user
 from src.vc_sheet.router import vc_sheet_router
-
+from src.startups.router import startup_router
 
 
 app = FastAPI()
@@ -14,6 +14,7 @@ app.title = "Fundraising School API"
 
 app.include_router(user)
 app.include_router(vc_sheet_router)
+app.include_router(startup_router)
 
 if __name__ == "__main__":
 
