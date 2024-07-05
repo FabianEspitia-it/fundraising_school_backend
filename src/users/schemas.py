@@ -27,6 +27,9 @@ class ImageUserReq(BaseModel):
     email: str
     image: str
 
+class FavFundReq(BaseModel):
+    email: str
+    fund_id: int
 
 # BD SCHEMAS 
 

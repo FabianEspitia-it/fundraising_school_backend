@@ -17,7 +17,6 @@ services:
     restart: always
     privileged: true
     shm_size: 2g
-    hostname: chrome
     ports:
       - "7900:7900"
     healthcheck:
@@ -34,11 +33,11 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - DB_SOURCE=postgresql://root:secret@db:5432/fundraising_school_db?sslmode=disable
+      - DB_SOURCE=postgresql://root:secret@fundraising-school-db-development.c942ssuu8bfm.us-east-2.rds.amazonaws.com:5432/fundraising_school_db?sslmode=require
       - PORT=8080
       - LINKEDIN_USER=pirajulian568@gmail.com
       - LINKEDIN_PASSWORD=Josepira1*
-      - WEBDRIVER_URL=http://chrome:4444/wd/hub
+      - WEBDRIVER_URL=http://localhost:4444/wd/hub
     depends_on:
       db:
         condition: service_healthy

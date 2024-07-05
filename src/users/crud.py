@@ -83,6 +83,14 @@ def add_favorite_fund_to_user(db: Session, email: str, fund_id: int) -> None:
         raise Exception("User not found")
 
 
+def get_favorite_fund_by_user_id(db: Session, email: str, fund_id: int) -> models.UserFundFavorite:
+    user = get_user_by_email(db, email)
+    if user:
+        return db.query(models.UserFundFavorite).filter(models.UserFundFavorite.user_id == user.id, models.UserFundFavorite.fund_id == fund_id).first()
+    else:
+        raise Exception("User not found")
+
+
 def get_favorite_funds_by_user_id(db: Session, email: str) -> list[models.Fund]:
 
     query = db.query(models.Fund).join(models.UserFundFavorite).join(

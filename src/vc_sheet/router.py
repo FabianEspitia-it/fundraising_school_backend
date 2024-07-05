@@ -11,7 +11,7 @@ vc_sheet_router = APIRouter()
 # FUND ROUTES
 
 @vc_sheet_router.get("/vc_sheet/funds", tags=["vc_sheet"])
-def get_funds(db: Session = Depends(get_db), page: int = 0, limit: int = 10, user_email: str = None):
+def get_funds(db: Session = Depends(get_db), page: int = 1, limit: int = 10, user_email: str | None = None, country: str | None = None, sector: str | None = None, check_size: str | None = None, fund_round: str | None = None):
     """
     Retrieve a list of venture capital funds.
 
@@ -23,8 +23,40 @@ def get_funds(db: Session = Depends(get_db), page: int = 0, limit: int = 10, use
     Returns:
         JSONResponse: A JSON response containing the list of funds.
     """
-    return get_all_funds(db=db, page=page, limit=limit, user_email=user_email )
+    return dict(page=page, total=total_funds(db, country, sector, check_size, fund_round), data=get_all_funds(db=db, page=page, limit=limit, user_email=user_email, country=country, sector=sector, check_size=check_size, round_op=fund_round))
 
+
+@vc_sheet_router.get("/vc_sheet/filter/options", tags=["vc_sheet"])
+def get_filter_options(db: Session = Depends(get_db)):
+    """
+    Retrieve the filter options for the venture capital funds.
+    Args:
+        db (Session, optional): Database session dependency.
+    Returns:
+        JSONResponse: A JSON response containing the filter options.
+    """
+    countries: list[str] = []
+    countries_db = get_countries(db=db)
+    for country in countries_db:
+        countries.append(country.name)
+
+
+    sectors: list[str] = []
+    sectors_db = get_sectors(db=db)
+    for sector in sectors_db:
+        sectors.append(sector.name)
+
+    check_size: list[str] = []
+    check_size_db = get_check_sizes(db=db)
+    for size in check_size_db:
+        check_size.append(size.size)
+
+    rounds: list[str] = []
+    rounds_db = get_rounds(db=db)
+    for round in rounds_db:
+        rounds.append(round.stage)    
+
+    return dict(countries=countries, sectors=sectors, check_size=check_size, rounds=rounds)
 
 @vc_sheet_router.get("/vc_sheet/funds/{fund_id}", tags=["vc_sheet"])
 def get_fund(fund_id: int, db: Session = Depends(get_db)):
@@ -48,6 +80,7 @@ def get_fund(fund_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Fund not found")
 
     return fund
+
 
 @vc_sheet_router.post("/vc_sheet/funds/add", tags=["vc_sheet"])
 def new_fund(db: Session = Depends(get_db)) -> JSONResponse:
@@ -76,7 +109,9 @@ def new_fund(db: Session = Depends(get_db)) -> JSONResponse:
 
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
 
+
 #PARTNER ROUTES
+
 
 @vc_sheet_router.post("/vc_sheet/partners/add", tags=["vc_sheet"])
 def new_partner(db: Session = Depends(get_db)) -> JSONResponse:
@@ -92,6 +127,7 @@ def new_partner(db: Session = Depends(get_db)) -> JSONResponse:
     add_partners_information(db=db)
 
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
+
 
 @vc_sheet_router.get("/vc_sheet/partners/{partner_id}", tags=["vc_sheet"])
 def get_partner(partner_id: int, db: Session = Depends(get_db)):
@@ -132,8 +168,6 @@ def new_investor(db: Session = Depends(get_db)) -> JSONResponse:
     create_bulk_crm_investors(db=db, crm_investors=investors)
 
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
-
-
 
 
 """

@@ -24,7 +24,7 @@ def move_down(url:str, scroll_count: int) -> BeautifulSoup:
         BeautifulSoup: A BeautifulSoup object containing the HTML of the scrolled page.
     """
 
-    driver = webdriver.Chrome()  
+    driver = webdriver.Remote(os.getenv("WEBDRIVER_URL"), webdriver.DesiredCapabilities.CHROME)
 
     driver.get(url)
 

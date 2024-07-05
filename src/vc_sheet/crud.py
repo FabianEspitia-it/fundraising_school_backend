@@ -248,17 +248,22 @@ def get_all_funds(db: Session, page: int, limit: int, user_email: str, country: 
         list[dict]: List of Fund objects with 'favorite' field added.
     """
     
-    # Get the user from the database
-    user = get_user_by_email(db, user_email)
-    
-    if not user:
-        raise ValueError("User not found")
-    
-    # Retrieve favorite funds
-    favorite_funds = get_favorite_funds_by_user_id(db, user_email)
-    favorite_fund_ids = {fund.id for fund in favorite_funds}
+    favorite_fund_ids = set()
 
+    if user_email:
+        user = get_user_by_email(db, user_email)
+    
+        if not user:
+            raise ValueError("User not found")
+    
+        favorite_funds = get_favorite_funds_by_user_id(db, user_email)
+        favorite_fund_ids = {fund.id for fund in favorite_funds}
+
+<<<<<<< HEAD
     # Create the initial query with joinedload options
+=======
+
+>>>>>>> 19e38221e0b895a0034557c9850e556273502174
     query = db.query(Fund).options(
         joinedload(Fund.rounds),
         joinedload(Fund.partners),
@@ -267,29 +272,21 @@ def get_all_funds(db: Session, page: int, limit: int, user_email: str, country: 
         joinedload(Fund.sectors)
     )
 
-    # Apply filters before pagination
     if country:
-        print("Country filter applied", country)
         query = query.join(Fund.countries).filter(Country.name == country)
 
     if sector:
-        print("Sector filter applied", sector)
         query = query.join(Fund.sectors).filter(Sector.name == sector)
 
     if check_size:
-        print("Check size filter applied", check_size)
         query = query.join(Fund.check_size).filter(CheckSize.size == check_size)
 
     if round_op:
-        print("Round filter applied", round_op)
         query = query.join(Fund.rounds).filter(Round.stage == round_op)  
 
-    # Apply pagination after filters and sorting
     query = query.offset((page - 1) * limit).limit(limit)
 
-    # Retrieve funds and convert to list of dicts with 'favorite' field
     funds = query.all()
-    
     
     funds_with_favorite = []
     for fund in funds:
@@ -298,9 +295,6 @@ def get_all_funds(db: Session, page: int, limit: int, user_email: str, country: 
         funds_with_favorite.append(fund_dict)
     
     return funds_with_favorite
-
-
-
 
 
 def get_fund_countries_invest(db: Session, fund_id: int) -> list[str]:
@@ -506,7 +500,7 @@ def create_bulk_crm_investors(db: Session, crm_investors: list[dict]) -> None:
         db.add(investor_data)
         db.commit()
         db.refresh(investor_data)
-        print(f"{investor["name"]} created and committed.")
+        print(f"{investor['name']} created and committed.")
 
         for sector in investor["sector_and_stage"]:
             sector = db.query(CrmSectorAndStage).filter(CrmSectorAndStage.name == sector).first()
