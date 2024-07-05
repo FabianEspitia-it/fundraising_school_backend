@@ -355,13 +355,12 @@ def get_favorite_startup_csv(email: str, db: Session = Depends(get_db)):
     df = pd.DataFrame([startup.__dict__ for startup in favorite_startups])
     df = df.drop(columns=['_sa_instance_state'])
 
-    download_folder = os.path.join(os.path.expanduser("~"), "Descargas")
-    os.makedirs(download_folder, exist_ok=True)
-    file_path = os.path.join(download_folder, "favorite_startups.csv")
+    # Using BytesIO to save the CSV in memory
+    buffer = io.BytesIO()
+    df.to_csv(buffer, index=False)
+    buffer.seek(0)
 
-    df.to_csv(file_path, index=False)
-
-    return FileResponse(path=file_path, filename="favorite_startups.csv", media_type="text/csv")
+    return StreamingResponse(buffer, media_type="text/csv", headers={"Content-Disposition": "attachment;filename=favorite_startups.csv"})
 
 
 @user.delete("/user/favorite_startup/{email}/{startup_id}", tags=["users"])
