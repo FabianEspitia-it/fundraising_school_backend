@@ -308,6 +308,7 @@ class Startup(Base):
     linkedin = Column(String(255), nullable=True)
     photo = Column(String(255), nullable=True)
     calendly = Column(String(255), nullable=True)
+    deck = Column(String(255), nullable=True)
 
     sector_id = Column(Integer, ForeignKey("sector.id"))
     round_id = Column(Integer, ForeignKey("round.id"))

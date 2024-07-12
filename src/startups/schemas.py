@@ -14,6 +14,7 @@ class NewStartupReq(BaseModel):
     linkedin: str
     photo: Union[str, None] = None
     calendly: Union[str, None] = None
+    deck: Union[str, None] = None
     sector: str
     round: str
     checksize: str
@@ -29,6 +30,7 @@ class UpdateStartupReq(BaseModel):
     website: Union[str, None] = None
     linkedin: Union[str, None] = None
     photo: Union[str, None] = None
+    deck: Union[str, None] = None
     calendly: Union[str, None] = None
     sector: Union[str, None] = None
     round: Union[str, None] = None
