@@ -385,3 +385,28 @@ def delete_favorite_startup(email: str, startup_id: int, db: Session = Depends(g
     delete_favorite_startup_by_user_id(db, email, startup_id)
 
     return JSONResponse(content={"response": "deleted"}, status_code=status.HTTP_200_OK)
+
+
+@user.patch("/user/update_info/{email}", tags=["users"])
+def update_user_info(email: str, user_data: UpdateUserReq, db: Session = Depends(get_db)):
+    """
+    Update user information.
+
+    Args:
+        email (str): The email address of the user.
+        user_data (dict): The user information to update.
+        db (Session): The database session dependency.
+
+    Returns:
+        JSONResponse: A JSON response indicating that the user was updated.
+
+    Raises:
+        HTTPException: If the email is invalid (status code 400).
+    """
+    updated_user = update_user_by_email(
+        db=db, email=email, user_data=user_data)
+
+    if not updated_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return JSONResponse(content={"response": "updated"}, status_code=status.HTTP_200_OK)

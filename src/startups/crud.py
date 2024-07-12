@@ -2,10 +2,11 @@ from sqlalchemy.orm import Session, joinedload
 
 from src.models import *
 
+from src.startups.schemas import NewStartupReq, UpdateStartupReq
 from src.users.crud import get_user_by_email, get_favorite_startups_by_user_id
 
 
-def get_all_startups(db: Session, page: int, limit: int, user_email: str, location: str = None, sector: str = None) -> list[dict]:
+def get_all_startups(db: Session, page: int, limit: int, user_email: str, sector: str = None, location: str = None, round: str = None, check_size: str = None) -> list[dict]:
 
     # Get the user from the database
     user = get_user_by_email(db, user_email)
@@ -26,6 +27,19 @@ def get_all_startups(db: Session, page: int, limit: int, user_email: str, locati
         print("Sector filter applied", sector)
         query = query.join(Startup.sector).filter(Sector.name == sector)
 
+    if location:
+        print("Location filter applied", location)
+        query = query.filter(Startup.location == location)
+
+    if round:
+        print("Round filter applied", round)
+        query = query.join(Startup.round).filter(Round.stage == round)
+
+    if check_size:
+        print("Check size filter applied", check_size)
+        query = query.join(Startup.checksize).filter(
+            CheckSize.size == check_size)
+
     # Apply pagination after filters and sorting
     query = query.offset((page - 1) * limit).limit(limit)
 
@@ -43,3 +57,47 @@ def get_all_startups(db: Session, page: int, limit: int, user_email: str, locati
 
 def get_startup_by_id(db: Session, startup_id: int) -> Startup:
     return db.query(Startup).filter(Startup.id == startup_id).first()
+
+
+def create_startup(db: Session, startup: NewStartupReq) -> Startup:
+    startup_data = startup.model_dump()
+    new_startup = Startup(
+        name=startup_data["name"],
+        email=startup_data["email"],
+        description=startup_data["description"],
+        country_code=startup_data["country_code"],
+        whatsapp=startup_data["whatsapp"],
+        location=startup_data["location"],
+        website=startup_data["website"],
+        linkedin=startup_data["linkedin"],
+        photo=startup_data["photo"],
+        calendly=startup_data["calendly"],
+        sector_id=db.query(Sector).filter(
+            Sector.name == startup_data["sector"]).first().id,
+        round_id=db.query(Round).filter(
+            Round.stage == startup_data["round"]).first().id,
+        checksize_id=db.query(CheckSize).filter(
+            CheckSize.size == startup_data["checksize"]).first().id
+    )
+    db.add(new_startup)
+    db.commit()
+    db.refresh(new_startup)
+    return new_startup
+
+
+def update_startup_by_id(db: Session, startup_id: int, startup: UpdateStartupReq) -> Startup:
+
+    startup_to_update = db.query(Startup).filter(
+        Startup.id == startup_id).first()
+
+    if not startup_to_update:
+        raise ValueError("Startup not found")
+
+    update_data = startup.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(startup_to_update, key, value)
+
+    db.commit()
+    db.refresh(startup_to_update)
+
+    return startup_to_update

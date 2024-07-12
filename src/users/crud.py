@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from src.users.schemas import NewUserReq
+from src.users.schemas import NewUserReq, UpdateUserReq
 
 import src.models as models
 
@@ -137,3 +137,21 @@ def delete_favorite_startup_by_user_id(db: Session, email: str, startup_id: int)
         db.commit()
     else:
         raise Exception("User not found")
+
+
+def update_user_by_email(db: Session, email: str, user_data: UpdateUserReq) -> models.User:
+
+    user = db.query(models.User).filter(
+        models.User.email == email).first()
+
+    if not user:
+        raise ValueError("User not found")
+
+    update_data = user_data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(user, key, value)
+
+    db.commit()
+    db.refresh(user)
+
+    return user

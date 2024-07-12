@@ -131,6 +131,8 @@ class CheckSize(Base):
     funds = relationship("Fund", secondary="fund_check_size",
                          back_populates='check_size', overlaps="fund")
 
+    startups = relationship("Startup", back_populates="check_size")
+
 
 class Country(Base):
     __tablename__ = 'country'
@@ -162,6 +164,8 @@ class Round(Base):
                             back_populates='rounds', overlaps="investor")
     fund = relationship("Fund", secondary="fund_rounds",
                         back_populates='rounds', overlaps="fund")
+
+    startup = relationship("Startup", back_populates="round")
 
 
 class User(Base):
@@ -295,17 +299,25 @@ class Startup(Base):
     __tablename__ = "startup"
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False)
+    email = Column(String(255), nullable=True)
     description = Column(Text, nullable=True)
+    country_code = Column(String(10), nullable=True)
+    whatsapp = Column(String(20), nullable=True)
     location = Column(String(100), nullable=True)
     website = Column(String(255), nullable=True)
     linkedin = Column(String(255), nullable=True)
-    twitter = Column(String(255), nullable=True)
     photo = Column(String(255), nullable=True)
-    crunch_base = Column(String(255), nullable=True)
-    contact = Column(String(255), nullable=True)
+    calendly = Column(String(255), nullable=True)
+
     sector_id = Column(Integer, ForeignKey("sector.id"))
+    round_id = Column(Integer, ForeignKey("round.id"))
+    checksize_id = Column(Integer, ForeignKey("check_size.id"))
+
+    check_size = relationship("CheckSize", back_populates="startups")
 
     sector = relationship("Sector", back_populates="startups")
+
+    round = relationship("Round", back_populates="startup")
 
     users = relationship("User", secondary="startup_users",
                          back_populates="startups", overlaps="user")
