@@ -1,22 +1,10 @@
 services:
-  db:
-    image: postgres:16-alpine
-    restart: always
-    environment:
-      - POSTGRES_DB=fundraising_school_db
-      - POSTGRES_PASSWORD=secret
-      - POSTGRES_USER=root
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U root -d fundraising_school_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   webdriver:
     image: selenium/standalone-chrome:latest
     restart: always
     privileged: true
     shm_size: 2g
+    hostname: chrome
     ports:
       - "7900:7900"
     healthcheck:
@@ -33,13 +21,11 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - DB_SOURCE=postgresql://root:secret@fundraising-school-db-development.c942ssuu8bfm.us-east-2.rds.amazonaws.com:5432/fundraising_school_db?sslmode=require
+      - DB_SOURCE=postgresql://root:M#Build#M@fundraising-school-db-development.c942ssuu8bfm.us-east-2.rds.amazonaws.com:5432/fundraising_school_db
       - PORT=8080
       - LINKEDIN_USER=pirajulian568@gmail.com
       - LINKEDIN_PASSWORD=Josepira1*
-      - WEBDRIVER_URL=http://localhost:4444/wd/hub
+      - WEBDRIVER_URL=http://chrome:4444/wd/hub
     depends_on:
-      db:
-        condition: service_healthy
       webdriver:
         condition: service_healthy
