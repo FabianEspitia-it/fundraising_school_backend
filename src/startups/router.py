@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from src.database import get_db
 from src.startups.crud import *
 
-from src.startups.schemas import NewStartupReq, UpdateStartupReq
+from src.startups.schemas import NewStartupReq, UpdateStartupReq, CreateBulkStartupReq
 
 
 startup_router = APIRouter()
@@ -96,3 +96,21 @@ def update_startup(startup_id: int, startup: UpdateStartupReq, db: Session = Dep
         raise HTTPException(status_code=404, detail="Startup not found")
 
     return JSONResponse(content={"response": "updated"}, status_code=status.HTTP_200_OK)
+
+
+@startup_router.post("/startups/bulk", tags=["startups"])
+def add_bulk_startups(startups: list[CreateBulkStartupReq], db: Session = Depends(get_db)):
+    """
+    Add multiple startups.
+
+    Args:
+        startups (list[NewStartupReq]): The list of startup information to add.
+        db (Session, optional): Database session dependency.
+
+    Returns:
+        JSONResponse: A JSON response containing the newly added startups information.
+    """
+
+    create_bulk_startup(db=db, startup_data_list=startups)
+
+    return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)

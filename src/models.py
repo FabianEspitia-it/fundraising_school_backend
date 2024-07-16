@@ -142,6 +142,8 @@ class Country(Base):
     funds = relationship("Fund", secondary="fund_countries",
                          back_populates='countries', overlaps="fund")
 
+    startups = relationship("Startup", back_populates="country")
+
 
 class Sector(Base):
     __tablename__ = 'sector'
@@ -303,16 +305,20 @@ class Startup(Base):
     email = Column(String(255), nullable=True)
     description = Column(Text, nullable=True)
     phone_number = Column(String(20), nullable=True)
-    location = Column(String(100), nullable=True)
     website = Column(String(255), nullable=True)
     linkedin = Column(String(255), nullable=True)
     photo = Column(String(255), nullable=True)
     calendly = Column(String(255), nullable=True)
     deck = Column(String(255), nullable=True)
+    traction = Column(Text, nullable=True)
+    fund_raised = Column(Text, nullable=True)
 
+    country_id = Column(Integer, ForeignKey("country.id"))
     sector_id = Column(Integer, ForeignKey("sector.id"))
     round_id = Column(Integer, ForeignKey("round.id"))
     checksize_id = Column(Integer, ForeignKey("check_size.id"))
+
+    country = relationship("Country", back_populates="startups")
 
     check_size = relationship("CheckSize", back_populates="startups")
 

@@ -33,3 +33,15 @@ class UpdateStartupReq(BaseModel):
     sector: Union[str, None] = None
     round: Union[str, None] = None
     checksize: Union[str, None] = None
+
+
+class CreateBulkStartupReq(BaseModel):
+    name: str
+    description: str
+    phone_number: str
+    country: str
+    website: str
+    photo: Union[str, None] = None
+    sector: str
+    traction: str
+    fund_raised: str

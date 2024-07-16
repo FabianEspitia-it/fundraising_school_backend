@@ -2,8 +2,10 @@ from sqlalchemy.orm import Session, joinedload
 
 from src.models import *
 
-from src.startups.schemas import NewStartupReq, UpdateStartupReq
+from src.startups.schemas import NewStartupReq, UpdateStartupReq, CreateBulkStartupReq
 from src.users.crud import get_user_by_email, get_favorite_startups_by_user_id
+
+from sqlalchemy.exc import SQLAlchemyError
 
 
 def get_all_startups(db: Session, page: int, limit: int, user_email: str, sector: str = None, location: str = None, round: str = None, check_size: str = None) -> list[dict]:
@@ -101,3 +103,43 @@ def update_startup_by_id(db: Session, startup_id: int, startup: UpdateStartupReq
     db.refresh(startup_to_update)
 
     return startup_to_update
+
+
+def get_or_create(db: Session, model, **kwargs):
+    instance = db.query(model).filter_by(**kwargs).first()
+    if instance:
+        return instance
+    else:
+        instance = model(**kwargs)
+        db.add(instance)
+        db.commit()
+        db.refresh(instance)
+        return instance
+
+
+def create_bulk_startup(db: Session, startup_data_list: list[CreateBulkStartupReq]):
+    try:
+        for startup_data in startup_data_list:
+
+            sector = get_or_create(db, Sector, name=startup_data.sector)
+
+            country = get_or_create(db, Country, name=startup_data.country)
+
+            startup = Startup(
+                name=startup_data.name,
+                description=startup_data.description,
+                phone_number=startup_data.phone_number,
+                country=country,
+                website=startup_data.website,
+                photo=startup_data.photo,
+                sector=sector,
+                traction=startup_data.traction,
+                fund_raised=startup_data.fund_raised
+            )
+
+            db.add(startup)
+
+        db.commit()
+    except SQLAlchemyError as e:
+        db.rollback()
+        raise e
