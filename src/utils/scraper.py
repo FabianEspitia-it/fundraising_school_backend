@@ -22,10 +22,18 @@ def move_down(url: str, scroll_count: int) -> BeautifulSoup:
     Returns:
         BeautifulSoup: A BeautifulSoup object containing the HTML of the scrolled page.
     """
-    webdriver_url = os.getenv("WEBDRIVER_URL")
-    
-    if not webdriver_url:
-        raise ValueError("WEBDRIVER_URL environment variable is not set")
+
+    driver = webdriver.Remote(
+        os.getenv("WEBDRIVER_URL"), webdriver.DesiredCapabilities.CHROME)
+
+    driver.get(url)
+
+    for _ in range(scroll_count):
+        driver.execute_script(
+            "window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(4)
+
+    html = driver.page_source
 
     options = webdriver.ChromeOptions()
     
@@ -127,12 +135,13 @@ def authenticate_linkedin() -> Linkedin | None:
 
     amount_attempts = 0
     while not linkedin_connect:
-        
+
         if amount_attempts >= 10:
             return None
-        
+
         try:
-            linkedin_connect = Linkedin(os.getenv("LINKEDIN_USER"), os.getenv("LINKEDIN_PASSWORD"))
+            linkedin_connect = Linkedin(
+                os.getenv("LINKEDIN_USER"), os.getenv("LINKEDIN_PASSWORD"))
         except Exception as e:
             print(f"[WARNING] Error while authenticating LinkedIn: {e}")
 

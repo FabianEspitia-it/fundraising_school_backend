@@ -39,19 +39,21 @@ def create_bulk_fund(db: Session, funds: list[Fund], fund_rounds: list[list[str]
     for rounds in fund_rounds:
         for round_stage in rounds:
             round = db.query(Round).filter(Round.stage == round_stage).first()
-            
+
             if not round:
                 round = Round(stage=round_stage)
                 db.add(round)
                 db.commit()
                 db.refresh(round)
                 print(f"New round created and committed: {round_stage}")
-            
-            existing_association = db.query(FundRound).filter_by(fund_id=fund_id, round_id=round.id).first()
+
+            existing_association = db.query(FundRound).filter_by(
+                fund_id=fund_id, round_id=round.id).first()
             if existing_association is None:
                 db.add(FundRound(fund_id=fund_id, round_id=round.id))
                 db.commit()
-                print(f"FundRound association created: fund_id={fund_id}, round_id={round.id}")
+                print(f"FundRound association created: fund_id={
+                      fund_id}, round_id={round.id}")
         fund_id += 1
 
     fund_id = 1
@@ -59,20 +61,23 @@ def create_bulk_fund(db: Session, funds: list[Fund], fund_rounds: list[list[str]
     print("Processing fund countries...")
     for countries in fund_countries:
         for country_name in countries:
-            country = db.query(Country).filter(Country.name == country_name).first()
-            
+            country = db.query(Country).filter(
+                Country.name == country_name).first()
+
             if not country:
                 country = Country(name=country_name)
                 db.add(country)
                 db.commit()
                 db.refresh(country)
                 print(f"New country created and committed: {country_name}")
-            
-            existing_association = db.query(FundCountry).filter_by(fund_id=fund_id, country_id=country.id).first()
+
+            existing_association = db.query(FundCountry).filter_by(
+                fund_id=fund_id, country_id=country.id).first()
             if existing_association is None:
                 db.add(FundCountry(fund_id=fund_id, country_id=country.id))
                 db.commit()
-                print(f"FundCountry association created: fund_id={fund_id}, country_id={country.id}")
+                print(f"FundCountry association created: fund_id={
+                      fund_id}, country_id={country.id}")
         fund_id += 1
 
     fund_id = 1
@@ -80,18 +85,21 @@ def create_bulk_fund(db: Session, funds: list[Fund], fund_rounds: list[list[str]
     print("Processing fund partners...")
     for partners in fund_partners:
         for partner_name in partners:
-            partner = db.query(Partner).filter(Partner.name == partner_name).first()
+            partner = db.query(Partner).filter(
+                Partner.name == partner_name).first()
             if not partner:
                 partner = Partner(name=partner_name)
                 db.add(partner)
                 db.commit()
                 db.refresh(partner)
                 print(f"New partner created and committed: {partner_name}")
-            existing_association = db.query(FundPartner).filter_by(fund_id=fund_id, partner_id=partner.id).first()
+            existing_association = db.query(FundPartner).filter_by(
+                fund_id=fund_id, partner_id=partner.id).first()
             if existing_association is None:
                 db.add(FundPartner(fund_id=fund_id, partner_id=partner.id))
                 db.commit()
-                print(f"FundPartner association created: fund_id={fund_id}, partner_id={partner.id}")
+                print(f"FundPartner association created: fund_id={
+                      fund_id}, partner_id={partner.id}")
         fund_id += 1
 
     fund_id = 1
@@ -99,18 +107,21 @@ def create_bulk_fund(db: Session, funds: list[Fund], fund_rounds: list[list[str]
     print("Processing fund check sizes...")
     for check_sizes in fund_check_size:
         for check_size in check_sizes:
-            check = db.query(CheckSize).filter(CheckSize.size == check_size).first()
+            check = db.query(CheckSize).filter(
+                CheckSize.size == check_size).first()
             if not check:
                 check = CheckSize(size=check_size)
                 db.add(check)
                 db.commit()
                 db.refresh(check)
                 print(f"New check size created and committed: {check_size}")
-            existing_association = db.query(FundCheckSize).filter_by(fund_id=fund_id, check_size_id=check.id).first()
+            existing_association = db.query(FundCheckSize).filter_by(
+                fund_id=fund_id, check_size_id=check.id).first()
             if existing_association is None:
                 db.add(FundCheckSize(fund_id=fund_id, check_size_id=check.id))
                 db.commit()
-                print(f"FundCheckSize association created: fund_id={fund_id}, check_size_id={check.id}")
+                print(f"FundCheckSize association created: fund_id={
+                      fund_id}, check_size_id={check.id}")
         fund_id += 1
 
     fund_id = 1
@@ -118,21 +129,22 @@ def create_bulk_fund(db: Session, funds: list[Fund], fund_rounds: list[list[str]
     print("Processing fund sectors...")
     for sectors in fund_sectors:
         for sector_name in sectors:
-            sector = db.query(Sector).filter(Sector.name == sector_name).first()
+            sector = db.query(Sector).filter(
+                Sector.name == sector_name).first()
             if not sector:
                 sector = Sector(name=sector_name)
                 db.add(sector)
                 db.commit()
                 db.refresh(sector)
                 print(f"New sector created and committed: {sector_name}")
-            existing_association = db.query(FundSector).filter_by(fund_id=fund_id, sector_id=sector.id).first()
+            existing_association = db.query(FundSector).filter_by(
+                fund_id=fund_id, sector_id=sector.id).first()
             if existing_association is None:
                 db.add(FundSector(fund_id=fund_id, sector_id=sector.id))
                 db.commit()
-                print(f"FundSector association created: fund_id={fund_id}, sector_id={sector.id}")
+                print(f"FundSector association created: fund_id={
+                      fund_id}, sector_id={sector.id}")
         fund_id += 1
-
-    
 
     print("Updating partner links...")
     for partner_links_group in partner_links:
@@ -140,14 +152,14 @@ def create_bulk_fund(db: Session, funds: list[Fund], fund_rounds: list[list[str]
 
             name = partner_link.split("/who/")[1].replace("-", " ").title()
             partner = db.query(Partner).filter(Partner.name == name).first()
-            
+
             if partner:
                 partner.vc_link = partner_link
                 db.commit()
                 db.refresh(partner)
-                print(f"Partner link updated for partner_id={fund_id}, vc_link={partner_link}")
+                print(f"Partner link updated for partner_id={
+                      fund_id}, vc_link={partner_link}")
 
-    
     print("--- %s seconds ---" % (time.time() - start_time))
 
 
@@ -247,18 +259,17 @@ def get_all_funds(db: Session, page: int, limit: int, user_email: str, country: 
     Returns:
         list[dict]: List of Fund objects with 'favorite' field added.
     """
-    
+
     favorite_fund_ids = set()
 
     if user_email:
         user = get_user_by_email(db, user_email)
-    
+
         if not user:
             raise ValueError("User not found")
-    
+
         favorite_funds = get_favorite_funds_by_user_id(db, user_email)
         favorite_fund_ids = {fund.id for fund in favorite_funds}
-
 
     query = db.query(Fund).options(
         joinedload(Fund.rounds),
@@ -275,21 +286,22 @@ def get_all_funds(db: Session, page: int, limit: int, user_email: str, country: 
         query = query.join(Fund.sectors).filter(Sector.name == sector)
 
     if check_size:
-        query = query.join(Fund.check_size).filter(CheckSize.size == check_size)
+        query = query.join(Fund.check_size).filter(
+            CheckSize.size == check_size)
 
     if round_op:
-        query = query.join(Fund.rounds).filter(Round.stage == round_op)  
+        query = query.join(Fund.rounds).filter(Round.stage == round_op)
 
     query = query.offset((page - 1) * limit).limit(limit)
 
     funds = query.all()
-    
+
     funds_with_favorite = []
     for fund in funds:
         fund_dict = fund.__dict__.copy()
         fund_dict['favorite'] = fund.id in favorite_fund_ids
         funds_with_favorite.append(fund_dict)
-    
+
     return funds_with_favorite
 
 
@@ -304,7 +316,8 @@ def get_fund_countries_invest(db: Session, fund_id: int) -> list[str]:
     Returns:
         list[str]: List of country names.
     """
-    country_names = db.query(Country.name).join(FundCountry).filter(FundCountry.fund_id == fund_id).all()
+    country_names = db.query(Country.name).join(
+        FundCountry).filter(FundCountry.fund_id == fund_id).all()
     return [country_name[0] for country_name in country_names]
 
 
@@ -340,10 +353,11 @@ def add_partners_information(db: Session):
                 db.refresh(partner)
                 print(f"added: {partner_id} partner")
                 partner_id += 1
-            
+
             except:
                 print(f"error: {partner_id} partner")
                 partner_id += 1
+
 
 def get_all_partners(db: Session, page: int, limit: int):
     """
@@ -409,7 +423,8 @@ def create_bulk_investors(db: Session, investors: list[Investor], investor_round
 
     for i in investor_rounds:
         for j in i:
-            db.add(InvestorRound(investor_id=investor_id, round_id=db.query(Round).filter(Round.stage == j).first().id))
+            db.add(InvestorRound(investor_id=investor_id, round_id=db.query(
+                Round).filter(Round.stage == j).first().id))
             db.commit()
         investor_id += 1
 
@@ -499,42 +514,40 @@ def create_bulk_crm_investors(db: Session, crm_investors: list[dict]) -> None:
         print(f"{investor['name']} created and committed.")
 
         for sector in investor["sector_and_stage"]:
-            sector = db.query(CrmSectorAndStage).filter(CrmSectorAndStage.name == sector).first()
+            sector = db.query(CrmSectorAndStage).filter(
+                CrmSectorAndStage.name == sector).first()
             if not sector:
                 sector = CrmSectorAndStage(name=sector)
                 db.add(sector)
                 db.commit()
                 db.refresh(sector)
                 print(f"New sector created and committed: {sector}")
-            existing_association = db.query(CrmInvestorSectorAndStage).filter_by(investor_id=investor_id_count, sector_id=sector.id).first()
+            existing_association = db.query(CrmInvestorSectorAndStage).filter_by(
+                investor_id=investor_id_count, sector_id=sector.id).first()
             if existing_association is None:
-                db.add(CrmInvestorSectorAndStage(investor_id=investor["id"], sector_id=sector.id))
+                db.add(CrmInvestorSectorAndStage(
+                    investor_id=investor["id"], sector_id=sector.id))
                 db.commit()
-                print(f"CrmInvestorSector association created: investor_id={investor['id']}, sector_id={sector.id}")
-        
+                print(f"CrmInvestorSector association created: investor_id={
+                      investor['id']}, sector_id={sector.id}")
+
         for invest_range in investor["invest_range_final"]:
-            invest_range = db.query(CrmInvestRange).filter(CrmInvestRange.size == invest_range).first()
+            invest_range = db.query(CrmInvestRange).filter(
+                CrmInvestRange.size == invest_range).first()
             if not invest_range:
                 invest_range = CrmInvestRange(size=invest_range)
                 db.add(invest_range)
                 db.commit()
                 db.refresh(invest_range)
-                print(f"New invest range created and committed: {invest_range}")
-            existing_association = db.query(CrmInvestorInvestRange).filter_by(investor_id=investor_id_count, invest_range_id=invest_range.id).first()
+                print(f"New invest range created and committed: {
+                      invest_range}")
+            existing_association = db.query(CrmInvestorInvestRange).filter_by(
+                investor_id=investor_id_count, invest_range_id=invest_range.id).first()
             if existing_association is None:
-                db.add(CrmInvestorInvestRange(investor_id=investor["id"], invest_range_id=invest_range.id))
+                db.add(CrmInvestorInvestRange(
+                    investor_id=investor["id"], invest_range_id=invest_range.id))
                 db.commit()
-                print(f"CrmInvestorInvestRange association created: investor_id={investor['id']}, invest_range_id={invest_range.id}")
+                print(f"CrmInvestorInvestRange association created: investor_id={
+                      investor['id']}, invest_range_id={invest_range.id}")
 
         investor_id_count += 1
-
-   
-
-
-       
-
-
-    
-
-
-
