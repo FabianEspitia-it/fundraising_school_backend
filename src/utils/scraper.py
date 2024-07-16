@@ -35,9 +35,29 @@ def move_down(url: str, scroll_count: int) -> BeautifulSoup:
 
     html = driver.page_source
 
-    driver.quit()
-
-    return BeautifulSoup(html, "html.parser")
+    options = webdriver.ChromeOptions()
+    
+    try:
+        driver = webdriver.Remote(
+            command_executor=webdriver_url,
+            options=options
+        )
+        
+        driver.get(url)
+        
+        for _ in range(scroll_count):
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            time.sleep(4)  
+        
+        html = driver.page_source
+        
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        html = ""
+    finally:
+        driver.quit()
+    
+    return BeautifulSoup(html, "html.parser") if html else None
 
 
 def internet_search(search: str) -> requests.Response:
