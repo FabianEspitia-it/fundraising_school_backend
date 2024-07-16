@@ -7,8 +7,7 @@ class NewStartupReq(BaseModel):
     name: str
     email: str
     description: str
-    country_code: str
-    whatsapp: str
+    phone_number: str
     location: str
     website: str
     linkedin: str
@@ -24,8 +23,7 @@ class UpdateStartupReq(BaseModel):
     name: Union[str, None] = None
     email: Union[str, None] = None
     description: Union[str, None] = None
-    country_code: Union[str, None] = None
-    whatsapp: Union[str, None] = None
+    phone_number: Union[str, None] = None
     location: Union[str, None] = None
     website: Union[str, None] = None
     linkedin: Union[str, None] = None

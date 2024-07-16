@@ -43,6 +43,7 @@ class User(BaseModel):
     id: int
     name: str
     followers_amount: int
+    phone_number: str
     linkedin_url: str
     location: str
     photo_url: str
@@ -101,6 +102,7 @@ class UpdateUserReq(BaseModel):
 
     nickname: Union[str, None] = None
     contact_email: Union[str, None] = None
+    phone_number: Union[str, None] = None
     photo_url: Union[str, None] = None
     seeking_capital: Union[bool, None] = None
     location: Union[str, None] = None
