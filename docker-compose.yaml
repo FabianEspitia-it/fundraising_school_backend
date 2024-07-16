@@ -21,7 +21,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - DB_SOURCE=postgresql://root:M#Build#M@fundraising-school-db-development.c942ssuu8bfm.us-east-2.rds.amazonaws.com:5432/fundraising_school_db
+      - DB_SOURCE=
       - PORT=8080
       - LINKEDIN_USER=pirajulian568@gmail.com
       - LINKEDIN_PASSWORD=Josepira1*
