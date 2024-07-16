@@ -1,6 +1,7 @@
+from typing import List
 from sqlalchemy.orm import Session
 
-from src.users.schemas import NewUserReq, UpdateUserReq
+from src.users.schemas import NewUserReq, UpdateUserReq, UserStartupReq
 
 import src.models as models
 
@@ -155,3 +156,55 @@ def update_user_by_email(db: Session, email: str, user_data: UpdateUserReq) -> m
     db.refresh(user)
 
     return user
+
+
+def create_user_startup(db: Session, user_data: UserStartupReq) -> None:
+    user = models.User(
+        nickname=user_data.nickname,
+        email=user_data.email,
+        linkedin_url=user_data.linkedin_url,
+        phone_number=user_data.phone_number,
+        location=user_data.location
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    startup = db.query(models.Startup).filter(
+        models.Startup.name == user_data.startup_name).first()
+
+    if startup:
+        user_startup = models.StartupUser(
+            user_id=user.id,
+            startup_id=startup.id
+        )
+        db.add(user_startup)
+        db.commit()
+
+    else:
+        raise Exception("Startup not found")
+
+
+def create_bulk_user_startup(db: Session, user_data_list: List[UserStartupReq]) -> None:
+    for user_data in user_data_list:
+        user = models.User(
+            nickname=user_data.nickname,
+            email=user_data.email,
+            linkedin_url=user_data.linkedin_url,
+            phone_number=user_data.phone_number,
+            location=user_data.location
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+        startup = db.query(models.Startup).filter(
+            models.Startup.name == user_data.startup_name).first()
+
+        if startup:
+            user_startup = models.StartupUser(
+                user_id=user.id,
+                startup_id=startup.id
+            )
+            db.add(user_startup)
+            db.commit()

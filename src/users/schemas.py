@@ -107,3 +107,15 @@ class UpdateUserReq(BaseModel):
     seeking_capital: Union[bool, None] = None
     location: Union[str, None] = None
     round: Union[str, None] = None
+
+
+class UserStartupReq(BaseModel):
+    nickname: str
+    email: str
+    linkedin_url: str
+    phone_number: str
+    location: str
+    startup_name: str
+
+    class Config:
+        orm_mode = True

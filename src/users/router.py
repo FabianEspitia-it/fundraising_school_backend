@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import APIRouter, status, Depends, BackgroundTasks, HTTPException
 from fastapi.responses import JSONResponse, FileResponse
 from starlette.responses import StreamingResponse
@@ -10,7 +11,7 @@ import os
 from src.database import get_db
 from src.users.linkedin_scraper import user_scraper
 
-from src.users.schemas import ContactUserReq, FavFundReq, ImageUserReq, NewUserReq, RoundUserReq
+from src.users.schemas import ContactUserReq, FavFundReq, ImageUserReq, NewUserReq, RoundUserReq, UpdateUserReq, UserStartupReq
 from src.users.crud import *
 
 from src.utils.validations import check_email
@@ -410,3 +411,17 @@ def update_user_info(email: str, user_data: UpdateUserReq, db: Session = Depends
         raise HTTPException(status_code=404, detail="User not found")
 
     return JSONResponse(content={"response": "updated"}, status_code=status.HTTP_200_OK)
+
+
+@user.post("/user/startup", tags=["users"])
+def add_user_startup(db: Session = Depends(get_db), user_data: UserStartupReq = None) -> JSONResponse:
+
+    create_user_startup(db=db, user_data=user_data)
+
+    return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
+
+
+@user.post("/user/startup/bulk", tags=["users"])
+def add_user_startups_bulk(db: Session = Depends(get_db), user_data_list: List[UserStartupReq] = None) -> JSONResponse:
+    create_bulk_user_startup(db=db, user_data_list=user_data_list)
+    return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)

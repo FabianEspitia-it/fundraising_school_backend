@@ -172,7 +172,7 @@ class User(Base):
     __tablename__ = "user"
     id = Column(Integer, primary_key=True)
     email = Column(String(200), unique=True, index=True, nullable=False)
-    first_name = Column(String(255), nullable=False)
+    first_name = Column(String(255), nullable=True)
     last_name = Column(String(255), nullable=True)
     nickname = Column(String(255), nullable=True)
     contact_email = Column(String(255), nullable=True)
