@@ -5,6 +5,18 @@ from sqlalchemy.orm import relationship
 
 from src.database import engine, Base
 
+
+class StartupTraction(Base):
+    __tablename__ = 'startup_traction'
+
+    startup_id = Column(Integer, ForeignKey('startup.id'), primary_key=True)
+    traction_id = Column(Integer, ForeignKey('traction.id'), primary_key=True)
+
+    startup = relationship("Startup", foreign_keys=[
+                           startup_id], overlaps="traction")
+    traction = relationship("Traction", foreign_keys=[
+                            traction_id], overlaps="startups")
+
 class StartupUser(Base):
     __tablename__ = 'startup_users'
 
@@ -102,6 +114,17 @@ class InvestorRound(Base):
     investor = relationship("Investor", foreign_keys=[
                             investor_id], overlaps="rounds")
     round = relationship("Round", foreign_keys=[round_id], overlaps="investor")
+
+
+class Traction(Base):
+    __tablename__ = 'traction'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False)
+
+    startups = relationship("Startup", secondary="startup_traction",
+                            back_populates="traction", overlaps="startup")
+
 
 
 class Partner(Base):
@@ -310,7 +333,6 @@ class Startup(Base):
     photo = Column(String(255), nullable=True)
     calendly = Column(String(255), nullable=True)
     deck = Column(String(255), nullable=True)
-    traction = Column(Text, nullable=True)
     fund_raised = Column(Text, nullable=True)
 
     country_id = Column(Integer, ForeignKey("country.id"))
@@ -328,6 +350,8 @@ class Startup(Base):
 
     users = relationship("User", secondary="startup_users",
                          back_populates="startups", overlaps="user")
+    
+    traction = relationship("Traction", secondary = "startup_traction", back_populates="startups", overlaps="traction" )
 
     users_favorites = relationship(
         "User", secondary="user_startup_favorites", back_populates="startups_favorites", overlaps="user")

@@ -125,6 +125,8 @@ def create_bulk_startup(db: Session, startup_data_list: list[CreateBulkStartupRe
 
             country = get_or_create(db, Country, name=startup_data.country)
 
+            traction = get_or_create(db, Traction, name=startup_data.traction)
+
             startup = Startup(
                 name=startup_data.name,
                 description=startup_data.description,
@@ -133,7 +135,7 @@ def create_bulk_startup(db: Session, startup_data_list: list[CreateBulkStartupRe
                 website=startup_data.website,
                 photo=startup_data.photo,
                 sector=sector,
-                traction=startup_data.traction,
+                traction=traction,
                 fund_raised=startup_data.fund_raised
             )
 
@@ -151,3 +153,7 @@ def get_countries(db: Session):
 
 def get_sectors(db: Session):
     return db.query(Sector).all()
+
+
+def get_tractions(db: Session):
+    return db.query(Traction).all()

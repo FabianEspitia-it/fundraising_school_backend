@@ -129,4 +129,9 @@ def get_filter_options(db: Session = Depends(get_db)):
     for sector in sectors_db:
         sectors.append(sector.name)
 
-    return dict(countries=countries, sectors=sectors)
+    tractions: list[str] = []
+    tractions_db = get_tractions(db=db)
+    for traction in tractions_db:
+        tractions.append(traction.name)
+
+    return dict(countries=countries, sectors=sectors, tractions=tractions)
