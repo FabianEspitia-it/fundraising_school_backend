@@ -114,3 +114,19 @@ def add_bulk_startups(startups: list[CreateBulkStartupReq], db: Session = Depend
     create_bulk_startup(db=db, startup_data_list=startups)
 
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
+
+
+@startup_router.get("/startups/filter/options", tags=["startups"])
+def get_filter_options(db: Session = Depends(get_db)):
+
+    countries: list[str] = []
+    countries_db = get_countries(db=db)
+    for country in countries_db:
+        countries.append(country.name)
+
+    sectors: list[str] = []
+    sectors_db = get_sectors(db=db)
+    for sector in sectors_db:
+        sectors.append(sector.name)
+
+    return dict(countries=countries, sectors=sectors)

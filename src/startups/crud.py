@@ -143,3 +143,11 @@ def create_bulk_startup(db: Session, startup_data_list: list[CreateBulkStartupRe
     except SQLAlchemyError as e:
         db.rollback()
         raise e
+    
+
+def get_countries(db: Session):
+    return db.query(Country).all()
+
+
+def get_sectors(db: Session):
+    return db.query(Sector).all()
