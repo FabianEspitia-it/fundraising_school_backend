@@ -52,8 +52,7 @@ def create_bulk_fund(db: Session, funds: list[Fund], fund_rounds: list[list[str]
             if existing_association is None:
                 db.add(FundRound(fund_id=fund_id, round_id=round.id))
                 db.commit()
-                print(f"FundRound association created: fund_id={
-                      fund_id}, round_id={round.id}")
+                print(f"FundRound association created: fund_id={fund_id}, round_id={round.id}")
         fund_id += 1
 
     fund_id = 1
@@ -76,8 +75,7 @@ def create_bulk_fund(db: Session, funds: list[Fund], fund_rounds: list[list[str]
             if existing_association is None:
                 db.add(FundCountry(fund_id=fund_id, country_id=country.id))
                 db.commit()
-                print(f"FundCountry association created: fund_id={
-                      fund_id}, country_id={country.id}")
+                print(f"FundCountry association created: fund_id={fund_id}, country_id={country.id}")
         fund_id += 1
 
     fund_id = 1
@@ -98,8 +96,7 @@ def create_bulk_fund(db: Session, funds: list[Fund], fund_rounds: list[list[str]
             if existing_association is None:
                 db.add(FundPartner(fund_id=fund_id, partner_id=partner.id))
                 db.commit()
-                print(f"FundPartner association created: fund_id={
-                      fund_id}, partner_id={partner.id}")
+                print(f"FundPartner association created: fund_id={fund_id}, partner_id={partner.id}")
         fund_id += 1
 
     fund_id = 1
@@ -120,8 +117,7 @@ def create_bulk_fund(db: Session, funds: list[Fund], fund_rounds: list[list[str]
             if existing_association is None:
                 db.add(FundCheckSize(fund_id=fund_id, check_size_id=check.id))
                 db.commit()
-                print(f"FundCheckSize association created: fund_id={
-                      fund_id}, check_size_id={check.id}")
+                print(f"FundCheckSize association created: fund_id={fund_id}, check_size_id={check.id}")
         fund_id += 1
 
     fund_id = 1
@@ -142,8 +138,7 @@ def create_bulk_fund(db: Session, funds: list[Fund], fund_rounds: list[list[str]
             if existing_association is None:
                 db.add(FundSector(fund_id=fund_id, sector_id=sector.id))
                 db.commit()
-                print(f"FundSector association created: fund_id={
-                      fund_id}, sector_id={sector.id}")
+                print(f"FundSector association created: fund_id={fund_id}, sector_id={sector.id}")
         fund_id += 1
 
     print("Updating partner links...")
@@ -157,8 +152,7 @@ def create_bulk_fund(db: Session, funds: list[Fund], fund_rounds: list[list[str]
                 partner.vc_link = partner_link
                 db.commit()
                 db.refresh(partner)
-                print(f"Partner link updated for partner_id={
-                      fund_id}, vc_link={partner_link}")
+                print(f"Partner link updated for partner_id={fund_id}, vc_link={partner_link}")
 
     print("--- %s seconds ---" % (time.time() - start_time))
 
@@ -528,8 +522,7 @@ def create_bulk_crm_investors(db: Session, crm_investors: list[dict]) -> None:
                 db.add(CrmInvestorSectorAndStage(
                     investor_id=investor["id"], sector_id=sector.id))
                 db.commit()
-                print(f"CrmInvestorSector association created: investor_id={
-                      investor['id']}, sector_id={sector.id}")
+                print(f"CrmInvestorSector association created: investor_id={investor['id']}, sector_id={sector.id}")
 
         for invest_range in investor["invest_range_final"]:
             invest_range = db.query(CrmInvestRange).filter(
@@ -539,15 +532,13 @@ def create_bulk_crm_investors(db: Session, crm_investors: list[dict]) -> None:
                 db.add(invest_range)
                 db.commit()
                 db.refresh(invest_range)
-                print(f"New invest range created and committed: {
-                      invest_range}")
+                print(f"New invest range created and committed: {invest_range}")
             existing_association = db.query(CrmInvestorInvestRange).filter_by(
                 investor_id=investor_id_count, invest_range_id=invest_range.id).first()
             if existing_association is None:
                 db.add(CrmInvestorInvestRange(
                     investor_id=investor["id"], invest_range_id=invest_range.id))
                 db.commit()
-                print(f"CrmInvestorInvestRange association created: investor_id={
-                      investor['id']}, invest_range_id={invest_range.id}")
+                print(f"CrmInvestorInvestRange association created: investor_id={investor['id']}, invest_range_id={invest_range.id}")
 
         investor_id_count += 1
