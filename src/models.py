@@ -5,7 +5,6 @@ from sqlalchemy.orm import relationship
 
 from src.database import engine, Base
 
-
 class StartupUser(Base):
     __tablename__ = 'startup_users'
 
