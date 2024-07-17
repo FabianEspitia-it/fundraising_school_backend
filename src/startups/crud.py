@@ -8,8 +8,7 @@ from src.users.crud import get_user_by_email, get_favorite_startups_by_user_id
 from sqlalchemy.exc import SQLAlchemyError
 
 
-def get_all_startups(db: Session, page: int, limit: int, user_email: str, sector: str = None, location: str = None, round: str = None, check_size: str = None) -> list[dict]:
-
+def get_all_startups(db: Session, page: int, limit: int, user_email: str, sector: str = None, country: str = None, traction: str = None):
     # Get the user from the database
     user = get_user_by_email(db, user_email)
 
@@ -17,35 +16,32 @@ def get_all_startups(db: Session, page: int, limit: int, user_email: str, sector
         raise ValueError("User not found")
 
     # Retrieve favorite startups
-    favorite_startups = get_favorite_startups_by_user_id(db, user_email)
+    favorite_startups = get_favorite_startups_by_user_id(db, user.id)
     favorite_startups_ids = {startup.id for startup in favorite_startups}
 
     # Create the initial query with joinedload options
     query = db.query(Startup).options(
-        joinedload(Startup.sector)
+        joinedload(Startup.sector),
+        joinedload(Startup.traction),
+        joinedload(Startup.country)
     )
 
     if sector:
         print("Sector filter applied", sector)
-        query = query.join(Startup.sector).filter(Sector.name == sector)
+        query = query.filter(Startup.sector.has(name=sector))
 
-    if location:
-        print("Location filter applied", location)
-        query = query.filter(Startup.location == location)
+    if country:
+        print("Location filter applied", country)
+        query = query.filter(Startup.country.has(name=country))
 
-    if round:
-        print("Round filter applied", round)
-        query = query.join(Startup.round).filter(Round.stage == round)
-
-    if check_size:
-        print("Check size filter applied", check_size)
-        query = query.join(Startup.checksize).filter(
-            CheckSize.size == check_size)
+    if traction:
+        print("Round filter applied", traction)
+        query = query.filter(Startup.traction.has(name=traction))
 
     # Apply pagination after filters and sorting
     query = query.offset((page - 1) * limit).limit(limit)
 
-    # Retrieve funds and convert to list of dicts with 'favorite' field
+    # Retrieve startups and convert to list of dicts with 'favorite' field
     startups = query.all()
 
     startups_with_favorite = []
@@ -55,6 +51,34 @@ def get_all_startups(db: Session, page: int, limit: int, user_email: str, sector
         startups_with_favorite.append(startup_dict)
 
     return startups_with_favorite
+
+
+def total_startups(db: Session, sector: str = None, country: str = None, traction: str = None) -> int:
+    """
+    Retrieves the total number of startups in the database.
+
+    Args:
+        db (Session): Database session object.
+        sector (str, optional): Sector filter.
+        country (str, optional): Country filter.
+        traction (str, optional): Traction filter.
+
+    Returns:
+        int: Total number of startups.
+    """
+    
+    query = db.query(Startup)
+    
+    if country:
+        query = query.filter(Startup.country.has(name=country))
+
+    if sector:
+        query = query.filter(Startup.sector.has(name=sector))
+
+    if traction:
+        query = query.filter(Startup.traction.has(name=traction))
+
+    return query.count()
 
 
 def get_startup_by_id(db: Session, startup_id: int) -> Startup:

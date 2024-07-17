@@ -13,7 +13,7 @@ startup_router = APIRouter()
 
 
 @startup_router.get("/startups/all", tags=["startups"])
-def get_startups(db: Session = Depends(get_db), page: int = 0, limit: int = 10, user_email: str = None):
+def get_startups(db: Session = Depends(get_db), page: int = 0, limit: int = 10, user_email: str = None, country: str | None = None, sector: str | None = None, traction: str | None = None):
     """
     Retrieve a list of startups.
 
@@ -25,8 +25,8 @@ def get_startups(db: Session = Depends(get_db), page: int = 0, limit: int = 10, 
     Returns:
         JSONResponse: A JSON response containing the list of startups.
     """
-
-    return get_all_startups(db=db, page=page, limit=limit, user_email=user_email)
+    
+    return dict(page=page, total=total_startups(db, country, sector, traction), data=get_all_startups(db=db, page=page, limit=limit, user_email=user_email, country=country, sector=sector, traction=traction))
 
 
 @startup_router.get("/startups/{startup_id}", tags=["startups"])
