@@ -121,17 +121,34 @@ def get_filter_options(db: Session = Depends(get_db)):
 
     countries: list[str] = []
     countries_db = get_countries(db=db)
+    startup_countries = get_country_startups(db=db)
+
+    startup_country_ids = [country_id for (country_id,) in startup_countries]
+
     for country in countries_db:
-        countries.append(country.name)
+        if country.id in startup_country_ids:
+            countries.append(country.name)
 
     sectors: list[str] = []
     sectors_db = get_sectors(db=db)
+    startup_sectors = get_sector_startups(db=db)
+
+    startup_sectors_ids = [sector_id for (sector_id,) in startup_sectors]
+
     for sector in sectors_db:
-        sectors.append(sector.name)
+        if sector.id in startup_sectors_ids:
+            sectors.append(sector.name)
 
     tractions: list[str] = []
     tractions_db = get_tractions(db=db)
+    startup_tractions = get_traction_startups(db=db)
+
+    startup_tractions_ids = [traction_id for (traction_id,) in startup_tractions]
     for traction in tractions_db:
-        tractions.append(traction.name)
+        if traction.id in startup_tractions_ids:
+            tractions.append(traction.name)
+
+
+
 
     return dict(countries=countries, sectors=sectors, tractions=tractions)

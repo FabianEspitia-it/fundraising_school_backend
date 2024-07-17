@@ -6,17 +6,6 @@ from sqlalchemy.orm import relationship
 from src.database import engine, Base
 
 
-class StartupTraction(Base):
-    __tablename__ = 'startup_traction'
-
-    startup_id = Column(Integer, ForeignKey('startup.id'), primary_key=True)
-    traction_id = Column(Integer, ForeignKey('traction.id'), primary_key=True)
-
-    startup = relationship("Startup", foreign_keys=[
-                           startup_id], overlaps="traction")
-    traction = relationship("Traction", foreign_keys=[
-                            traction_id], overlaps="startups")
-
 class StartupUser(Base):
     __tablename__ = 'startup_users'
 
@@ -122,8 +111,7 @@ class Traction(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False)
 
-    startups = relationship("Startup", secondary="startup_traction",
-                            back_populates="traction", overlaps="startup")
+    startups = relationship("Startup", back_populates="traction")
 
 
 
@@ -339,6 +327,7 @@ class Startup(Base):
     sector_id = Column(Integer, ForeignKey("sector.id"))
     round_id = Column(Integer, ForeignKey("round.id"))
     checksize_id = Column(Integer, ForeignKey("check_size.id"))
+    traction_id = Column(Integer, ForeignKey("traction.id"))
 
     country = relationship("Country", back_populates="startups")
 
@@ -351,7 +340,7 @@ class Startup(Base):
     users = relationship("User", secondary="startup_users",
                          back_populates="startups", overlaps="user")
     
-    traction = relationship("Traction", secondary = "startup_traction", back_populates="startups", overlaps="traction" )
+    traction = relationship("Traction", back_populates="startups")
 
     users_favorites = relationship(
         "User", secondary="user_startup_favorites", back_populates="startups_favorites", overlaps="user")

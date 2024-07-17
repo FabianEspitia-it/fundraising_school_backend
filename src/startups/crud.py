@@ -157,3 +157,17 @@ def get_sectors(db: Session):
 
 def get_tractions(db: Session):
     return db.query(Traction).all()
+
+
+def get_country_startups(db: Session):
+    return db.query(Startup.country_id).all()
+
+
+def get_sector_startups(db: Session):
+    return db.query(Startup.sector_id).all()
+
+
+def get_traction_startups(db: Session):
+    return db.query(Startup.traction_id).all()
+
+
