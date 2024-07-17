@@ -26,7 +26,7 @@ def get_startups(db: Session = Depends(get_db), page: int = 0, limit: int = 10, 
         JSONResponse: A JSON response containing the list of startups.
     """
     
-    return dict(page=page, total=total_startups(db, country, sector, traction), data=get_all_startups(db=db, page=page, limit=limit, user_email=user_email, country=country, sector=sector, traction=traction))
+    return dict(page=page, total=total_startups(db, country=country, sector=sector, traction=traction), data=get_all_startups(db=db, page=page, limit=limit, user_email=user_email, country=country, sector=sector, traction=traction))
 
 
 @startup_router.get("/startups/{startup_id}", tags=["startups"])

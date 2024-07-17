@@ -78,6 +78,8 @@ def total_startups(db: Session, sector: str = None, country: str = None, tractio
     if traction:
         query = query.filter(Startup.traction.has(name=traction))
 
+    
+
     return query.count()
 
 
