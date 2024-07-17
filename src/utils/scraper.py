@@ -9,7 +9,6 @@ from src.utils.constants import SEARCH_URL
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 
 
 def move_down(url: str, scroll_count: int) -> BeautifulSoup | None:
@@ -52,6 +51,7 @@ def move_down(url: str, scroll_count: int) -> BeautifulSoup | None:
         driver.quit()
 
     return BeautifulSoup(html, "html.parser") if html else None
+
 
 def internet_search(search: str) -> requests.Response:
     """
@@ -119,7 +119,7 @@ def get_time_period(
     return start_date, end_date
 
 
-def authenticate_linkedin() -> Linkedin:
+def authenticate_linkedin() -> Linkedin | None:
     """
     Authenticates the user with LinkedIn using environment variables for username and password.
 
@@ -128,13 +128,20 @@ def authenticate_linkedin() -> Linkedin:
     """
     linkedin_connect = None
 
+    amount_attempts = 0
     while not linkedin_connect:
+
+        if amount_attempts >= 10:
+            return None
+
         try:
-            # linkedin_connect = Linkedin(os.getenv("LINKEDIN_USER"), os.getenv("LINKEDIN_PASSWORD"))
-            linkedin_connect = Linkedin("fabian@makers.ngo ", "M#Build#M")
+            linkedin_connect = Linkedin(
+                os.getenv("LINKEDIN_USER"), os.getenv("LINKEDIN_PASSWORD")
+            )
         except Exception as e:
             print(f"[WARNING] Error while authenticating LinkedIn: {e}")
 
-            time.sleep(2.0)
+            amount_attempts += 1
+            time.sleep(5.0)
 
     return linkedin_connect
