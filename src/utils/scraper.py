@@ -24,36 +24,32 @@ def move_down(url: str, scroll_count: int) -> BeautifulSoup | None:
     """
 
     webdriver_url = os.getenv("WEBDRIVER_URL")
-    
+
     if not webdriver_url:
         raise ValueError("WEBDRIVER_URL environment variable is not set")
 
     options = webdriver.ChromeOptions()
-    
-    options.add_argument('--no-sandbox')  
-    
-    try:
-        driver = webdriver.Remote(
-            command_executor=webdriver_url,
-            options=options
-        )
-        
-        driver.get(url)
-        
 
-        time.sleep(4)  
+    options.add_argument("--no-sandbox")
+
+    try:
+        driver = webdriver.Remote(command_executor=webdriver_url, options=options)
+
+        driver.get(url)
+
+        time.sleep(4)
         for _ in range(scroll_count):
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(4)  
-        
+            time.sleep(4)
+
         html = driver.page_source
-        
+
     except Exception as e:
         print(f"An error occurred: {e}")
         html = ""
     finally:
         driver.quit()
-    
+
     return BeautifulSoup(html, "html.parser") if html else None
 
 
@@ -68,12 +64,12 @@ def internet_search(search: str) -> requests.Response:
         A requests.Response object containing the response from the internet search.
     """
     headers = {
-        'Accept': '*/*',
-        'Accept-Language': 'en-US,en;q=0.5',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
-                      'Chrome/98.0.4758.82'
+        "Accept": "*/*",
+        "Accept-Language": "en-US,en;q=0.5",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/98.0.4758.82",
     }
-    return requests.get(SEARCH_URL, headers=headers, params={'q': search})
+    return requests.get(SEARCH_URL, headers=headers, params={"q": search})
 
 
 def get_html(url: str) -> BeautifulSoup:
@@ -91,7 +87,9 @@ def get_html(url: str) -> BeautifulSoup:
     return BeautifulSoup(html, "html.parser")
 
 
-def get_time_period(values: dict) -> tuple[None | datetime.datetime, None | datetime.datetime]:
+def get_time_period(
+    values: dict,
+) -> tuple[None | datetime.datetime, None | datetime.datetime]:
     """
     Extracts start and end dates from a dictionary representing a time period.
 
@@ -138,7 +136,8 @@ def authenticate_linkedin() -> Linkedin | None:
 
         try:
             linkedin_connect = Linkedin(
-                os.getenv("LINKEDIN_USER"), os.getenv("LINKEDIN_PASSWORD"))
+                os.getenv("LINKEDIN_USER"), os.getenv("LINKEDIN_PASSWORD")
+            )
         except Exception as e:
             print(f"[WARNING] Error while authenticating LinkedIn: {e}")
 

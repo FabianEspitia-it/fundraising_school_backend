@@ -182,6 +182,7 @@ class User(Base):
     followers_amount = Column(Integer, nullable=False, default=0)
     industry = Column(String(255), nullable=True, unique=False)
     summary = Column(Text, nullable=True, unique=False)
+    role = Column(Text, nullable=True, unique=False)
     headline = Column(Text, nullable=True, unique=False)
     linkedin_url = Column(String(255), nullable=True, unique=True)
     location = Column(String(255), nullable=True)
