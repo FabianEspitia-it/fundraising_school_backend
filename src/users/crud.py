@@ -208,3 +208,18 @@ def create_bulk_user_startup(db: Session, user_data_list: List[UserStartupReq]) 
             )
             db.add(user_startup)
             db.commit()
+
+
+def get_user_startup_by_email(db: Session, email: str) -> bool:
+    
+    user = db.query(models.User).filter(models.User.email == email).first()
+    
+    if user: 
+        connection = db.query(models.StartupUser).filter(models.StartupUser.user_id == user.id).first()
+        if connection:
+            return {"startup": True}
+        else:
+            return {"startup": False}
+    else:
+        raise Exception("User not found") 
+

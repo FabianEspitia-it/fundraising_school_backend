@@ -76,8 +76,7 @@ def create_bulk_fund(db: Session, funds: list[Fund], fund_rounds: list[list[str]
             if existing_association is None:
                 db.add(FundCountry(fund_id=fund_id, country_id=country.id))
                 db.commit()
-                print(f"FundCountry association created: fund_id={
-                      fund_id}, country_id={country.id}")
+                print(f"FundCountry association created: fund_id={fund_id}, country_id={country.id}")
         fund_id += 1
 
     fund_id = 1

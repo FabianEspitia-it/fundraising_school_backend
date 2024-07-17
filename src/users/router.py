@@ -425,3 +425,12 @@ def add_user_startup(db: Session = Depends(get_db), user_data: UserStartupReq = 
 def add_user_startups_bulk(db: Session = Depends(get_db), user_data_list: List[UserStartupReq] = None) -> JSONResponse:
     create_bulk_user_startup(db=db, user_data_list=user_data_list)
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
+
+
+@user.get("/user/check/{email}", tags=["users"])
+def check_user(db: Session = Depends(get_db), email: str = None) -> JSONResponse:
+    if not check_email(email):
+        raise HTTPException(status_code=400, detail="Invalid Email")
+    
+    user_startup = get_user_startup_by_email(db, email)
+    return JSONResponse(content=user_startup, status_code=status.HTTP_200_OK)
