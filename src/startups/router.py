@@ -156,3 +156,8 @@ def get_filter_options(db: Session = Depends(get_db)):
             tractions.append(traction.name)
 
     return dict(countries=countries, sectors=sectors, tractions=tractions)
+
+
+@startup_router.get("/sartups/countries", tags=["startups"])
+def get_countries(db: Session = Depends(get_db)):
+    return get_countries(db=db)
