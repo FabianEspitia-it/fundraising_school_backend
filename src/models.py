@@ -6,6 +6,16 @@ from sqlalchemy.orm import relationship
 from src.database import engine, Base
 
 
+class FundUsers(Base):
+    __tablename__ = 'fund_users'
+
+    fund_id = Column(Integer, ForeignKey('vc_fund.id'), primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id'), primary_key=True)
+
+    fund = relationship("Fund", foreign_keys=[fund_id], overlaps="users_in")
+    user = relationship("User", foreign_keys=[user_id], overlaps="funds_in")
+
+
 class StartupUser(Base):
     __tablename__ = 'startup_users'
 
@@ -212,6 +222,9 @@ class User(Base):
 
     funds = relationship("Fund", secondary="user_fund_favorites",
                          back_populates="users", overlaps="fund")
+    
+    funds_in = relationship("Fund", secondary="fund_users",
+                         back_populates='users_in', overlaps="fund")
 
     startups = relationship("Startup", secondary="startup_users",
                             back_populates="users", overlaps="startup")
@@ -307,6 +320,8 @@ class Fund(Base):
                               back_populates='funds', overlaps="check_size")
     users = relationship("User", secondary="user_fund_favorites",
                          back_populates='funds', overlaps="user")
+    
+    users_in = relationship("User", secondary="fund_users", back_populates='funds_in', overlaps="user")
 
 
 class Startup(Base):

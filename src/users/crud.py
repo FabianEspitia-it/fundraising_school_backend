@@ -210,6 +210,21 @@ def create_bulk_user_startup(db: Session, user_data_list: List[UserStartupReq]) 
             db.commit()
 
 
+
+def get_user_fund_by_email(db: Session, email: str) -> bool:
+        
+        user = db.query(models.User).filter(models.User.email == email).first()
+        
+        if user: 
+            connection = db.query(models.FundUsers).filter(models.FundUsers.user_id == user.id).first()
+            if connection:
+                return {"response": "fund" }
+            else:
+                return {"response": "guest"}
+        else:
+            raise Exception("User not found")
+
+
 def get_user_startup_by_email(db: Session, email: str) -> bool:
     
     user = db.query(models.User).filter(models.User.email == email).first()
@@ -217,9 +232,12 @@ def get_user_startup_by_email(db: Session, email: str) -> bool:
     if user: 
         connection = db.query(models.StartupUser).filter(models.StartupUser.user_id == user.id).first()
         if connection:
-            return {"startup": True}
+            return {"response": "startup"}
         else:
-            return {"startup": False}
+            return get_user_fund_by_email(db, email)
     else:
         raise Exception("User not found") 
+    
+
+
 
