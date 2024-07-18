@@ -238,3 +238,12 @@ def get_user_startup_by_email(db: Session, email: str) -> bool:
             return get_user_fund_by_email(db, email)
     else:
         raise Exception("User not found")
+    
+
+def get_startup_by_user_email(db: Session, email: str) -> models.Startup:
+    user = db.query(models.User).filter(models.User.email == email).first()
+    if user:
+        startup = db.query(models.Startup).join(models.StartupUser).filter(models.StartupUser.user_id == user.id).first()
+        return startup
+    else:
+        raise Exception("User not found")

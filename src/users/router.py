@@ -434,3 +434,13 @@ def check_user(db: Session = Depends(get_db), email: str = None) -> JSONResponse
 
     user_startup = get_user_startup_by_email(db, email)
     return JSONResponse(content=user_startup, status_code=status.HTTP_200_OK)
+
+
+
+@user.get("/user/get_startup/{email}", tags=["users"])
+def get_user_startup(db: Session = Depends(get_db), email: str = None) -> JSONResponse:
+    if not check_email(email):
+        raise HTTPException(status_code=400, detail="Invalid Email")
+
+    user_startup = get_startup_by_user_email(db, email)
+    return user_startup

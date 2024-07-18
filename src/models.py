@@ -151,7 +151,6 @@ class CheckSize(Base):
     funds = relationship("Fund", secondary="fund_check_size",
                          back_populates='check_size', overlaps="fund")
 
-    startups = relationship("Startup", back_populates="check_size")
 
 
 class Country(Base):
@@ -341,12 +340,11 @@ class Startup(Base):
     country_id = Column(Integer, ForeignKey("country.id"))
     sector_id = Column(Integer, ForeignKey("sector.id"))
     round_id = Column(Integer, ForeignKey("round.id"))
-    checksize_id = Column(Integer, ForeignKey("check_size.id"))
     traction_id = Column(Integer, ForeignKey("traction.id"))
 
     country = relationship("Country", back_populates="startups")
 
-    check_size = relationship("CheckSize", back_populates="startups")
+
 
     sector = relationship("Sector", back_populates="startups")
 
