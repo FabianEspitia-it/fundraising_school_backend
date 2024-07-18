@@ -122,15 +122,15 @@ def add_favorite_startup_to_user(db: Session, email: str, startup_id: int) -> No
         raise Exception("User not found")
 
 
-def get_favorite_startups_by_user_id(db: Session, email: str) -> list[models.Startup]:
+def get_favorite_startups_by_user_id(db: Session, id: int) -> list[models.Startup]:
 
     query = db.query(models.Startup).join(models.UserStartupFavorite).join(
-        models.User).filter(models.User.email == email).all()
+        models.User).filter(models.User.id == id).all()
 
     return query
 
 
-def delete_favorite_startup_by_user_id(db: Session, email: str, startup_id: int) -> None:
+def delete_favorite_startup_by_user_email(db: Session, email: str, startup_id: int) -> None:
     user = get_user_by_email(db, email)
     if user:
         db.query(models.UserStartupFavorite).filter(models.UserStartupFavorite.user_id ==
@@ -210,34 +210,31 @@ def create_bulk_user_startup(db: Session, user_data_list: List[UserStartupReq]) 
             db.commit()
 
 
-
 def get_user_fund_by_email(db: Session, email: str) -> bool:
-        
-        user = db.query(models.User).filter(models.User.email == email).first()
-        
-        if user: 
-            connection = db.query(models.FundUsers).filter(models.FundUsers.user_id == user.id).first()
-            if connection:
-                return {"response": "fund" }
-            else:
-                return {"response": "guest"}
+
+    user = db.query(models.User).filter(models.User.email == email).first()
+
+    if user:
+        connection = db.query(models.FundUsers).filter(
+            models.FundUsers.user_id == user.id).first()
+        if connection:
+            return {"response": "fund"}
         else:
-            raise Exception("User not found")
+            return {"response": "guest"}
+    else:
+        raise Exception("User not found")
 
 
 def get_user_startup_by_email(db: Session, email: str) -> bool:
-    
+
     user = db.query(models.User).filter(models.User.email == email).first()
-    
-    if user: 
-        connection = db.query(models.StartupUser).filter(models.StartupUser.user_id == user.id).first()
+
+    if user:
+        connection = db.query(models.StartupUser).filter(
+            models.StartupUser.user_id == user.id).first()
         if connection:
             return {"response": "startup"}
         else:
             return get_user_fund_by_email(db, email)
     else:
-        raise Exception("User not found") 
-    
-
-
-
+        raise Exception("User not found")

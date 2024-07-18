@@ -383,7 +383,7 @@ def delete_favorite_startup(email: str, startup_id: int, db: Session = Depends(g
     if not check_email(email):
         raise HTTPException(status_code=400, detail="Invalid Email")
 
-    delete_favorite_startup_by_user_id(db, email, startup_id)
+    delete_favorite_startup_by_user_email(db, email, startup_id)
 
     return JSONResponse(content={"response": "deleted"}, status_code=status.HTTP_200_OK)
 
@@ -431,6 +431,6 @@ def add_user_startups_bulk(db: Session = Depends(get_db), user_data_list: List[U
 def check_user(db: Session = Depends(get_db), email: str = None) -> JSONResponse:
     if not check_email(email):
         raise HTTPException(status_code=400, detail="Invalid Email")
-    
+
     user_startup = get_user_startup_by_email(db, email)
     return JSONResponse(content=user_startup, status_code=status.HTTP_200_OK)

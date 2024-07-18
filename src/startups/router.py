@@ -13,7 +13,7 @@ startup_router = APIRouter()
 
 
 @startup_router.get("/startups/all", tags=["startups"])
-def get_startups(db: Session = Depends(get_db), page: int = 0, limit: int = 10, user_email: str = None, country: str | None = None, sector: str | None = None, traction: str | None = None):
+def get_startups(db: Session = Depends(get_db), page: int = 1, limit: int = 10, user_email: str = None, country: str | None = None, sector: str | None = None, traction: str | None = None):
     """
     Retrieve a list of startups.
 
@@ -25,7 +25,13 @@ def get_startups(db: Session = Depends(get_db), page: int = 0, limit: int = 10, 
     Returns:
         JSONResponse: A JSON response containing the list of startups.
     """
-    
+
+    if not user_email:
+        return HTTPException(status_code=400, detail="Not User")
+
+    if page <= 0:
+        page = 1
+
     return dict(page=page, total=total_startups(db, country=country, sector=sector, traction=traction), data=get_all_startups(db=db, page=page, limit=limit, user_email=user_email, country=country, sector=sector, traction=traction))
 
 
@@ -143,12 +149,10 @@ def get_filter_options(db: Session = Depends(get_db)):
     tractions_db = get_tractions(db=db)
     startup_tractions = get_traction_startups(db=db)
 
-    startup_tractions_ids = [traction_id for (traction_id,) in startup_tractions]
+    startup_tractions_ids = [traction_id for (
+        traction_id,) in startup_tractions]
     for traction in tractions_db:
         if traction.id in startup_tractions_ids:
             tractions.append(traction.name)
-
-
-
 
     return dict(countries=countries, sectors=sectors, tractions=tractions)
