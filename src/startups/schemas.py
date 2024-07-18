@@ -8,7 +8,7 @@ class NewStartupReq(BaseModel):
     email: str
     description: str
     phone_number: str
-    location: str
+    country: str
     website: str
     linkedin: str
     photo: Union[str, None] = None
@@ -16,15 +16,14 @@ class NewStartupReq(BaseModel):
     deck: Union[str, None] = None
     sector: str
     round: str
-    checksize: str
-
+    traction: str
 
 class UpdateStartupReq(BaseModel):
     name: Union[str, None] = None
     email: Union[str, None] = None
     description: Union[str, None] = None
     phone_number: Union[str, None] = None
-    location: Union[str, None] = None
+    country: Union[str, None] = None
     website: Union[str, None] = None
     linkedin: Union[str, None] = None
     photo: Union[str, None] = None
@@ -32,7 +31,7 @@ class UpdateStartupReq(BaseModel):
     calendly: Union[str, None] = None
     sector: Union[str, None] = None
     round: Union[str, None] = None
-    checksize: Union[str, None] = None
+    traction: Union[str, None] = None
 
 
 class CreateBulkStartupReq(BaseModel):

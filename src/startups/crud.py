@@ -93,9 +93,8 @@ def create_startup(db: Session, startup: NewStartupReq) -> Startup:
         name=startup_data["name"],
         email=startup_data["email"],
         description=startup_data["description"],
-        country_code=startup_data["country_code"],
-        whatsapp=startup_data["whatsapp"],
-        location=startup_data["location"],
+        phone_number=startup_data["phone_number"],
+        country=startup_data["country"],
         website=startup_data["website"],
         linkedin=startup_data["linkedin"],
         photo=startup_data["photo"],
@@ -104,8 +103,8 @@ def create_startup(db: Session, startup: NewStartupReq) -> Startup:
             Sector.name == startup_data["sector"]).first().id,
         round_id=db.query(Round).filter(
             Round.stage == startup_data["round"]).first().id,
-        checksize_id=db.query(CheckSize).filter(
-            CheckSize.size == startup_data["checksize"]).first().id
+        traction_id=db.query(Traction).filter(
+            Traction.name == startup_data["traction"]).first().id
     )
     db.add(new_startup)
     db.commit()
@@ -114,21 +113,36 @@ def create_startup(db: Session, startup: NewStartupReq) -> Startup:
 
 
 def update_startup_by_id(db: Session, startup_id: int, startup: UpdateStartupReq) -> Startup:
-
-    startup_to_update = db.query(Startup).filter(
-        Startup.id == startup_id).first()
+    startup_to_update = db.query(Startup).filter(Startup.id == startup_id).first()
 
     if not startup_to_update:
         raise ValueError("Startup not found")
 
     update_data = startup.model_dump(exclude_unset=True)
     for key, value in update_data.items():
-        setattr(startup_to_update, key, value)
+        if key == 'country':
+            country = db.query(Country).filter(Country.name == value).first()
+            if not country:
+                raise ValueError("Country not found")
+            startup_to_update.country = country
+        elif key == 'sector':
+            sector = db.query(Sector).filter(Sector.name == value).first()
+            if not sector:
+                raise ValueError("Sector not found")
+            startup_to_update.sector = sector
+        elif key == 'traction':
+            traction = db.query(Traction).filter(Traction.name == value).first()
+            if not traction:
+                raise ValueError("Traction not found")
+            startup_to_update.traction = traction
+        else:
+            setattr(startup_to_update, key, value)
 
     db.commit()
     db.refresh(startup_to_update)
 
     return startup_to_update
+
 
 
 def get_or_create(db: Session, model, **kwargs):
