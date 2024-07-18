@@ -159,5 +159,5 @@ def get_filter_options(db: Session = Depends(get_db)):
 
 
 @startup_router.get("/sartups/countries", tags=["startups"])
-def get_countries(db: Session = Depends(get_db)):
+def get_countries_startups(db: Session = Depends(get_db)):
     return get_countries(db=db)
