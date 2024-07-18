@@ -161,3 +161,8 @@ def get_filter_options(db: Session = Depends(get_db)):
 @startup_router.get("/sartups/countries", tags=["startups"])
 def get_countries_startups(db: Session = Depends(get_db)):
     return get_countries(db=db)
+
+
+@startup_router.get("/startup/users/{startup_name}", tags=["startups"])
+def get_startup_users(startup_name: str, db: Session = Depends(get_db)):
+    return get_users_by_startup_name(db=db, startup_name=startup_name)

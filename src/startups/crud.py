@@ -211,3 +211,14 @@ def get_traction_startups(db: Session):
     return db.query(Startup.traction_id).all()
 
 
+def get_users_by_startup_name(db: Session, startup_name: str):
+    startup = db.query(Startup).filter(Startup.name == startup_name).first()
+
+    if not startup:
+        raise ValueError("Startup not found")
+    
+    users_in_startup = db.query(User).join(StartupUser).filter(StartupUser.startup_id == startup.id).all()
+
+    return users_in_startup
+
+
