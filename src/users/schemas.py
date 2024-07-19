@@ -36,6 +36,11 @@ class FavFundReq(BaseModel):
     email: str
     fund_id: int
 
+
+class FavStartupReq(BaseModel):
+    email: str
+    startup_id: int
+
 # BD SCHEMAS
 
 
