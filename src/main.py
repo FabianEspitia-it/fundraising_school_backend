@@ -3,6 +3,7 @@ import uvicorn
 
 from fastapi import FastAPI
 
+from src.course.router import course
 from src.users.router import user
 from src.vc_sheet.router import vc_sheet_router
 from src.startups.router import startup_router
@@ -15,6 +16,7 @@ app.title = "Fundraising School API"
 app.include_router(user)
 app.include_router(vc_sheet_router)
 app.include_router(startup_router)
+app.include_router(course)
 
 if __name__ == "__main__":
 

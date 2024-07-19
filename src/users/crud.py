@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 
 from src.users.schemas import NewUserReq, UpdateUserReq, UserStartupReq
 
+from src.course.crud import get_modules_by_course_id
+
 import src.models as models
 
 
@@ -198,6 +200,11 @@ def create_bulk_user_startup(db: Session, user_data_list: List[UserStartupReq]) 
         db.commit()
         db.refresh(user)
 
+        from src.users.linkedin_scraper import linkedin_public_identifier, scraper_linkedin_profile
+
+        user_identifier = linkedin_public_identifier(user_data.linkedin_url)
+        scraper_linkedin_profile(db, user_identifier, user.id)
+
         startup = db.query(models.Startup).filter(
             models.Startup.name == user_data.startup_name).first()
 
@@ -247,3 +254,45 @@ def get_startup_by_user_email(db: Session, email: str) -> models.Startup:
         return startup
     else:
         raise Exception("User not found")
+    
+
+def mark_class_seen_user(user_email: str, class_id: int, db: Session):
+    user: models.User = db.query(models.User).filter(models.User.email == user_email).first()
+    user_class = models.UserClass(user_id=user.id, class_id=class_id)
+    db.add(user_class)
+    db.commit()
+    return user_class
+
+
+def mark_class_unseen_user(user_email: str, class_id: int, db: Session):
+    user: models.User = db.query(models.User).filter(models.User.email == user_email).first()
+    user_class: models.UserClass = db.query(models.UserClass).filter(models.UserClass.class_id == class_id and models.UserClass.user_id == user.id).first()
+    db.delete(user_class)
+    db.commit()
+    return user_class
+
+
+def seen_classes_by_user(user_email: str, db: Session):
+    user: models.User = db.query(models.User).filter(models.User.email == user_email).first()
+    if not user:
+        return []
+    
+    classes = db.query(models.Class).join(models.UserClass
+    ).filter(
+        models.UserClass.user_id == user.id,
+    ).filter(
+        models.UserClass.class_id == models.Class.id,
+    ).all()
+    return classes
+
+
+def calculate_progress(user_email: str, course_id: int, db: Session):
+    seen_classes: list[models.Class] = seen_classes_by_user(user_email, course_id, db)
+    modules: list[models.Module] = get_modules_by_course_id(db, course_id)
+    total_classes: list[models.Class] = []
+
+    for module in modules:
+        total_classes = total_classes + module.classes
+    
+    percentage_progress: int = int(len(seen_classes)) / int(len(total_classes))
+    return f"{int(percentage_progress * 100)}%"

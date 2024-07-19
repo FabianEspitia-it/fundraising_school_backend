@@ -230,6 +230,11 @@ class User(Base):
     startups_favorites = relationship(
         "Startup", secondary="user_startup_favorites", back_populates="users_favorites", overlaps="startup")
 
+    courses = relationship(
+        "Course", secondary="user_courses", back_populates="users")
+    classes = relationship(
+        "Class", secondary="user_classes", back_populates="users")
+
 
 class Education(Base):
     __tablename__ = "education"
@@ -419,6 +424,81 @@ class CrmInvestor(Base):
         "CrmInvestorInvestRange", back_populates="crm_investor")
     sector_and_stages = relationship(
         "CrmInvestorSectorAndStage", back_populates="crm_investor")
+    
+
+# COURSE MODELS
+
+class UserClass(Base):
+    __tablename__ = "user_classes"
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("user.id"), primary_key=True)
+    class_id = Column(Integer, ForeignKey("class.id"), primary_key=True)
+    created_at = Column(DateTime, server_default=func.now())
+
+    user = relationship("User", foreign_keys=[user_id], overlaps="classes")
+    class_ = relationship("Class", foreign_keys=[class_id], overlaps="users")
+
+
+class UserCourse(Base):
+    __tablename__ = "user_courses"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("user.id"), primary_key=True)
+    course_id = Column(Integer, ForeignKey("course.id"), primary_key=True)
+    created_at = Column(DateTime, server_default=func.now())
+    user = relationship("User", foreign_keys=[user_id], overlaps="courses")
+    course = relationship("Course", foreign_keys=[course_id], overlaps="users")
+
+
+
+
+class Course(Base):
+    __tablename__ = "course"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), index=True)
+    description = Column(Text)
+    created_at = Column(DateTime, server_default=func.now())
+    users = relationship("User", secondary="user_courses",
+                         back_populates="courses")
+    modules = relationship("Module", back_populates="course")
+    events = relationship("Event", back_populates="course")
+
+
+class Module(Base):
+    __tablename__ = "module"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), index=True)
+    previous_id = Column(Integer)
+    next_id = Column(Integer)
+    course_id = Column(Integer, ForeignKey("course.id"))
+    course = relationship("Course", back_populates="modules")
+    classes = relationship("Class", back_populates="module")
+    created_at = Column(DateTime, server_default=func.now())
+
+
+class Class(Base):
+    __tablename__ = "class"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), index=True)
+    video_link = Column(String(255))
+    description = Column(Text)
+    previous_id = Column(Integer)
+    next_id = Column(Integer)
+    created_at = Column(DateTime, server_default=func.now())
+    module_id = Column(Integer, ForeignKey("module.id"))
+    module = relationship("Module", back_populates="classes")
+    users = relationship("User", secondary="user_classes",
+                         back_populates="classes")
+
+
+class Event(Base):
+    __tablename__ = "event"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), nullable=False)
+    event_date = Column(DateTime, nullable=False)
+    description = Column(String(255), nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+    course_id = Column(Integer, ForeignKey("course.id"))
+    course = relationship("Course", back_populates="events")
 
 
 Base.metadata.create_all(bind=engine)

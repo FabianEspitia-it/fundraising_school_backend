@@ -422,8 +422,8 @@ def add_user_startup(db: Session = Depends(get_db), user_data: UserStartupReq = 
 
 
 @user.post("/user/startup/bulk", tags=["users"])
-def add_user_startups_bulk(db: Session = Depends(get_db), user_data_list: List[UserStartupReq] = None) -> JSONResponse:
-    create_bulk_user_startup(db=db, user_data_list=user_data_list)
+def add_user_startups_bulk(background_tasks: BackgroundTasks, db: Session = Depends(get_db), user_data_list: List[UserStartupReq] = None) -> JSONResponse:
+    background_tasks.add_task(create_bulk_user_startup, db=db, user_data_list=user_data_list)
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
 
 
@@ -444,3 +444,28 @@ def get_user_startup(db: Session = Depends(get_db), email: str = None) -> JSONRe
 
     user_startup = get_startup_by_user_email(db, email)
     return user_startup
+
+
+@user.post("/user/classes/{class_id}", tags=["users"])
+def create_class_seen_user(user_email: str, class_id: int, db: Session = Depends(get_db)):
+    mark_class_seen_user(user_email, class_id, db)
+    return JSONResponse(content={"response": "created"}, status_code=201)
+
+
+@user.delete("/user/classes/{class_id}", tags=["users"])
+def delete_class_unseen_user(user_email: str, class_id: int, db: Session = Depends(get_db)):
+    mark_class_unseen_user(user_email, class_id, db)
+    return JSONResponse(content={"response": "deleted"}, status_code=200)
+
+
+@user.get("/user/course/{course_id}/modules", tags=["users"])
+def get_users_seen_classes_in_module(user_email: str, course_id: int, db: Session = Depends(get_db)):
+    return seen_classes_by_user(user_email, course_id, db)
+
+
+@user.get("/user/course/{course_id}/progress", tags=["users"])
+def get_course_progress(user_email: str, course_id: int, db: Session = Depends(get_db)):
+    return JSONResponse(
+        content={"progress": calculate_progress(user_email, course_id, db)},
+        status_code=200
+        )
