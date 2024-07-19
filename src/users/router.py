@@ -11,7 +11,7 @@ import os
 from src.database import get_db
 from src.users.linkedin_scraper import user_scraper
 
-from src.users.schemas import ContactUserReq, FavFundReq, ImageUserReq, NewUserReq, RoundUserReq, UpdateUserReq, UserStartupReq
+from src.users.schemas import ContactUserReq, FavFundReq, FavStartupReq, ImageUserReq, NewUserReq, RoundUserReq, UpdateUserReq, UserStartupReq
 from src.users.crud import *
 
 from src.utils.validations import check_email
@@ -304,7 +304,7 @@ def delete_favorite_fund(email: str, fund_id: int, db: Session = Depends(get_db)
 
 
 @user.post("/user/favorite_startup", tags=["users"])
-def add_favorite_startup(email: str, startup_id: int, db: Session = Depends(get_db)):
+def add_favorite_startup(data: FavStartupReq, db: Session = Depends(get_db)):
     """
     Add a favorite startup to a user's profile.
 
@@ -318,7 +318,7 @@ def add_favorite_startup(email: str, startup_id: int, db: Session = Depends(get_
 
     """
 
-    add_favorite_startup_to_user(db, email, startup_id)
+    add_favorite_startup_to_user(db, data.email, data.startup_id)
 
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
 
@@ -347,7 +347,7 @@ def get_favorite_startup_csv(email: str, db: Session = Depends(get_db)):
     if not user_record:
         raise HTTPException(status_code=404, detail="User not found")
 
-    favorite_startups = get_favorite_startups_by_user_id(db, email=email)
+    favorite_startups = get_favorite_startups_by_user_id(db, id=user_record.id)
 
     if not favorite_startups:
         raise HTTPException(
@@ -434,7 +434,6 @@ def check_user(db: Session = Depends(get_db), email: str = None) -> JSONResponse
 
     user_startup = get_user_startup_by_email(db, email)
     return JSONResponse(content=user_startup, status_code=status.HTTP_200_OK)
-
 
 
 @user.get("/user/get_startup/{email}", tags=["users"])
