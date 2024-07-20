@@ -9,8 +9,10 @@ class NewUserReq(BaseModel):
     email: str
     linkedin_picture: Union[str, None] = None
 
+
 class NewUserRes(BaseModel):
     error: str | None = None
+
 
 class RoundUserReq(BaseModel):
     email: str
@@ -18,22 +20,35 @@ class RoundUserReq(BaseModel):
     accept_terms_and_condition: bool
     round_name: Union[str, None] = None
 
+
 class ContactUserReq(BaseModel):
     nickname: str
     email: str
     contact_email: str
+
 
 class ImageUserReq(BaseModel):
     email: str
     image: str
 
 
-# BD SCHEMAS 
+class FavFundReq(BaseModel):
+    email: str
+    fund_id: int
+
+
+class FavStartupReq(BaseModel):
+    email: str
+    startup_id: int
+
+# BD SCHEMAS
+
 
 class User(BaseModel):
     id: int
     name: str
     followers_amount: int
+    phone_number: str
     linkedin_url: str
     location: str
     photo_url: str
@@ -83,6 +98,29 @@ class Education(BaseModel):
     start_year: datetime
     end_year: datetime
     user_id: int
+
+    class Config:
+        orm_mode = True
+
+
+class UpdateUserReq(BaseModel):
+
+    nickname: Union[str, None] = None
+    contact_email: Union[str, None] = None
+    phone_number: Union[str, None] = None
+    photo_url: Union[str, None] = None
+    seeking_capital: Union[bool, None] = None
+    location: Union[str, None] = None
+    round: Union[str, None] = None
+
+
+class UserStartupReq(BaseModel):
+    nickname: str
+    email: str
+    linkedin_url: str
+    phone_number: str
+    location: str
+    startup_name: str
 
     class Config:
         orm_mode = True

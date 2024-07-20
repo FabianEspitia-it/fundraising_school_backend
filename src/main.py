@@ -3,10 +3,10 @@ import uvicorn
 
 from fastapi import FastAPI
 
+from src.course.router import course
 from src.users.router import user
 from src.vc_sheet.router import vc_sheet_router
 from src.startups.router import startup_router
-
 
 
 app = FastAPI()
@@ -16,10 +16,22 @@ app.title = "Fundraising School API"
 app.include_router(user)
 app.include_router(vc_sheet_router)
 app.include_router(startup_router)
+app.include_router(course)
 
 if __name__ == "__main__":
 
+    try:
+        print("[INFO] Running migrations")
+
+        os.system("alembic revision --autogenerate -m 'Auto-generated migration'")
+
+        os.system("alembic upgrade head")
+    except Exception as e:
+        print(f"[ERROR] {e}")
+
     port = os.getenv("PORT")
+
+    print(f"[INFO] Port: {port}")
 
     if not port:
         print("[INFO] Environment variable not found: Port")
