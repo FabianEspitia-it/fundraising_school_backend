@@ -158,7 +158,7 @@ def get_filter_options(db: Session = Depends(get_db)):
     return dict(countries=countries, sectors=sectors, tractions=tractions)
 
 
-@startup_router.get("/sartups/countries", tags=["startups"])
+@startup_router.get("/sartup/countries", tags=["startups"])
 def get_countries_startups(db: Session = Depends(get_db)):
     return get_countries(db=db)
 
