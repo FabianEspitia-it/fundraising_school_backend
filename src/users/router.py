@@ -360,7 +360,7 @@ def get_favorite_startup_csv(email: str, db: Session = Depends(get_db)):
             status_code=404, detail="No favorite startups found for this user.")
 
     df = pd.DataFrame([startup for startup in favorite_startups])
-    df = df.rename(columns={"phone_number": "phone number", "fund_raised": "fund raised",})
+    df = df.rename(columns={"phone_number": "phone number", "fund_raised": "fund raised", "one_sentence_description": "one sentence description",})
 
     # Using BytesIO to save the CSV in memory
     buffer = io.BytesIO()

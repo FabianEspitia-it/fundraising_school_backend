@@ -336,6 +336,7 @@ class Startup(Base):
     description = Column(Text, nullable=True)
     phone_number = Column(String(20), nullable=True)
     website = Column(String(255), nullable=True)
+    one_sentence_description = Column(String(115), nullable=True)
     linkedin = Column(String(255), nullable=True)
     photo = Column(String(255), nullable=True)
     calendly = Column(String(255), nullable=True)
