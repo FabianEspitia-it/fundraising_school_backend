@@ -270,7 +270,13 @@ def get_favorite_fund_csv(email: str, db: Session = Depends(get_db)):
 
     df = pd.DataFrame([fund.__dict__ for fund in favorite_funds])
     df = df.drop(columns=['_sa_instance_state'])
+    df = df.drop(columns=['id'])
+    df = df.drop(columns=['photo'])
+    df = df.rename(columns={"crunch_base": "crunchbase",})
 
+    
+    df = df[['name', 'contact', 'description', 'location', 'website', 'linkedin', 'twitter', 'crunchbase']]
+            
     # Using BytesIO to save the CSV in memory
     buffer = io.BytesIO()
     df.to_csv(buffer, index=False)
@@ -353,8 +359,8 @@ def get_favorite_startup_csv(email: str, db: Session = Depends(get_db)):
         raise HTTPException(
             status_code=404, detail="No favorite startups found for this user.")
 
-    df = pd.DataFrame([startup.__dict__ for startup in favorite_startups])
-    df = df.drop(columns=['_sa_instance_state'])
+    df = pd.DataFrame([startup for startup in favorite_startups])
+    df = df.rename(columns={"phone_number": "phone number", "fund_raised": "fund raised",})
 
     # Using BytesIO to save the CSV in memory
     buffer = io.BytesIO()
