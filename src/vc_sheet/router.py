@@ -35,26 +35,14 @@ def get_filter_options(db: Session = Depends(get_db)):
     Returns:
         JSONResponse: A JSON response containing the filter options.
     """
-    countries: list[str] = []
-    countries_db = get_countries(db=db)
-    for country in countries_db:
-        countries.append(country.name)
+    countries: list[str] = get_country_funds(db=db)
 
 
-    sectors: list[str] = []
-    sectors_db = get_sectors(db=db)
-    for sector in sectors_db:
-        sectors.append(sector.name)
+    sectors: list[str] = get_sector_funds(db=db)
 
-    check_size: list[str] = []
-    check_size_db = get_check_sizes(db=db)
-    for size in check_size_db:
-        check_size.append(size.size)
+    check_size: list[str] = get_check_size_funds(db=db)
 
-    rounds: list[str] = []
-    rounds_db = get_rounds(db=db)
-    for round in rounds_db:
-        rounds.append(round.stage)    
+    rounds: list[str] = get_round_funds(db=db)   
 
     return dict(countries=countries, sectors=sectors, check_size=check_size, rounds=rounds)
 
@@ -168,6 +156,8 @@ def new_investor(db: Session = Depends(get_db)) -> JSONResponse:
     create_bulk_crm_investors(db=db, crm_investors=investors)
 
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
+
+
 
 
 """

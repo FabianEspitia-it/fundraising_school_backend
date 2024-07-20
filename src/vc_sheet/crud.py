@@ -551,3 +551,44 @@ def create_bulk_crm_investors(db: Session, crm_investors: list[dict]) -> None:
                     f"CrmInvestorInvestRange association created: investor_id={investor['id']}, invest_range_id={invest_range.id}")
 
         investor_id_count += 1
+
+
+def get_country_funds(db: Session):
+    
+    result = db.query(Country.name).join(FundCountry, Country.id == FundCountry.country_id).group_by(Country.name).having(func.count(FundCountry.fund_id) > 0).all()
+    
+   
+    countries = [row[0] for row in result]
+    
+    return countries
+
+
+def get_sector_funds(db: Session):
+    
+    result = db.query(Sector.name).join(FundSector, Sector.id == FundSector.sector_id).group_by(Sector.name).having(func.count(FundSector.fund_id) > 0).all()
+    
+    sectors = [row[0] for row in result]
+    
+    return sectors
+
+
+def get_check_size_funds(db: Session):
+        
+        result = db.query(CheckSize.size).join(FundCheckSize, CheckSize.id == FundCheckSize.check_size_id).group_by(CheckSize.size).having(func.count(FundCheckSize.fund_id) > 0).all()
+        
+        check_sizes = [row[0] for row in result]
+        
+        return check_sizes
+
+
+def get_round_funds(db: Session):
+    
+    result = db.query(Round.stage).join(FundRound, Round.id == FundRound.round_id).group_by(Round.stage).having(func.count(FundRound.fund_id) > 0).all()
+    
+    rounds = [row[0] for row in result]
+    
+    return rounds
+    
+
+
+
