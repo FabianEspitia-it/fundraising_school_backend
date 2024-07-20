@@ -171,8 +171,8 @@ def get_countries_startups(db: Session = Depends(get_db)):
 def get_startup_users(startup_name: str, db: Session = Depends(get_db)):
     return get_users_by_startup_name(db=db, startup_name=startup_name)
 
-@startup_router.post("/startup/{startup_id}", tags=["startup"])
-async def upload_startup_photo(startup_id: str | None = None, startup_photo: UploadFile = File(...), db: Session = Depends(get_db)) -> JSONResponse:
+@startup_router.patch("/startup/{startup_id}/startup_photo", tags=["startups"])
+async def upload_startup_photo(startup_id: int | None = None, startup_photo: UploadFile = File(...), db: Session = Depends(get_db)) -> JSONResponse:
 
     content = await startup_photo.read()
     size = len(content)
@@ -194,11 +194,11 @@ async def upload_startup_photo(startup_id: str | None = None, startup_photo: Upl
             detail=f'Unsupported file type: {file_type}. Supported file types are: {supported_image_types.keys()}'
         )
     
-    await s3_upload(content= content, key= f'{startup_id}.{supported_image_types[file_type]}')
+    await s3_upload(content= content, startup_id= startup_id, file_type= file_type)
     
     aws_bucket_name = os.getenv("AWS_BUCKET")
     bucket_link: str = f'S3://{aws_bucket_name}/{startup_id}.{file_type}'
-    upload_startup_photo(db=db, startup_id=startup_id, startup_photo=bucket_link)
+    update_startup_photo(db=db, startup_id=startup_id, startup_photo_link=bucket_link)
 
     return JSONResponse(content={"bucket_link": bucket_link}, status_code=status.HTTP_201_CREATED)
 

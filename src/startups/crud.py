@@ -10,8 +10,6 @@ from src.users.crud import get_user_by_email, get_favorite_startups_by_user_id
 
 from sqlalchemy.exc import SQLAlchemyError
 
-from fastapi import UploadFile
-
 from sqlalchemy.orm import Session, joinedload
 
 import src.models as models
@@ -239,7 +237,7 @@ def get_users_by_startup_name(db: Session, startup_name: str):
     return users_in_startup
 
 
-async def s3_upload(content: bytes, key: str):
+async def s3_upload(content: bytes, startup_id: int, file_type: str):
 
     session = boto3.session.Session(
         aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
@@ -248,8 +246,22 @@ async def s3_upload(content: bytes, key: str):
     )
     s3 = session.resource('s3')
     bucket = s3.Bucket(AWS_BUCKET)
-    bucket.put_object(Key=key, Body=content)
+
+    bucket_items = [item.key for item in list(bucket.objects.all())]
+    for item in bucket_items:
+        item_id = item.split('.')[0]
+        if str(item_id) == str(startup_id):
+            bucket.delete_objects(Delete={
+                'Objects': [
+                    {
+                        'Key': item
+                    }
+                ]
+            })
+
+    bucket.put_object(Key=f'{startup_id}.{SUPPORTED_IMAGES_TYPES[file_type]}', Body=content)
 
 
 def update_startup_photo(db: Session, startup_photo_link: str, startup_id: str) -> str:
     db.query(models.Startup).filter(models.Startup.id == startup_id).update({'photo': startup_photo_link})
+    db.commit()
