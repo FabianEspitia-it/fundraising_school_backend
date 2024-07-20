@@ -1,6 +1,8 @@
 from typing import List
 from sqlalchemy.orm import Session
 
+from sqlalchemy.orm import joinedload, load_only
+
 from src.users.schemas import NewUserReq, UpdateUserReq, UserStartupReq
 
 from src.course.crud import get_modules_by_course_id
@@ -124,12 +126,30 @@ def add_favorite_startup_to_user(db: Session, email: str, startup_id: int) -> No
         raise Exception("User not found")
 
 
-def get_favorite_startups_by_user_id(db: Session, id: int) -> list[models.Startup]:
-
+def get_favorite_startups_by_user_id(db: Session, id: int) -> list[dict]:
     query = db.query(models.Startup).join(models.UserStartupFavorite).join(
-        models.User).filter(models.User.id == id).all()
+        models.User).filter(models.User.id == id).options(
+        joinedload(models.Startup.country),
+        joinedload(models.Startup.traction),
+        joinedload(models.Startup.sector),
+        joinedload(models.Startup.round)
+    ).all()
 
-    return query
+    startups = []
+    for startup in query:
+        startup_dict = {
+            column: getattr(startup, column)
+            for column in models.Startup.__table__.columns.keys()
+            if column not in ['id', 'photo', 'country_id', 'traction_id', 'sector_id', 'round_id']
+        }
+        startup_dict['country'] = startup.country.name if startup.country else None
+        startup_dict['traction'] = startup.traction.name if startup.traction else None
+        startup_dict['sector'] = startup.sector.name if startup.sector else None
+        startup_dict['round'] = startup.round.name if startup.round else None
+
+        startups.append(startup_dict)
+
+    return startups
 
 
 def delete_favorite_startup_by_user_email(db: Session, email: str, startup_id: int) -> None:
