@@ -5,6 +5,7 @@ from src.vc_sheet.vc_scraper import vc_scraper_partners
 
 from src.users.crud import get_user_by_email, get_favorite_funds_by_user_id
 
+from sqlalchemy.sql import text
 
 import time
 
@@ -590,5 +591,17 @@ def get_round_funds(db: Session):
     return rounds
     
 
+def search_vc_by_term(db: Session, vc_term: str):
+    if len(vc_term) > 1:
+        query = """select name from vc_fund v where ts @@ plainto_tsquery('simple', '{0}:*') limit 10;""".format(vc_term)
 
+        print(query)
+        res = db.execute(text(query)).fetchall()
+        if len(res) > 0:
+
+            return [res[c][0] for c in range(len(res))]
+        else:
+            return "No results found"
+    else:
+        return "No results found"
 

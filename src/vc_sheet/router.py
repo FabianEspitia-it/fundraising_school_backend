@@ -6,6 +6,7 @@ from src.vc_sheet.crud import *
 from src.vc_sheet.test import get_investor_info
 from src.vc_sheet.vc_scraper import *
 
+
 vc_sheet_router = APIRouter()
 
 # FUND ROUTES
@@ -158,6 +159,9 @@ def new_investor(db: Session = Depends(get_db)) -> JSONResponse:
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
 
 
+@vc_sheet_router.get("/vc_sheet/search_term", tags=["vc_sheet"])
+def fts_search_vc(db: Session = Depends(get_db), vc_term: str = '') -> JSONResponse:
+    return search_vc_by_term(db, vc_term)
 
 
 """
