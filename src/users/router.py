@@ -8,11 +8,14 @@ import pandas as pd
 import io
 import os
 
+
 from src.database import get_db
 from src.users.linkedin_scraper import user_scraper
 
 from src.users.schemas import ContactUserReq, FavFundReq, FavStartupReq, ImageUserReq, NewUserReq, RoundUserReq, UpdateUserReq, UserStartupReq
 from src.users.crud import *
+
+from src.models import Country, Round, Sector, Traction
 
 from src.utils.validations import check_email
 
@@ -360,8 +363,35 @@ def get_favorite_startup_csv(email: str, db: Session = Depends(get_db)):
             status_code=404, detail="No favorite startups found for this user.")
 
     df = pd.DataFrame([startup.__dict__ for startup in favorite_startups])
-    df = df.drop(columns=['_sa_instance_state'])
-    df = df.rename(columns={"phone_number": "phone number", "fund_raised": "fund raised", "one_sentence_description": "one sentence description",})
+    df = df.drop(columns=['_sa_instance_state', 'id', 'photo'])
+
+    country_ids = df['country_id'].tolist()
+    countries = db.query(Country).filter(Country.id.in_(country_ids)).all()
+    country_dict = {country.id: country.name for country in countries}
+
+    df['country'] = df['country_id'].map(country_dict)
+    df = df.drop(columns=['country_id'])
+
+    sector_ids = df['sector_id'].tolist()
+    sectors = db.query(Sector).filter(Sector.id.in_(sector_ids)).all()
+    sector_dict = {sector.id: sector.name for sector in sectors}
+
+    df['sector'] = df['sector_id'].map(sector_dict)
+    df = df.drop(columns=['sector_id'])
+
+    round_ids = df['round_id'].tolist()
+    rounds = db.query(Round).filter(Round.id.in_(round_ids)).all()
+    round_dict = {round.id: round.stage for round in rounds}
+
+    df['round'] = df['round_id'].map(round_dict)
+    df = df.drop(columns=['round_id'])
+
+    traction_ids = df['traction_id'].tolist()
+    tractions = db.query(Traction).filter(Traction.id.in_(traction_ids)).all()
+    traction_dict = {traction.id: traction.name for traction in tractions}
+
+    df['traction'] = df['traction_id'].map(traction_dict)
+    df = df.drop(columns=['traction_id'])
 
     # Using BytesIO to save the CSV in memory
     buffer = io.BytesIO()
