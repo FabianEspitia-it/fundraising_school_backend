@@ -1,7 +1,7 @@
 from typing import List
 from sqlalchemy.orm import Session
 
-from sqlalchemy.orm import joinedload, load_only
+import pandas as pd
 
 from src.users.schemas import NewUserReq, UpdateUserReq, UserStartupReq
 
@@ -130,12 +130,20 @@ def get_favorite_startups_by_user_id(db: Session, id: int):
     query = db.query(models.Startup).join(models.UserStartupFavorite).join(
         models.User).filter(models.User.id == id).all()
 
-    
-
     return query
 
 
-
+def map_ids_to_names(db: Session, df: pd.DataFrame, column_name: str, model, attr_name: str):
+    ids = df[column_name].tolist()
+    records = db.query(model).filter(model.id.in_(ids)).all()
+    record_dict = {record.id: getattr(record, attr_name) for record in records}
+    
+    new_column_name = column_name.replace('_id', '')
+    df[new_column_name] = df[column_name].map(record_dict)
+    df = df.drop(columns=[column_name])
+    
+    return df
+    
 
 
 def delete_favorite_startup_by_user_email(db: Session, email: str, startup_id: int) -> None:

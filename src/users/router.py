@@ -365,33 +365,10 @@ def get_favorite_startup_csv(email: str, db: Session = Depends(get_db)):
     df = pd.DataFrame([startup.__dict__ for startup in favorite_startups])
     df = df.drop(columns=['_sa_instance_state', 'id', 'photo'])
 
-    country_ids = df['country_id'].tolist()
-    countries = db.query(Country).filter(Country.id.in_(country_ids)).all()
-    country_dict = {country.id: country.name for country in countries}
-
-    df['country'] = df['country_id'].map(country_dict)
-    df = df.drop(columns=['country_id'])
-
-    sector_ids = df['sector_id'].tolist()
-    sectors = db.query(Sector).filter(Sector.id.in_(sector_ids)).all()
-    sector_dict = {sector.id: sector.name for sector in sectors}
-
-    df['sector'] = df['sector_id'].map(sector_dict)
-    df = df.drop(columns=['sector_id'])
-
-    round_ids = df['round_id'].tolist()
-    rounds = db.query(Round).filter(Round.id.in_(round_ids)).all()
-    round_dict = {round.id: round.stage for round in rounds}
-
-    df['round'] = df['round_id'].map(round_dict)
-    df = df.drop(columns=['round_id'])
-
-    traction_ids = df['traction_id'].tolist()
-    tractions = db.query(Traction).filter(Traction.id.in_(traction_ids)).all()
-    traction_dict = {traction.id: traction.name for traction in tractions}
-
-    df['traction'] = df['traction_id'].map(traction_dict)
-    df = df.drop(columns=['traction_id'])
+    df = map_ids_to_names(db, df, 'country_id', Country, 'name')
+    df = map_ids_to_names(db, df, 'sector_id', Sector, 'name')
+    df = map_ids_to_names(db, df, 'round_id', Round, 'stage')
+    df = map_ids_to_names(db, df, 'traction_id', Traction, 'name')
 
     # Using BytesIO to save the CSV in memory
     buffer = io.BytesIO()
