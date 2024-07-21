@@ -1,5 +1,5 @@
 import os
-import boto3
+#import boto3
 
 from sqlalchemy.orm import Session, joinedload
 
@@ -236,7 +236,7 @@ def get_users_by_startup_name(db: Session, startup_name: str):
 
     return users_in_startup
 
-
+"""
 async def s3_upload(content: bytes, startup_id: int, file_type: str):
 
     session = boto3.session.Session(
@@ -265,3 +265,4 @@ async def s3_upload(content: bytes, startup_id: int, file_type: str):
 def update_startup_photo(db: Session, startup_photo_link: str, startup_id: str) -> str:
     db.query(models.Startup).filter(models.Startup.id == startup_id).update({'photo': startup_photo_link})
     db.commit()
+"""

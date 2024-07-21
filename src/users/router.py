@@ -8,11 +8,14 @@ import pandas as pd
 import io
 import os
 
+
 from src.database import get_db
 from src.users.linkedin_scraper import user_scraper
 
 from src.users.schemas import ContactUserReq, FavFundReq, FavStartupReq, ImageUserReq, NewUserReq, RoundUserReq, UpdateUserReq, UserStartupReq
 from src.users.crud import *
+
+from src.models import Country, Round, Sector, Traction
 
 from src.utils.validations import check_email
 
@@ -359,8 +362,13 @@ def get_favorite_startup_csv(email: str, db: Session = Depends(get_db)):
         raise HTTPException(
             status_code=404, detail="No favorite startups found for this user.")
 
-    df = pd.DataFrame([startup for startup in favorite_startups])
-    df = df.rename(columns={"phone_number": "phone number", "fund_raised": "fund raised", "one_sentence_description": "one sentence description",})
+    df = pd.DataFrame([startup.__dict__ for startup in favorite_startups])
+    df = df.drop(columns=['_sa_instance_state', 'id', 'photo'])
+
+    df = map_ids_to_names(db, df, 'country_id', Country, 'name')
+    df = map_ids_to_names(db, df, 'sector_id', Sector, 'name')
+    df = map_ids_to_names(db, df, 'round_id', Round, 'stage')
+    df = map_ids_to_names(db, df, 'traction_id', Traction, 'name')
 
     # Using BytesIO to save the CSV in memory
     buffer = io.BytesIO()
