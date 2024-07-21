@@ -126,14 +126,9 @@ def add_favorite_startup_to_user(db: Session, email: str, startup_id: int) -> No
         raise Exception("User not found")
 
 
-def get_favorite_startups_by_user_id(db: Session, id: int) -> list[dict]:
+def get_favorite_startups_by_user_id(db: Session, id: int):
     query = db.query(models.Startup).join(models.UserStartupFavorite).join(
-        models.User).filter(models.User.id == id).options(
-        joinedload(models.Startup.country),
-        joinedload(models.Startup.traction),
-        joinedload(models.Startup.sector),
-        joinedload(models.Startup.round)
-    ).all()
+        models.User).filter(models.User.id == id).all()
 
     
 
