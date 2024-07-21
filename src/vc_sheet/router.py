@@ -6,7 +6,6 @@ from src.vc_sheet.crud import *
 from src.vc_sheet.test import get_investor_info
 from src.vc_sheet.vc_scraper import *
 
-from sqlalchemy.sql import text
 
 vc_sheet_router = APIRouter()
 
@@ -162,18 +161,7 @@ def new_investor(db: Session = Depends(get_db)) -> JSONResponse:
 
 @vc_sheet_router.get("/vc_sheet/search_term", tags=["vc_sheet"])
 def fts_search_vc(db: Session = Depends(get_db), vc_term: str = '') -> JSONResponse:
-    if len(vc_term) > 1:
-        query = """select name from vc_fund v where ts @@ plainto_tsquery('simple', '{0}:*') limit 10;""".format(vc_term)
-
-        print(query)
-        res = db.execute(text(query)).fetchall()
-        if len(res) > 0:
-
-            return [res[c][0] for c in range(len(res))]
-        else:
-            return "No results found"
-    else:
-        return "No results found"
+    return search_vc_by_term(db, vc_term)
 
 
 """
