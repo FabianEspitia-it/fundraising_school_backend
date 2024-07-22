@@ -21,7 +21,6 @@ def api_key_auth(api_key: str = Depends(oauth2_scheme)):
 
 app = FastAPI(dependencies=[Depends(api_key_auth)])
 
-
 app.title = "Fundraising School API"
 
 app.include_router(user)

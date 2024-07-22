@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey
+from sqlalchemy import Column, ForeignKey, Index
 from sqlalchemy.sql.sqltypes import Integer, String, Boolean, DateTime, Text
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
@@ -326,6 +326,9 @@ class Fund(Base):
                          back_populates='funds', overlaps="user")
     
     users_in = relationship("User", secondary="fund_users", back_populates='funds_in', overlaps="user")
+
+
+Index('trgm_index_vc_funds_name', Fund.name, postgresql_concurrently=True, postgresql_using='gin')
 
 
 class Startup(Base):
