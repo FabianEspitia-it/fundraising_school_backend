@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from src.database import get_db
 
 from src.course.crud import *
-from src.course.schemas import NewClass, NewEvent
+from src.course.schemas import NewClass, NewCourse, NewEvent
 
 
 course = APIRouter()
@@ -39,3 +39,6 @@ def get_class_by_id_course_and_module(course_id: int, module_id: int, class_id: 
 def add_new_class_module(course_id: int, module_id: int, new_class: NewClass, db: Session = Depends(get_db)):
     add_class_to_module(db, course_id, module_id, new_class)
 
+@course.post('/course', tags=['courses'])
+def add_new_course(new_course: NewCourse, db: Session = Depends(get_db)):
+    return crate_new_course(db, new_course)

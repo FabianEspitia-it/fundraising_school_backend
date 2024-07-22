@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session, joinedload
 
 from src.models import *
-from src.course.schemas import NewClass
+from src.course.schemas import NewClass, NewCourse
 
 
 def all_courses(db: Session):
@@ -49,3 +49,15 @@ def add_class_to_module(db: Session, course_id: int, module_id: int, new_class: 
     db.commit()
 
     return class_instance
+
+
+def crate_new_course(db: Session, new_course: NewCourse):
+    course = Course(
+        title=new_course.title,
+        description=new_course.description,
+        users=db.query(User).all()
+    )
+    db.add(course)
+    db.commit()
+
+    return course
