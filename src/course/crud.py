@@ -28,8 +28,6 @@ def all_courses(db: Session, user_email: str):
             'last_class_name': None,
         }
 
-        print(courses)
-
         if last_user_class:
             last_class_name = db.query(Class).filter(
                 Class.id == last_user_class.class_id).first().title
