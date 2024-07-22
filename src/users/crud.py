@@ -301,7 +301,7 @@ def seen_classes_by_user(user_email: str, db: Session):
 
 
 def calculate_progress(user_email: str, course_id: int, db: Session):
-    seen_classes: list[models.Class] = seen_classes_by_user(user_email, course_id, db)
+    seen_classes: list[models.Class] = seen_classes_by_user(user_email, db)
     modules: list[models.Module] = get_modules_by_course_id(db, course_id)
     total_classes: list[models.Class] = []
 

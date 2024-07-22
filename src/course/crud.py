@@ -1,12 +1,36 @@
 from fastapi import HTTPException
+from sqlalchemy import desc
 from sqlalchemy.orm import Session, joinedload
 
 from src.models import *
 from src.course.schemas import NewClass
 
 
-def all_courses(db: Session):
-    return db.query(Course).all()
+
+
+def all_courses(db: Session, user_email: str):
+    from src.users.crud import calculate_progress
+    courses = db.query(Course).all()
+    result = []
+
+    user = db.query(User).filter(User.email == user_email).first()
+
+    for course in courses:
+        progress = calculate_progress(db=db, user_email=user_email, course_id=course.id)
+        
+       
+        last_user_class = db.query(UserClass).filter(UserClass.user_id == user.id).order_by(desc(UserClass.id)).first()
+
+        next_id = db.query(Class).filter(Class.id == last_user_class.class_id).first().next_id
+
+        course_with_progress = {
+            'course': course,
+            'progress': progress,
+            'next_id': next_id
+        }
+        result.append(course_with_progress)
+
+    return result
 
 
 def get_course_by_id(db: Session, course_id: int):
@@ -49,3 +73,7 @@ def add_class_to_module(db: Session, course_id: int, module_id: int, new_class: 
     db.commit()
 
     return class_instance
+
+
+def get_class_by_name_method(db: Session, class_name: str):
+    return db.query(Class).filter(Class.title == class_name).first()

@@ -11,8 +11,8 @@ course = APIRouter()
 
 
 @course.get("/courses", tags=["courses"])
-def get_courses(db: Session = Depends(get_db)):
-    courses = all_courses(db)
+def get_courses(user_email: str, db: Session = Depends(get_db)):
+    courses = all_courses(db, user_email)
     return courses
 
 
@@ -38,4 +38,12 @@ def get_class_by_id_course_and_module(course_id: int, module_id: int, class_id: 
 @course.post("/course/{course_id}/modules/{module_id}/classes", tags=["courses"])
 def add_new_class_module(course_id: int, module_id: int, new_class: NewClass, db: Session = Depends(get_db)):
     add_class_to_module(db, course_id, module_id, new_class)
+
+
+@course.get("/course/class/{class_name}", tags= ["courses"])
+def get_class_by_name(class_name: str, db: Session = Depends(get_db)):
+    class_instance = get_class_by_name_method(db, class_name)
+    if class_instance is None:
+        raise HTTPException(status_code=404, detail="Class not found")
+    return class_instance
 
