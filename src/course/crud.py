@@ -22,6 +22,16 @@ def all_courses(db: Session, user_email: str):
         last_user_class = db.query(UserClass).filter(
             UserClass.user_id == user.id).order_by(desc(UserClass.id)).first()
 
+        for module in course.modules:
+            for classObj in module.classes:
+                take_class = db.query(UserClass).filter(
+                    UserClass.user_id == user.id, UserClass.class_id == classObj.id).first()
+
+                if take_class:
+                    classObj.taken = True
+                else:
+                    classObj.taken = False
+
         course_with_progress = {
             'course': course,
             'progress': progress,
