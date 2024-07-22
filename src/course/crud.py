@@ -114,3 +114,46 @@ def add_class_as_seen(db: Session, class_id: int, user_email: UserEmail):
 
     db.commit()
     db.refresh(user_db)
+
+
+def get_next_class_course(db: Session, class_id: int, module_id: int):
+    current_class = db.query(Class).filter(Class.id == class_id).first()
+    
+    if current_class.next_id is None:
+        current_module = db.query(Module).filter(Module.id == module_id).first()
+        
+        if current_module.next_id is None:
+            return None
+        else:
+            next_module = db.query(Module).filter(Module.id == current_module.next_id).options(joinedload(Module.classes)).first()
+            
+            if next_module is None or len(next_module.classes) == 0:
+                return None
+            
+            next_class = next_module.classes[0]
+
+    else:
+        next_class = db.query(Class).filter(Class.id == current_class.next_id).first()
+    
+    return next_class
+
+
+def get_previous_class_course(db: Session, class_id: int, module_id: int):
+    current_class = db.query(Class).filter(Class.id == class_id).first()
+    
+    if current_class.previous_id is None:
+        current_module = db.query(Module).filter(Module.id == module_id).first()
+        
+        if current_module.previous_id is None:
+            return None
+        else:
+            previous_module = db.query(Module).filter(Module.id == current_module.previous_id).options(joinedload(Module.classes)).first()
+            
+            if previous_module is None or len(previous_module.classes) == 0:
+                return None
+            
+            previous_class = previous_module.classes[0]
+
+    else:
+        previous_class = db.query(Class).filter(Class.id == current_class.previous_id).first()
+    return previous_class

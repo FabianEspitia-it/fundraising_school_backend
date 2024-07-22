@@ -60,3 +60,13 @@ def get_course_by_name(course_name: str, db: Session = Depends(get_db)):
 def mark_class_complete(class_id: int, user_email: UserEmail, db: Session = Depends(get_db)):
     add_class_as_seen(db, class_id, user_email)
     return JSONResponse(status_code=201, content={'response': 'Class completed'})
+
+
+@course.get('/course/{course_name}/module/{module_id}/classes/{class_id}/next_class', tags=['courses'])
+def get_next_class(module_id: int, class_id: int, db: Session = Depends(get_db)):
+    return get_next_class_course(db, class_id, module_id)
+
+
+@course.get('/course/{course_name}/module/{module_id}/classes/{class_id}/previous_class', tags=['courses'])
+def get_next_class(module_id: int, class_id: int, db: Session = Depends(get_db)):
+    return get_previous_class_course(db, class_id, module_id)
