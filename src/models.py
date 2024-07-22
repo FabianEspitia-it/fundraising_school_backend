@@ -459,6 +459,7 @@ class Course(Base):
     __tablename__ = "course"
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(255), index=True)
+    photo = Column(String(255))
     description = Column(Text)
     created_at = Column(DateTime, server_default=func.now())
     users = relationship("User", secondary="user_courses",
