@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from src.database import get_db
 
 from src.course.crud import *
-from src.course.schemas import NewClass, NewCourse, NewEvent
+from src.course.schemas import NewClass, UserEmail, NewCourse, NewEvent
 
 
 course = APIRouter()
@@ -54,3 +54,9 @@ def get_course_by_name(course_name: str, db: Session = Depends(get_db)):
     if course is None:
         raise HTTPException(status_code=404, detail="Course not found")
     return course
+
+
+@course.post("/course/{course_name}/modules/{module_id}/classes/{class_id}/completed", tags=['courses'])
+def mark_class_complete(class_id: int, user_email: UserEmail, db: Session = Depends(get_db)):
+    add_class_as_seen(db, class_id, user_email)
+    return JSONResponse(status_code=201, content={'response': 'Class completed'})

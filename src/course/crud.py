@@ -3,7 +3,7 @@ from sqlalchemy import desc
 from sqlalchemy.orm import Session, joinedload
 
 from src.models import *
-from src.course.schemas import NewClass, NewCourse
+from src.course.schemas import NewClass, UserEmail, NewCourse
 
 
 def all_courses(db: Session, user_email: str):
@@ -98,3 +98,19 @@ def get_class_by_name_method(db: Session, class_name: str):
 
 def get_course_by_name_method(db: Session, course_name: str):
     return db.query(Course).filter(Course.title == course_name).first()
+
+
+def add_class_as_seen(db: Session, class_id: int, user_email: UserEmail):
+    user_db = db.query(User).filter(User.email == user_email.email).options(joinedload(User.classes)).first()
+    class_db = db.query(Class).filter(Class.id == class_id).first()
+
+    if user_db is None:
+        raise HTTPException('User not found')
+
+    if class_db not in user_db.classes:
+        user_db.classes.append(class_db)
+    else:
+        raise HTTPException(status_code=400, detail='Class already seen by user')
+
+    db.commit()
+    db.refresh(user_db)

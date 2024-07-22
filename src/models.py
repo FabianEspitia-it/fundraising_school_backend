@@ -431,7 +431,7 @@ class CrmInvestor(Base):
 
 class UserClass(Base):
     __tablename__ = "user_classes"
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    id = Column(Integer, index=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("user.id"), primary_key=True)
     class_id = Column(Integer, ForeignKey("class.id"), primary_key=True)
     created_at = Column(DateTime, server_default=func.now())
