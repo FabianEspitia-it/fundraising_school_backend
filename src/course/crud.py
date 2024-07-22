@@ -26,7 +26,6 @@ def all_courses(db: Session, user_email: str):
             'course': course,
             'progress': progress,
             'last_class_name': None,
-            'first_class_name': None,
         }
 
         print(courses)
