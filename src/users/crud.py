@@ -139,13 +139,12 @@ def map_ids_to_names(db: Session, df: pd.DataFrame, column_name: str, model, att
     ids = df[column_name].tolist()
     records = db.query(model).filter(model.id.in_(ids)).all()
     record_dict = {record.id: getattr(record, attr_name) for record in records}
-    
+
     new_column_name = column_name.replace('_id', '')
     df[new_column_name] = df[column_name].map(record_dict)
     df = df.drop(columns=[column_name])
-    
+
     return df
-    
 
 
 def delete_favorite_startup_by_user_email(db: Session, email: str, startup_id: int) -> None:
@@ -262,19 +261,21 @@ def get_user_startup_by_email(db: Session, email: str) -> bool:
             return get_user_fund_by_email(db, email)
     else:
         raise Exception("User not found")
-    
+
 
 def get_startup_by_user_email(db: Session, email: str) -> models.Startup:
     user = db.query(models.User).filter(models.User.email == email).first()
     if user:
-        startup = db.query(models.Startup).join(models.StartupUser).filter(models.StartupUser.user_id == user.id).first()
+        startup = db.query(models.Startup).join(models.StartupUser).filter(
+            models.StartupUser.user_id == user.id).first()
         return startup
     else:
         raise Exception("User not found")
-    
+
 
 def mark_class_seen_user(user_email: str, class_id: int, db: Session):
-    user: models.User = db.query(models.User).filter(models.User.email == user_email).first()
+    user: models.User = db.query(models.User).filter(
+        models.User.email == user_email).first()
     user_class = models.UserClass(user_id=user.id, class_id=class_id)
     db.add(user_class)
     db.commit()
@@ -282,20 +283,23 @@ def mark_class_seen_user(user_email: str, class_id: int, db: Session):
 
 
 def mark_class_unseen_user(user_email: str, class_id: int, db: Session):
-    user: models.User = db.query(models.User).filter(models.User.email == user_email).first()
-    user_class: models.UserClass = db.query(models.UserClass).filter(models.UserClass.class_id == class_id and models.UserClass.user_id == user.id).first()
+    user: models.User = db.query(models.User).filter(
+        models.User.email == user_email).first()
+    user_class: models.UserClass = db.query(models.UserClass).filter(
+        models.UserClass.class_id == class_id and models.UserClass.user_id == user.id).first()
     db.delete(user_class)
     db.commit()
     return user_class
 
 
 def seen_classes_by_user(user_email: str, db: Session):
-    user: models.User = db.query(models.User).filter(models.User.email == user_email).first()
+    user: models.User = db.query(models.User).filter(
+        models.User.email == user_email).first()
     if not user:
         return []
-    
+
     classes = db.query(models.Class).join(models.UserClass
-    ).filter(
+                                          ).filter(
         models.UserClass.user_id == user.id,
     ).filter(
         models.UserClass.class_id == models.Class.id,
@@ -310,8 +314,12 @@ def calculate_progress(user_email: str, course_id: int, db: Session):
 
     for module in modules:
         total_classes = total_classes + module.classes
-    
-    percentage_progress: int = int(len(seen_classes)) / int(len(total_classes))
+
+    percentage_progress: int = 0
+    if int(len(total_classes)) != 0:
+        percentage_progress: int = int(
+            len(seen_classes)) / int(len(total_classes))
+
     return f"{int(percentage_progress * 100)}%"
 
 
