@@ -16,3 +16,9 @@ class NewEvent(BaseModel):
     title: str
     description: str
     date: datetime
+
+
+class NewCourse(BaseModel):
+    title: str
+    description: str
+    

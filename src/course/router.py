@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from src.database import get_db
 
 from src.course.crud import *
-from src.course.schemas import NewClass, NewEvent
+from src.course.schemas import NewClass, NewCourse, NewEvent
 
 
 course = APIRouter()

@@ -3,7 +3,7 @@ from sqlalchemy import desc
 from sqlalchemy.orm import Session, joinedload
 
 from src.models import *
-from src.course.schemas import NewClass
+from src.course.schemas import NewClass, NewCourse
 
 
 

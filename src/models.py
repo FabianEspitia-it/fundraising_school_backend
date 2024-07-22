@@ -442,7 +442,7 @@ class UserClass(Base):
 
 class UserCourse(Base):
     __tablename__ = "user_courses"
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("user.id"), primary_key=True)
     course_id = Column(Integer, ForeignKey("course.id"), primary_key=True)
     created_at = Column(DateTime, server_default=func.now())

@@ -46,11 +46,13 @@ def update_round_info_user_by_email(db: Session, email: str, seeking_capital: bo
 
 
 def create_user_principal_data(db: Session, new_user: NewUserReq) -> int:
+    print(new_user)
     user_first_name = new_user.name.split()[0]
     user = models.User(
         first_name=user_first_name,
         email=new_user.email,
-        photo_url=new_user.linkedin_picture
+        photo_url=new_user.linkedin_picture,
+        courses=db.query(models.Course).all()
     )
     db.add(user)
     db.commit()
@@ -180,7 +182,8 @@ def create_user_startup(db: Session, user_data: UserStartupReq) -> None:
         email=user_data.email,
         linkedin_url=user_data.linkedin_url,
         phone_number=user_data.phone_number,
-        location=user_data.location
+        location=user_data.location,
+        courses=db.query(models.Course).all()
     )
     db.add(user)
     db.commit()
@@ -310,3 +313,7 @@ def calculate_progress(user_email: str, course_id: int, db: Session):
     
     percentage_progress: int = int(len(seen_classes)) / int(len(total_classes))
     return f"{int(percentage_progress * 100)}%"
+
+
+def get_all_users(db: Session):
+    return db.query(models.User).all()
