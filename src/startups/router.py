@@ -1,5 +1,5 @@
 import os
-#import magic
+import magic
 
 from fastapi import APIRouter, HTTPException, status, Depends, File, UploadFile
 from fastapi.responses import JSONResponse
