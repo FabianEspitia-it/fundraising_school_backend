@@ -47,3 +47,10 @@ def get_class_by_name(class_name: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Class not found")
     return class_instance
 
+
+@course.get("/course/name/{course_name}", tags= ["courses"])
+def get_course_by_name(course_name: str, db: Session = Depends(get_db)):
+    course = get_course_by_name_method(db, course_name)
+    if course is None:
+        raise HTTPException(status_code=404, detail="Course not found")
+    return course

@@ -84,3 +84,7 @@ def add_class_to_module(db: Session, course_id: int, module_id: int, new_class: 
 
 def get_class_by_name_method(db: Session, class_name: str):
     return db.query(Class).filter(Class.title == class_name).first()
+
+
+def get_course_by_name_method(db: Session, course_name: str):
+    return db.query(Course).filter(Course.title == course_name).first()
