@@ -10,7 +10,7 @@ def all_courses(db: Session, user_email: str):
     from src.users.crud import calculate_progress
     user = db.query(User).filter(User.email == user_email).first()
 
-    courses = db.query(Course).join(UserCourse).filter(
+    courses = db.query(Course).options(joinedload(Course.modules)).join(UserCourse).filter(
         UserCourse.user_id == user.id).all()
 
     result = []
@@ -25,8 +25,11 @@ def all_courses(db: Session, user_email: str):
         course_with_progress = {
             'course': course,
             'progress': progress,
-            'last_class_name': None
+            'last_class_name': None,
+            'first_class_name': None,
         }
+
+        print(courses)
 
         if last_user_class:
             last_class_name = db.query(Class).filter(
