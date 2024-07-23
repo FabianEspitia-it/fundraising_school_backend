@@ -273,15 +273,6 @@ def get_startup_by_user_email(db: Session, email: str) -> models.Startup:
         raise Exception("User not found")
 
 
-def mark_class_seen_user(user_email: str, class_id: int, db: Session):
-    user: models.User = db.query(models.User).filter(
-        models.User.email == user_email).first()
-    user_class = models.UserClass(user_id=user.id, class_id=class_id)
-    db.add(user_class)
-    db.commit()
-    return user_class
-
-
 def mark_class_unseen_user(user_email: str, class_id: int, db: Session):
     user: models.User = db.query(models.User).filter(
         models.User.email == user_email).first()
