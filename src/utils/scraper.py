@@ -53,6 +53,7 @@ def move_down(url: str, scroll_count: int) -> BeautifulSoup | None:
     return BeautifulSoup(html, "html.parser") if html else None
 
 
+
 def internet_search(search: str) -> requests.Response:
     """
     Performs an internet search using the specified search query.

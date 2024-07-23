@@ -5,32 +5,48 @@ from sqlalchemy.orm import Session, joinedload
 from src.models import *
 from src.course.schemas import NewClass, NewCourse
 
-
-
-
 def all_courses(db: Session, user_email: str):
     from src.users.crud import calculate_progress
-    courses = db.query(Course).all()
-    result = []
-
     user = db.query(User).filter(User.email == user_email).first()
 
-    for course in courses:
-        progress = calculate_progress(db=db, user_email=user_email, course_id=course.id)
-        
-       
-        last_user_class = db.query(UserClass).filter(UserClass.user_id == user.id).order_by(desc(UserClass.id)).first()
+    courses = db.query(Course).options(joinedload(Course.modules)).join(UserCourse).filter(
+        UserCourse.user_id == user.id).all()
 
-        next_id = db.query(Class).filter(Class.id == last_user_class.class_id).first().next_id
+    result = []
+
+    for course in courses:
+        progress = calculate_progress(
+            db=db, user_email=user_email, course_id=course.id)
+
+        last_user_class = db.query(UserClass).filter(
+            UserClass.user_id == user.id).order_by(desc(UserClass.id)).first()
+
+        for module in course.modules:
+            for classObj in module.classes:
+                take_class = db.query(UserClass).filter(
+                    UserClass.user_id == user.id, UserClass.class_id == classObj.id).first()
+
+                if take_class:
+                    classObj.taken = True
+                else:
+                    classObj.taken = False
 
         course_with_progress = {
             'course': course,
             'progress': progress,
-            'next_id': next_id
+            'last_class_name': None,
         }
+
+        if last_user_class:
+            last_class_name = db.query(Class).filter(
+                Class.id == last_user_class.class_id).first().title
+
+            course_with_progress['last_class_name'] = last_class_name
+
         result.append(course_with_progress)
 
     return result
+
 
 
 def get_course_by_id(db: Session, course_id: int):
