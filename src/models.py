@@ -509,7 +509,7 @@ def create_concurrent_index():
 
     try:
         connection.execute(text(
-            "CREATE INDEX CONCURRENTLY trgm_index_vc_funds_name ON vc_fund USING gin (lower(name) gin_trgm_ops);"
+            "CREATE INDEX CONCURRENTLY IF NOT EXISTS trgm_index_vc_funds_name ON vc_fund USING gin (lower(name) gin_trgm_ops);"
         ))
     finally:
         connection.close()
