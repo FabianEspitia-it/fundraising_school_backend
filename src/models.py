@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Index
+from sqlalchemy import Column, ForeignKey, Index, text
 from sqlalchemy.sql.sqltypes import Integer, String, Boolean, DateTime, Text
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
@@ -327,7 +327,7 @@ class Fund(Base):
                             back_populates='funds_in', overlaps="user")
 
 
-Index('trgm_index_vc_funds_name', Fund.name, postgresql_concurrently=True, postgresql_using='gin')
+#Index('trgm_index_vc_funds_name', Fund.name, postgresql_concurrently=True, postgresql_using='gin')
 
 
 class Startup(Base):
@@ -502,3 +502,16 @@ class Event(Base):
 
 
 Base.metadata.create_all(bind=engine)
+
+def create_concurrent_index():
+    connection = engine.connect()
+    connection.execution_options(isolation_level="AUTOCOMMIT")
+
+    try:
+        connection.execute(text(
+            "CREATE INDEX CONCURRENTLY trgm_index_vc_funds_name ON vc_fund USING gin (lower(name) gin_trgm_ops);"
+        ))
+    finally:
+        connection.close()
+
+create_concurrent_index()

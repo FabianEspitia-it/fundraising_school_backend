@@ -3,7 +3,7 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
-from src.models import Base
+from src.models import Base, create_concurrent_index
 
 from alembic import context
 
@@ -50,6 +50,8 @@ def run_migrations_offline() -> None:
 
     with context.begin_transaction():
         context.run_migrations()
+    
+    create_concurrent_index()
 
 
 def run_migrations_online() -> None:
@@ -72,6 +74,8 @@ def run_migrations_online() -> None:
 
         with context.begin_transaction():
             context.run_migrations()
+            
+        create_concurrent_index()
 
 
 if context.is_offline_mode():
