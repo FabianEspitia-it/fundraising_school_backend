@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey
+from sqlalchemy import Column, ForeignKey, Index
 from sqlalchemy.sql.sqltypes import Integer, String, Boolean, DateTime, Text
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
@@ -124,7 +124,6 @@ class Traction(Base):
     startups = relationship("Startup", back_populates="traction")
 
 
-
 class Partner(Base):
     __tablename__ = 'vc_partner'
     id = Column(Integer, primary_key=True)
@@ -150,7 +149,6 @@ class CheckSize(Base):
 
     funds = relationship("Fund", secondary="fund_check_size",
                          back_populates='check_size', overlaps="fund")
-
 
 
 class Country(Base):
@@ -221,9 +219,9 @@ class User(Base):
 
     funds = relationship("Fund", secondary="user_fund_favorites",
                          back_populates="users", overlaps="fund")
-    
+
     funds_in = relationship("Fund", secondary="fund_users",
-                         back_populates='users_in', overlaps="fund")
+                            back_populates='users_in', overlaps="fund")
 
     startups = relationship("Startup", secondary="startup_users",
                             back_populates="users", overlaps="startup")
@@ -324,8 +322,12 @@ class Fund(Base):
                               back_populates='funds', overlaps="check_size")
     users = relationship("User", secondary="user_fund_favorites",
                          back_populates='funds', overlaps="user")
-    
-    users_in = relationship("User", secondary="fund_users", back_populates='funds_in', overlaps="user")
+
+    users_in = relationship("User", secondary="fund_users",
+                            back_populates='funds_in', overlaps="user")
+
+
+Index('trgm_index_vc_funds_name', Fund.name, postgresql_concurrently=True, postgresql_using='gin')
 
 
 class Startup(Base):
@@ -350,15 +352,13 @@ class Startup(Base):
 
     country = relationship("Country", back_populates="startups")
 
-
-
     sector = relationship("Sector", back_populates="startups")
 
     round = relationship("Round", back_populates="startup")
 
     users = relationship("User", secondary="startup_users",
                          back_populates="startups", overlaps="user")
-    
+
     traction = relationship("Traction", back_populates="startups")
 
     users_favorites = relationship(
@@ -425,13 +425,13 @@ class CrmInvestor(Base):
         "CrmInvestorInvestRange", back_populates="crm_investor")
     sector_and_stages = relationship(
         "CrmInvestorSectorAndStage", back_populates="crm_investor")
-    
+
 
 # COURSE MODELS
 
 class UserClass(Base):
     __tablename__ = "user_classes"
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    id = Column(Integer, index=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("user.id"), primary_key=True)
     class_id = Column(Integer, ForeignKey("class.id"), primary_key=True)
     created_at = Column(DateTime, server_default=func.now())
@@ -448,8 +448,6 @@ class UserCourse(Base):
     created_at = Column(DateTime, server_default=func.now())
     user = relationship("User", foreign_keys=[user_id], overlaps="courses")
     course = relationship("Course", foreign_keys=[course_id], overlaps="users")
-
-
 
 
 class Course(Base):
@@ -480,7 +478,7 @@ class Module(Base):
 class Class(Base):
     __tablename__ = "class"
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String(255), index=True)
+    title = Column(String(255), index=True, unique=True)
     video_link = Column(String(255))
     description = Column(Text)
     previous_id = Column(Integer)

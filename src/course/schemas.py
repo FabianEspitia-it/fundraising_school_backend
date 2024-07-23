@@ -21,4 +21,7 @@ class NewEvent(BaseModel):
 class NewCourse(BaseModel):
     title: str
     description: str
-    
+
+
+class UserEmail(BaseModel):
+    email: str

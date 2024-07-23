@@ -593,9 +593,8 @@ def get_round_funds(db: Session):
 
 def search_vc_by_term(db: Session, vc_term: str):
     if len(vc_term) > 1:
-        query = """select name from vc_fund v where ts @@ plainto_tsquery('simple', '{0}:*') limit 10;""".format(vc_term)
+        query = f"""SELECT name FROM vc_fund WHERE LOWER(name) LIKE '%{vc_term.lower()}%';"""
 
-        print(query)
         res = db.execute(text(query)).fetchall()
         if len(res) > 0:
 

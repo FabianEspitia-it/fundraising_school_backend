@@ -3,7 +3,8 @@ from sqlalchemy import desc
 from sqlalchemy.orm import Session, joinedload
 
 from src.models import *
-from src.course.schemas import NewClass, NewCourse
+from src.course.schemas import NewClass, UserEmail, NewCourse
+
 
 def all_courses(db: Session, user_email: str):
     from src.users.crud import calculate_progress
@@ -58,7 +59,8 @@ def get_modules_by_course_id(db: Session, course_id: int):
 
 
 def get_module_by_id(db: Session, course_id: int, module_id: int) -> Class:
-    module = db.query(Module).filter(Module.course_id == course_id and Module.id == module_id).options(joinedload(Module.classes)).first()
+    module = db.query(Module).filter(Module.course_id == course_id and Module.id ==
+                                     module_id).options(joinedload(Module.classes)).first()
     if module is None:
         raise HTTPException(status_code=404, detail="Module not found")
     return module
@@ -69,14 +71,14 @@ def get_module_class(db: Session, course_id: int, module_id: int, class_id: int)
     classes: list[Class] = module.classes
     searched_class = list(filter(lambda c: c.id == class_id, classes))
     if len(searched_class) == 0:
-        raise HTTPException(status_code=404, detail="Class not found") 
+        raise HTTPException(status_code=404, detail="Class not found")
     return searched_class[0]
 
 
 def add_class_to_module(db: Session, course_id: int, module_id: int, new_class: NewClass):
     class_module = get_module_by_id(db, course_id, module_id)
     class_instance = Class(
-        title= new_class.title,
+        title=new_class.title,
         video_link=new_class.video_link,
         description=new_class.description,
         previous_id=new_class.previous_id,
@@ -84,7 +86,7 @@ def add_class_to_module(db: Session, course_id: int, module_id: int, new_class: 
         module_id=new_class.module_id,
         module=class_module
     )
-    
+
     db.add(class_instance)
     db.commit()
 
@@ -93,3 +95,66 @@ def add_class_to_module(db: Session, course_id: int, module_id: int, new_class: 
 
 def get_class_by_name_method(db: Session, class_name: str):
     return db.query(Class).filter(Class.title == class_name).first()
+
+
+def get_course_by_name_method(db: Session, course_name: str):
+    return db.query(Course).filter(Course.title == course_name).first()
+
+
+def add_class_as_seen(db: Session, class_id: int, user_email: str):
+    user_db = db.query(User).filter(User.email == user_email).options(joinedload(User.classes)).first()
+    class_db = db.query(Class).filter(Class.id == class_id).first()
+
+    if user_db is None:
+        raise HTTPException('User not found')
+
+    if class_db not in user_db.classes:
+        user_db.classes.append(class_db)
+    else:
+        raise HTTPException(status_code=400, detail='Class already seen by user')
+
+    db.commit()
+    db.refresh(user_db)
+
+
+def get_next_class_course(db: Session, class_id: int, module_id: int):
+    current_class = db.query(Class).filter(Class.id == class_id).first()
+    
+    if current_class.next_id is None:
+        current_module = db.query(Module).filter(Module.id == module_id).first()
+        
+        if current_module.next_id is None:
+            return None
+        else:
+            next_module = db.query(Module).filter(Module.id == current_module.next_id).options(joinedload(Module.classes)).first()
+            
+            if next_module is None or len(next_module.classes) == 0:
+                return None
+            
+            next_class = next_module.classes[0]
+
+    else:
+        next_class = db.query(Class).filter(Class.id == current_class.next_id).first()
+    
+    return next_class
+
+
+def get_previous_class_course(db: Session, class_id: int, module_id: int):
+    current_class = db.query(Class).filter(Class.id == class_id).first()
+    
+    if current_class.previous_id is None:
+        current_module = db.query(Module).filter(Module.id == module_id).first()
+        
+        if current_module.previous_id is None:
+            return None
+        else:
+            previous_module = db.query(Module).filter(Module.id == current_module.previous_id).options(joinedload(Module.classes)).first()
+            
+            if previous_module is None or len(previous_module.classes) == 0:
+                return None
+            
+            previous_class = previous_module.classes[0]
+
+    else:
+        previous_class = db.query(Class).filter(Class.id == current_class.previous_id).first()
+    return previous_class
