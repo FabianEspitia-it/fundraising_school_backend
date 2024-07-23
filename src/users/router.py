@@ -459,12 +459,6 @@ def get_user_startup(db: Session = Depends(get_db), email: str = None) -> JSONRe
     return user_startup
 
 
-@user.post("/user/classes/{class_id}", tags=["users"])
-def create_class_seen_user(user_email: str, class_id: int, db: Session = Depends(get_db)):
-    mark_class_seen_user(user_email, class_id, db)
-    return JSONResponse(content={"response": "created"}, status_code=201)
-
-
 @user.delete("/user/classes/{class_id}", tags=["users"])
 def delete_class_unseen_user(user_email: str, class_id: int, db: Session = Depends(get_db)):
     mark_class_unseen_user(user_email, class_id, db)
