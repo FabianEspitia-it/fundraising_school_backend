@@ -100,8 +100,8 @@ def get_course_by_name_method(db: Session, course_name: str):
     return db.query(Course).filter(Course.title == course_name).first()
 
 
-def add_class_as_seen(db: Session, class_id: int, user_email: UserEmail):
-    user_db = db.query(User).filter(User.email == user_email.email).options(joinedload(User.classes)).first()
+def add_class_as_seen(db: Session, class_id: int, user_email: str):
+    user_db = db.query(User).filter(User.email == user_email).options(joinedload(User.classes)).first()
     class_db = db.query(Class).filter(Class.id == class_id).first()
 
     if user_db is None:
