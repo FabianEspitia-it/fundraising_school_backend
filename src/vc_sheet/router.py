@@ -12,7 +12,7 @@ vc_sheet_router = APIRouter()
 # FUND ROUTES
 
 @vc_sheet_router.get("/vc_sheet/funds", tags=["vc_sheet"])
-def get_funds(db: Session = Depends(get_db), page: int = 1, limit: int = 10, user_email: str | None = None, country: str | None = None, sector: str | None = None, check_size: str | None = None, fund_round: str | None = None):
+def get_funds(db: Session = Depends(get_db), page: int = 1, limit: int = 10, user_email: str | None = None, country: str | None = None, sector: str | None = None, check_size: str | None = None, fund_round: str | None = None, fund_name_term: str | None = None):
     """
     Retrieve a list of venture capital funds.
 
@@ -24,7 +24,7 @@ def get_funds(db: Session = Depends(get_db), page: int = 1, limit: int = 10, use
     Returns:
         JSONResponse: A JSON response containing the list of funds.
     """
-    return dict(page=page, total=total_funds(db, country, sector, check_size, fund_round), data=get_all_funds(db=db, page=page, limit=limit, user_email=user_email, country=country, sector=sector, check_size=check_size, round_op=fund_round))
+    return dict(page=page, total=total_funds(db, country, sector, check_size, fund_round, fund_name_term), data=get_all_funds(db=db, page=page, limit=limit, user_email=user_email, country=country, sector=sector, check_size=check_size, round_op=fund_round, term=fund_name_term))
 
 
 @vc_sheet_router.get("/vc_sheet/filter/options", tags=["vc_sheet"])
