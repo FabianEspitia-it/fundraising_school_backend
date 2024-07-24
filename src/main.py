@@ -23,6 +23,7 @@ app = FastAPI(dependencies=[Depends(api_key_auth)])
 
 """
 
+
 app = FastAPI()
 
 app.title = "Fundraising School API"
