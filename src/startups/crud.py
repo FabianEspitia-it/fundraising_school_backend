@@ -3,6 +3,7 @@ import boto3
 
 from fastapi import UploadFile
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
 from src.models import *
@@ -25,7 +26,7 @@ SUPPORTED_IMAGES_TYPES = {
     }
 
 
-def get_all_startups(db: Session, page: int, limit: int, user_email: str, sector: str = None, country: str = None, traction: str = None):
+def get_all_startups(db: Session, page: int, limit: int, user_email: str, sector: str = None, country: str = None, traction: str = None, term: str = None ):
     # Get the user from the database
     user = get_user_by_email(db, user_email)
 
@@ -37,11 +38,18 @@ def get_all_startups(db: Session, page: int, limit: int, user_email: str, sector
     favorite_startups_ids = {startup.id for startup in favorite_startups}
 
     # Create the initial query with joinedload options
-    query = db.query(Startup).options(
-        joinedload(Startup.sector),
-        joinedload(Startup.traction),
-        joinedload(Startup.country)
-    )
+    if term:
+        query = db.query(Startup).filter(func.lower(Startup.name).like(f"%{term.lower()}%")).options(
+            joinedload(Startup.sector),
+            joinedload(Startup.traction),
+            joinedload(Startup.country)
+        )
+    else:
+        query = db.query(Startup).options(
+            joinedload(Startup.sector),
+            joinedload(Startup.traction),
+            joinedload(Startup.country)
+        )
 
     if sector:
         print("Sector filter applied", sector)
@@ -70,7 +78,7 @@ def get_all_startups(db: Session, page: int, limit: int, user_email: str, sector
     return startups_with_favorite
 
 
-def total_startups(db: Session, sector: str = None, country: str = None, traction: str = None) -> int:
+def total_startups(db: Session, sector: str = None, country: str = None, traction: str = None, term: str = None) -> int:
     """
     Retrieves the total number of startups in the database.
 
@@ -85,6 +93,9 @@ def total_startups(db: Session, sector: str = None, country: str = None, tractio
     """
     
     query = db.query(Startup)
+
+    if term:
+        query = query.filter(func.lower(Startup.name).like(f"%{term.lower()}%"))
     
     if country:
         query = query.filter(Startup.country.has(name=country))
