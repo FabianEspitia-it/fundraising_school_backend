@@ -75,7 +75,7 @@ def run_migrations_online() -> None:
         with context.begin_transaction():
             context.run_migrations()
             
-        create_concurrent_index()
+    create_concurrent_index()
 
 
 if context.is_offline_mode():
