@@ -7,10 +7,10 @@ on:
 env:
   AWS_REGION: us-east-1                           # Ajustado a tu región de AWS
   ECR_REPOSITORY: mi-fastapi-app                  # Ajustado al nombre de tu repositorio ECR
-  ECS_SERVICE: backend                     # Ajustado al nombre de tu servicio ECS
+  ECS_SERVICE: backend                             # Ajustado al nombre de tu servicio ECS
   ECS_CLUSTER: my-cluster                         # Ajustado al nombre de tu cluster ECS
   ECS_TASK_DEFINITION: .aws/task-definition.json  # Ajustado a la ruta de tu archivo de definición de tareas
-  CONTAINER_NAME: backend                    # Ajustado al nombre de tu contenedor en la definición de tareas
+  CONTAINER_NAME: backend                         # Ajustado al nombre de tu contenedor en la definición de tareas
 
 permissions:
   contents: read
@@ -46,6 +46,18 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
+    - name: Set up environment variables
+      run: |
+        echo "DB_SOURCE=${{ secrets.DB_SOURCE }}" >> $GITHUB_ENV
+        echo "LINKEDIN_USER=${{ secrets.LINKEDIN_USER }}" >> $GITHUB_ENV
+        echo "LINKEDIN_PASSWORD=${{ secrets.LINKEDIN_PASSWORD }}" >> $GITHUB_ENV
+        echo "PORT=${{ secrets.PORT }}" >> $GITHUB_ENV
+        echo "API_KEY=${{ secrets.API_KEY }}" >> $GITHUB_ENV
+        echo "AWS_BUCKET=${{ secrets.AWS_BUCKET }}" >> $GITHUB_ENV
+        echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+        echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+        echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
+
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
@@ -61,13 +73,3 @@ jobs:
         service: ${{ env.ECS_SERVICE }}
         cluster: ${{ env.ECS_CLUSTER }}
         wait-for-service-stability: true
-        environment-variables: |
-          DB_SOURCE=${{ secrets.DB_SOURCE }}
-          LINKEDIN_USER=${{ secrets.LINKEDIN_USER }}
-          LINKEDIN_PASSWORD=${{ secrets.LINKEDIN_PASSWORD }}
-          PORT=${{ secrets.PORT }}
-          API_KEY=${{ secrets.API_KEY }}
-          AWS_BUCKET=${{ secrets.AWS_BUCKET }}
-          AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION=${{ secrets.AWS_REGION }}
