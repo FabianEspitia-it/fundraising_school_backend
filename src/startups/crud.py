@@ -1,5 +1,7 @@
 import os
-#import boto3
+import boto3
+
+from fastapi import UploadFile
 
 from sqlalchemy.orm import Session, joinedload
 
@@ -236,33 +238,33 @@ def get_users_by_startup_name(db: Session, startup_name: str):
 
     return users_in_startup
 
-"""
-async def s3_upload(content: bytes, startup_id: int, file_type: str):
 
-    session = boto3.session.Session(
-        aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
-        aws_secret_access_key= os.getenv('AWS_SECRET_ACCESS_KEY'),
-        aws_session_token= os.getenv('AWS_SESSION_TOKEN')
+async def s3_upload(startup_photo_file: UploadFile, startup_id: int, file_type: str):
+
+    s3_client = boto3.client(
+        service_name = 's3',
+        region_name = os.getenv('AWS_REGION'),
+        aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID'),
+        aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
     )
-    s3 = session.resource('s3')
-    bucket = s3.Bucket(AWS_BUCKET)
 
-    bucket_items = [item.key for item in list(bucket.objects.all())]
-    for item in bucket_items:
-        item_id = item.split('.')[0]
+    bucket = s3_client.list_objects_v2(Bucket=AWS_BUCKET)
+    
+    for item in bucket['Contents']:
+        item_id = item['Key'].split('/')[-1].split('.')[0]
         if str(item_id) == str(startup_id):
-            bucket.delete_objects(Delete={
-                'Objects': [
-                    {
-                        'Key': item
-                    }
-                ]
-            })
+            s3_client.delete_object(
+                Bucket=AWS_BUCKET, 
+                Key=item['Key']
+                )
 
-    bucket.put_object(Key=f'{startup_id}.{SUPPORTED_IMAGES_TYPES[file_type]}', Body=content)
+    startup_photo_file.file.seek(0)
+    s3_client.upload_fileobj(startup_photo_file.file, AWS_BUCKET, f'/startups/{startup_id}.{SUPPORTED_IMAGES_TYPES[file_type]}')
+    url = f"https://s3.{os.getenv('AWS_REGION')}.amazonaws.com/{AWS_BUCKET}/startups/{startup_id}.{SUPPORTED_IMAGES_TYPES[file_type]}"
+
+    return url
 
 
 def update_startup_photo(db: Session, startup_photo_link: str, startup_id: str) -> str:
     db.query(models.Startup).filter(models.Startup.id == startup_id).update({'photo': startup_photo_link})
     db.commit()
-"""
