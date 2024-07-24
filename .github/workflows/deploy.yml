@@ -7,10 +7,10 @@ on:
 env:
   AWS_REGION: us-east-1                           # Ajustado a tu región de AWS
   ECR_REPOSITORY: my-fastapi-app                  # Ajustado al nombre de tu repositorio ECR
-  ECS_SERVICE: my-ecs-service                     # Ajustado al nombre de tu servicio ECS
+  ECS_SERVICE: backend                     # Ajustado al nombre de tu servicio ECS
   ECS_CLUSTER: my-cluster                         # Ajustado al nombre de tu cluster ECS
   ECS_TASK_DEFINITION: .aws/task-definition.json  # Ajustado a la ruta de tu archivo de definición de tareas
-  CONTAINER_NAME: my-container                    # Ajustado al nombre de tu contenedor en la definición de tareas
+  CONTAINER_NAME: backend                    # Ajustado al nombre de tu contenedor en la definición de tareas
 
 permissions:
   contents: read
