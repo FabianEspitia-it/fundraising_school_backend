@@ -9,7 +9,7 @@ from src.vc_sheet.router import vc_sheet_router
 from src.startups.router import startup_router
 from fastapi.security import OAuth2PasswordBearer
 
-"""
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")  
 
 def api_key_auth(api_key: str = Depends(oauth2_scheme)):
@@ -20,8 +20,6 @@ def api_key_auth(api_key: str = Depends(oauth2_scheme)):
         )
 
 app = FastAPI(dependencies=[Depends(api_key_auth)])
-
-"""
 
 
 app = FastAPI()

@@ -61,3 +61,9 @@ jobs:
         service: ${{ env.ECS_SERVICE }}
         cluster: ${{ env.ECS_CLUSTER }}
         wait-for-service-stability: true
+        environment-variables: |
+          DB_SOURCE=${{ secrets.DB_SOURCE }}
+          LINKEDIN_USER=${{ secrets.LINKEDIN_USER }}
+          LINKEDIN_PASSWORD=${{ secrets.LINKEDIN_PASSWORD }}
+          PORT=${{ secrets.PORT }}
+          API_KEY=${{ secrets.API_KEY }}
