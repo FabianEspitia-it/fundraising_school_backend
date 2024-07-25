@@ -6,7 +6,8 @@ RUN apk add --no-cache \
     gcc \
     musl-dev \
     postgresql-dev \
-    libpq
+    libpq \
+    libmagic
 
 COPY ./src /code/src
 COPY ./requirements/requirements.txt /code/requirements.txt
