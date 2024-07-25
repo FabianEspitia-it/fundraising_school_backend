@@ -1,3 +1,4 @@
+from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
 from src.models import *
@@ -164,7 +165,7 @@ def create_bulk_fund(db: Session, funds: list[Fund], fund_rounds: list[list[str]
     print("--- %s seconds ---" % (time.time() - start_time))
 
 
-def total_funds(db: Session, country: str | None = None, sector: str | None = None, check_size: str | None = None, round_op: str | None = None):
+def total_funds(db: Session, country: str | None = None, sector: str | None = None, check_size: str | None = None, round_op: str | None = None, term: str | None = None):
     """
     Retrieves the total number of funds in the database.
 
@@ -175,7 +176,11 @@ def total_funds(db: Session, country: str | None = None, sector: str | None = No
         int: Total number of funds.
     """
 
-    fund = db.query(Fund)
+    if term:
+        fund = db.query(Fund).filter(func.lower(Fund.name).like(f"%{term.lower()}%"))
+    else:
+        fund = db.query(Fund)
+
     if country:
         fund = fund.join(Fund.countries).filter(Country.name == country)
 
@@ -243,7 +248,7 @@ def get_check_sizes(db: Session) -> list[CheckSize]:
     return db.query(CheckSize).all()
 
 
-def get_all_funds(db: Session, page: int, limit: int, user_email: str, country: str | None = None, sector: str | None = None, check_size: str | None = None, round_op: str | None = None):
+def get_all_funds(db: Session, page: int, limit: int, user_email: str, country: str | None = None, sector: str | None = None, check_size: str | None = None, round_op: str | None = None, term: str | None = None):
     """
     Retrieves all funds from the database with pagination, prioritizing favorite funds for a specific user.
 
@@ -272,13 +277,22 @@ def get_all_funds(db: Session, page: int, limit: int, user_email: str, country: 
         favorite_funds = get_favorite_funds_by_user_id(db, user_email)
         favorite_fund_ids = {fund.id for fund in favorite_funds}
 
-    query = db.query(Fund).options(
-        joinedload(Fund.rounds),
-        joinedload(Fund.partners),
-        joinedload(Fund.check_size),
-        joinedload(Fund.countries),
-        joinedload(Fund.sectors)
-    )
+    if term:
+        query = db.query(Fund).filter(func.lower(Fund.name).like(f"%{term.lower()}%")).options(
+            joinedload(Fund.rounds),
+            joinedload(Fund.partners),
+            joinedload(Fund.check_size),
+            joinedload(Fund.countries),
+            joinedload(Fund.sectors)
+        )
+    else:
+        query = db.query(Fund).options(
+            joinedload(Fund.rounds),
+            joinedload(Fund.partners),
+            joinedload(Fund.check_size),
+            joinedload(Fund.countries),
+            joinedload(Fund.sectors)
+        )
 
     if country:
         query = query.join(Fund.countries).filter(Country.name == country)

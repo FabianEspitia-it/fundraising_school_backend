@@ -32,15 +32,6 @@ app.include_router(course)
 
 if __name__ == "__main__":
 
-    try:
-        print("[INFO] Running migrations")
-
-        os.system("alembic revision --autogenerate -m 'Auto-generated migration'")
-
-        os.system("alembic upgrade head")
-    except Exception as e:
-        print(f"[ERROR] {e}")
-
     port = os.getenv("PORT")
 
     print(f"[INFO] Port: {port}")
