@@ -10,6 +10,7 @@ from src.course.crud import get_modules_by_course_id
 import src.models as models
 
 
+
 def get_user_by_email(db: Session, email: str) -> models.User:
     return db.query(models.User).filter(models.User.email == email).first()
 
@@ -204,11 +205,12 @@ def create_user_startup(db: Session, user_data: UserStartupReq) -> None:
 
 
 def create_bulk_user_startup(db: Session, user_data_list: List[UserStartupReq]) -> None:
+    from src.users.linkedin_scraper import search_linkedin_url
     for user_data in user_data_list:
         user = models.User(
             nickname=user_data.nickname,
             email=user_data.email,
-            linkedin_url=user_data.linkedin_url,
+            linkedin_url=search_linkedin_url(user_data.nickname),
             phone_number=user_data.phone_number,
             location=user_data.location,
             startup_url = user_data.startup_url,
@@ -218,11 +220,6 @@ def create_bulk_user_startup(db: Session, user_data_list: List[UserStartupReq]) 
         db.add(user)
         db.commit()
         db.refresh(user)
-
-        from src.users.linkedin_scraper import linkedin_public_identifier, scraper_linkedin_profile
-
-        user_identifier = linkedin_public_identifier(user_data.linkedin_url)
-        scraper_linkedin_profile(db, user_identifier, user.id)
 
         startup = db.query(models.Startup).filter(
             models.Startup.name == user_data.startup_name).first()
@@ -337,10 +334,11 @@ def get_all_users(db: Session):
 
 
 def create_normal_user(db: Session, user_data: UserNormal):
+    from src.users.linkedin_scraper import search_linkedin_url, linkedin_public_identifier, scraper_linkedin_profile
     user = models.User(
         nickname=user_data.nickname,
         email=user_data.email,
-        linkedin_url=user_data.linkedin_url,
+        linkedin_url=search_linkedin_url(user_data.nickname),
         phone_number=user_data.phone_number,
         location=user_data.location
     )
@@ -348,20 +346,19 @@ def create_normal_user(db: Session, user_data: UserNormal):
     db.commit()
     db.refresh(user)
 
-    from src.users.linkedin_scraper import linkedin_public_identifier, scraper_linkedin_profile
-
-    user_identifier = linkedin_public_identifier(user_data.linkedin_url)
-    scraper_linkedin_profile(db, user_identifier, user.id)
+    user_public_identifier = linkedin_public_identifier(user.linkedin_url)
+    scraper_linkedin_profile(db, user_public_identifier, user.id)
 
 
     return user
 
 
 def create_attendee_user(db: Session, user_data: UserAttendee):
+    from src.users.linkedin_scraper import search_linkedin_url, linkedin_public_identifier, scraper_linkedin_profile
     user = models.User(
         nickname=user_data.nickname,
         email=user_data.email,
-        linkedin_url=user_data.linkedin_url,
+        linkedin_url=search_linkedin_url(user_data.nickname),
         phone_number=user_data.phone_number,
         location=user_data.location,
         job_level=user_data.job_level,
@@ -371,10 +368,8 @@ def create_attendee_user(db: Session, user_data: UserAttendee):
     db.commit()
     db.refresh(user)
 
-    from src.users.linkedin_scraper import linkedin_public_identifier, scraper_linkedin_profile
-
-    user_identifier = linkedin_public_identifier(user_data.linkedin_url)
-    scraper_linkedin_profile(db, user_identifier, user.id)
+    user_public_identifier = linkedin_public_identifier(user.linkedin_url)
+    scraper_linkedin_profile(db, user_public_identifier, user.id)
 
 
 
@@ -418,11 +413,11 @@ def create_investor_user(db: Session, user_data: UserInvestor):
         db.commit()
         db.refresh(stage)
 
-
+    from src.users.linkedin_scraper import search_linkedin_url, linkedin_public_identifier, scraper_linkedin_profile
     user = models.User(
         nickname=user_data.nickname,
         email=user_data.email,
-        linkedin_url=user_data.linkedin_url,
+        linkedin_url=search_linkedin_url(user_data.nickname),
         phone_number=user_data.phone_number,
         location=user_data.location,
         role = user_data.role,
@@ -436,11 +431,10 @@ def create_investor_user(db: Session, user_data: UserInvestor):
     db.commit()
     db.refresh(user)
 
+    user_public_identifier = linkedin_public_identifier(user.linkedin_url)
+    scraper_linkedin_profile(db, user_public_identifier, user.id)
 
-    from src.users.linkedin_scraper import linkedin_public_identifier, scraper_linkedin_profile
 
-    user_identifier = linkedin_public_identifier(user_data.linkedin_url)
-    scraper_linkedin_profile(db, user_identifier, user.id)
 
 
 

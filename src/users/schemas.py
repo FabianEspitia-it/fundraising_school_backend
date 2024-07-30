@@ -132,7 +132,6 @@ class UserStartupReq(BaseModel):
 
 class UserNormal(BaseModel):
     nickname: str
-    linkedin_url: str
     email: str
     phone_number: str
     location: str
@@ -143,7 +142,6 @@ class UserNormal(BaseModel):
 
 class UserAttendee(BaseModel):
     nickname: str
-    linkedin_url: str
     email: str
     phone_number: str
     location: str
@@ -157,13 +155,10 @@ class UserAttendee(BaseModel):
 
 class UserInvestor(BaseModel):
     nickname: str
-    linkedin_url: str
     email: str
     phone_number: str
     location: str
     role: str
-    job_level: str
-    ecosystem_role: str
     investment_stage: str
     investment_geography: str
     investment_industry: str
