@@ -12,7 +12,7 @@ import os
 from src.database import get_db
 from src.users.linkedin_scraper import user_scraper
 
-from src.users.schemas import ContactUserReq, FavFundReq, FavStartupReq, ImageUserReq, NewUserReq, RoundUserReq, UpdateUserReq, UserStartupReq
+from src.users.schemas import *
 from src.users.crud import *
 
 from src.models import Country, Round, Sector, Traction
@@ -476,3 +476,19 @@ def get_course_progress(user_email: str, course_id: int, db: Session = Depends(g
         content={"progress": calculate_progress(user_email, course_id, db)},
         status_code=200
         )
+
+
+@user.post("/user/add_normal_user", tags=["users"])
+def add_normal_user(user_data: UserNormal, db: Session = Depends(get_db)):
+    return create_normal_user(db = db, user_data = user_data)
+
+
+@user.post("/user/attendee_user", tags=["users"])
+def add_attendee_user(user_data: UserAttendee, db: Session = Depends(get_db)):
+    return create_attendee_user(db = db, user_data = user_data)
+
+
+@user.post("/user/investor_user", tags=["users"])
+def add_investor_user(user_data: UserInvestor, db: Session = Depends(get_db)):
+    return create_investor_user(db = db, user_data = user_data)
+

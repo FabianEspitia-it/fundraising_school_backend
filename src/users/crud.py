@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 import pandas as pd
 
-from src.users.schemas import NewUserReq, UpdateUserReq, UserStartupReq
+from src.users.schemas import *
 
 from src.course.crud import get_modules_by_course_id
 
@@ -210,7 +210,10 @@ def create_bulk_user_startup(db: Session, user_data_list: List[UserStartupReq]) 
             email=user_data.email,
             linkedin_url=user_data.linkedin_url,
             phone_number=user_data.phone_number,
-            location=user_data.location
+            location=user_data.location,
+            startup_url = user_data.startup_url,
+            role = user_data.role,
+            main_industry = user_data.main_industry
         )
         db.add(user)
         db.commit()
@@ -231,6 +234,21 @@ def create_bulk_user_startup(db: Session, user_data_list: List[UserStartupReq]) 
             )
             db.add(user_startup)
             db.commit()
+        else:
+            new_startup = models.Startup(
+                name=user_data.startup_name,
+            )
+            db.add(new_startup)
+            db.commit()
+            db.refresh(new_startup)
+
+            user_startup = models.StartupUser(
+                user_id=user.id,
+                startup_id=new_startup.id
+            )
+            db.add(user_startup)
+            db.commit()
+
 
 
 def get_user_fund_by_email(db: Session, email: str) -> bool:
@@ -316,3 +334,95 @@ def calculate_progress(user_email: str, course_id: int, db: Session):
 
 def get_all_users(db: Session):
     return db.query(models.User).all()
+
+
+def create_normal_user(db: Session, user_data: UserNormal):
+    user = models.User(
+        nickname=user_data.nickname,
+        email=user_data.email,
+        linkedin_url=user_data.linkedin_url,
+        phone_number=user_data.phone_number,
+        location=user_data.location
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return user
+
+
+def create_attendee_user(db: Session, user_data: UserAttendee):
+    user = models.User(
+        nickname=user_data.nickname,
+        email=user_data.email,
+        linkedin_url=user_data.linkedin_url,
+        phone_number=user_data.phone_number,
+        location=user_data.location,
+        job_level=user_data.job_level,
+        ecosystem_role=user_data.ecosystem_role
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+
+    startup = db.query(models.Startup).filter(
+            models.Startup.name == user_data.startup_name).first()
+
+    if startup:
+            user_startup = models.StartupUser(
+                user_id=user.id,
+                startup_id=startup.id
+            )
+            db.add(user_startup)
+            db.commit()
+    else:
+            new_startup = models.Startup(
+                name=user_data.startup_name,
+            )
+            db.add(new_startup)
+            db.commit()
+            db.refresh(new_startup)
+
+            user_startup = models.StartupUser(
+                user_id=user.id,
+                startup_id=new_startup.id
+            )
+            db.add(user_startup)
+            db.commit()
+
+    return user
+
+
+def create_investor_user(db: Session, user_data: UserInvestor):
+
+    stage = db.query(models.Round).filter(models.Round.stage == user_data.investment_stage).first()
+
+    if not stage:
+        stage = models.Round(
+            stage=user_data.investment_stage
+        )
+        db.add(stage)
+        db.commit()
+        db.refresh(stage)
+
+
+    user = models.User(
+        nickname=user_data.nickname,
+        email=user_data.email,
+        linkedin_url=user_data.linkedin_url,
+        phone_number=user_data.phone_number,
+        location=user_data.location,
+        role = user_data.role,
+        round_id = stage.id ,
+        investment_geography = user_data.investment_geography,
+        industry_to_invest = user_data.investment_industry,
+        check_size = user_data.investment_check_size
+    )   
+
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+
+    return user

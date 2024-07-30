@@ -205,6 +205,13 @@ class User(Base):
     location = Column(String(255), nullable=True)
     seeking_capital = Column(Boolean, nullable=True)
     photo_url = Column(String(255), nullable=True)
+    startup_url = Column(String(255), nullable=True)
+    main_industry = Column(String(255), nullable=True)
+    ecosystem_role = Column(String(255), nullable=True)
+    investment_geography = Column(String(255), nullable=True)
+    industry_to_invest = Column(String(255), nullable=True)
+    check_size = Column(String(255), nullable=True)
+    job_level = Column(String(255), nullable=True)
     terms_conditions = Column(Boolean, nullable=True)
     created_at = Column(DateTime, nullable=False, default=func.now())
     updated_at = Column(DateTime, nullable=False,
@@ -503,6 +510,7 @@ class Event(Base):
 
 Base.metadata.create_all(bind=engine)
 
+
 def create_concurrent_index():
     connection = engine.connect()
     connection.execution_options(isolation_level="AUTOCOMMIT")
@@ -515,3 +523,4 @@ def create_concurrent_index():
         connection.close()
 
 create_concurrent_index()
+

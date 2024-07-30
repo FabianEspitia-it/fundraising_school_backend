@@ -121,6 +121,57 @@ class UserStartupReq(BaseModel):
     phone_number: str
     location: str
     startup_name: str
+    startup_url: str
+    role: str
+    main_industry: str
+
 
     class Config:
         orm_mode = True
+
+
+class UserNormal(BaseModel):
+    nickname: str
+    linkedin_url: str
+    email: str
+    phone_number: str
+    location: str
+
+    class Config:
+        orm_mode = True
+
+
+class UserAttendee(BaseModel):
+    nickname: str
+    linkedin_url: str
+    email: str
+    phone_number: str
+    location: str
+    startup_name: str
+    job_level: str
+    ecosystem_role: str
+
+    class Config:
+        orm_mode = True
+
+
+class UserInvestor(BaseModel):
+    nickname: str
+    linkedin_url: str
+    email: str
+    phone_number: str
+    location: str
+    role: str
+    job_level: str
+    ecosystem_role: str
+    investment_stage: str
+    investment_geography: str
+    investment_industry: str
+    investment_check_size: str
+
+    class Config:
+        orm_mode = True
+
+
+
+
