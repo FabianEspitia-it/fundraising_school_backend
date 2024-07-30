@@ -479,16 +479,24 @@ def get_course_progress(user_email: str, course_id: int, db: Session = Depends(g
 
 
 @user.post("/user/add_normal_user", tags=["users"])
-def add_normal_user(user_data: UserNormal, db: Session = Depends(get_db)):
-    return create_normal_user(db = db, user_data = user_data)
+def add_normal_user(background_tasks: BackgroundTasks, user_data: UserNormal, db: Session = Depends(get_db)):
 
+    background_tasks.add_task(create_normal_user, db=db, user_data = user_data)
+    return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
+
+
+    
 
 @user.post("/user/attendee_user", tags=["users"])
-def add_attendee_user(user_data: UserAttendee, db: Session = Depends(get_db)):
-    return create_attendee_user(db = db, user_data = user_data)
+def add_attendee_user(background_tasks: BackgroundTasks, user_data: UserAttendee, db: Session = Depends(get_db)):
+
+    background_tasks.add_task(create_attendee_user, db=db, user_data = user_data)
+    return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
+    
 
 
 @user.post("/user/investor_user", tags=["users"])
-def add_investor_user(user_data: UserInvestor, db: Session = Depends(get_db)):
-    return create_investor_user(db = db, user_data = user_data)
+def add_investor_user(background_tasks: BackgroundTasks,user_data: UserInvestor, db: Session = Depends(get_db)):
+    background_tasks.add_task(create_investor_user, db=db, user_data = user_data)
+    return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
 

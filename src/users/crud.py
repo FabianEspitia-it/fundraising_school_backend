@@ -348,6 +348,12 @@ def create_normal_user(db: Session, user_data: UserNormal):
     db.commit()
     db.refresh(user)
 
+    from src.users.linkedin_scraper import linkedin_public_identifier, scraper_linkedin_profile
+
+    user_identifier = linkedin_public_identifier(user_data.linkedin_url)
+    scraper_linkedin_profile(db, user_identifier, user.id)
+
+
     return user
 
 
@@ -364,6 +370,12 @@ def create_attendee_user(db: Session, user_data: UserAttendee):
     db.add(user)
     db.commit()
     db.refresh(user)
+
+    from src.users.linkedin_scraper import linkedin_public_identifier, scraper_linkedin_profile
+
+    user_identifier = linkedin_public_identifier(user_data.linkedin_url)
+    scraper_linkedin_profile(db, user_identifier, user.id)
+
 
 
     startup = db.query(models.Startup).filter(
@@ -423,6 +435,13 @@ def create_investor_user(db: Session, user_data: UserInvestor):
     db.add(user)
     db.commit()
     db.refresh(user)
+
+
+    from src.users.linkedin_scraper import linkedin_public_identifier, scraper_linkedin_profile
+
+    user_identifier = linkedin_public_identifier(user_data.linkedin_url)
+    scraper_linkedin_profile(db, user_identifier, user.id)
+
 
 
     return user
