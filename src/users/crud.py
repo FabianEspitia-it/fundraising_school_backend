@@ -233,12 +233,18 @@ def create_user_startup_new(db: Session, user_data: UserStartup) -> None:
     db.commit()
     db.refresh(startup)
 
-    user_startup = models.StartupUser(
-            user_id=user.id,
-            startup_id=startup.id
-        )
-    db.add(user_startup)
-    db.commit()
+    relationship = db.query(models.StartupUser).filter(
+        models.StartupUser.user_id == user.id).first()
+    
+    if not relationship:
+        user_startup = models.StartupUser(
+                user_id=user.id,
+                startup_id=startup.id
+            )
+        db.add(user_startup)
+        db.commit()
+
+    
 
     return user
 
