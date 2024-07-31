@@ -204,47 +204,43 @@ def create_user_startup(db: Session, user_data: UserStartupReq) -> None:
         raise Exception("Startup not found")
 
 
-def create_bulk_user_startup(db: Session, user_data_list: List[UserStartupReq]) -> None:
-    from src.users.linkedin_scraper import search_linkedin_url
-    for user_data in user_data_list:
-        user = models.User(
-            nickname=user_data.nickname,
-            email=user_data.email,
-            linkedin_url=search_linkedin_url(user_data.nickname),
-            phone_number=user_data.phone_number,
-            location=user_data.location,
-            startup_url = user_data.startup_url,
-            role = user_data.role,
-            main_industry = user_data.main_industry
+def create_user_startup_new(db: Session, user_data: UserStartup) -> None:
+
+    user = db.query(models.User).filter(user_data.email == models.User.email).first()
+
+    update_data = user_data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(user, key, value)
+
+    db.commit()
+    db.refresh(user)
+
+    startup = db.query(models.Startup).filter(
+        models.Startup.name == user_data.startup_name).first()
+
+    if startup:
+        user_startup = models.StartupUser(
+            user_id=user.id,
+            startup_id=startup.id
         )
-        db.add(user)
+        db.add(user_startup)
         db.commit()
-        db.refresh(user)
+    else:
+         startup = models.Startup(
+            name=user_data.startup_name,
+        )
+    db.add(startup)
+    db.commit()
+    db.refresh(startup)
 
-        startup = db.query(models.Startup).filter(
-            models.Startup.name == user_data.startup_name).first()
+    user_startup = models.StartupUser(
+            user_id=user.id,
+            startup_id=startup.id
+        )
+    db.add(user_startup)
+    db.commit()
 
-        if startup:
-            user_startup = models.StartupUser(
-                user_id=user.id,
-                startup_id=startup.id
-            )
-            db.add(user_startup)
-            db.commit()
-        else:
-            new_startup = models.Startup(
-                name=user_data.startup_name,
-            )
-            db.add(new_startup)
-            db.commit()
-            db.refresh(new_startup)
-
-            user_startup = models.StartupUser(
-                user_id=user.id,
-                startup_id=new_startup.id
-            )
-            db.add(user_startup)
-            db.commit()
+    return user
 
 
 
@@ -354,23 +350,15 @@ def create_normal_user(db: Session, user_data: UserNormal):
 
 
 def create_attendee_user(db: Session, user_data: UserAttendee):
-    from src.users.linkedin_scraper import search_linkedin_url, linkedin_public_identifier, scraper_linkedin_profile
-    user = models.User(
-        nickname=user_data.nickname,
-        email=user_data.email,
-        linkedin_url=search_linkedin_url(user_data.nickname),
-        phone_number=user_data.phone_number,
-        location=user_data.location,
-        job_level=user_data.job_level,
-        ecosystem_role=user_data.ecosystem_role
-    )
-    db.add(user)
+
+    user = db.query(models.User).filter(user_data.email == models.User.email).first()
+
+    update_data = user_data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(user, key, value)
+
     db.commit()
     db.refresh(user)
-
-    user_public_identifier = linkedin_public_identifier(user.linkedin_url)
-    scraper_linkedin_profile(db, user_public_identifier, user.id)
-
 
 
     startup = db.query(models.Startup).filter(
@@ -413,29 +401,17 @@ def create_investor_user(db: Session, user_data: UserInvestor):
         db.commit()
         db.refresh(stage)
 
-    from src.users.linkedin_scraper import search_linkedin_url, linkedin_public_identifier, scraper_linkedin_profile
-    user = models.User(
-        nickname=user_data.nickname,
-        email=user_data.email,
-        linkedin_url=search_linkedin_url(user_data.nickname),
-        phone_number=user_data.phone_number,
-        location=user_data.location,
-        role = user_data.role,
-        round_id = stage.id ,
-        investment_geography = user_data.investment_geography,
-        industry_to_invest = user_data.investment_industry,
-        check_size = user_data.investment_check_size
-    )   
+    user = db.query(models.User).filter(user_data.email == models.User.email).first()
 
-    db.add(user)
+    update_data = user_data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(user, key, value)
+
+
+    user.round_id = stage.id
+
     db.commit()
     db.refresh(user)
-
-    user_public_identifier = linkedin_public_identifier(user.linkedin_url)
-    scraper_linkedin_profile(db, user_public_identifier, user.id)
-
-
-
 
 
     return user

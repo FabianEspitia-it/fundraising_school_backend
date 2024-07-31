@@ -435,9 +435,9 @@ def add_user_startup(db: Session = Depends(get_db), user_data: UserStartupReq = 
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
 
 
-@user.post("/user/startup/bulk", tags=["users"])
-def add_user_startups_bulk(background_tasks: BackgroundTasks, db: Session = Depends(get_db), user_data_list: List[UserStartupReq] = None) -> JSONResponse:
-    background_tasks.add_task(create_bulk_user_startup, db=db, user_data_list=user_data_list)
+@user.put("/user/startup/bulk", tags=["users"])
+def add_user_startups_bulk(background_tasks: BackgroundTasks, db: Session = Depends(get_db), user_data: UserStartup = None) -> JSONResponse:
+    background_tasks.add_task(create_user_startup_new, db=db, user_data=user_data)
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
 
 
@@ -487,7 +487,7 @@ def add_normal_user(background_tasks: BackgroundTasks, user_data: UserNormal, db
 
     
 
-@user.post("/user/attendee_user", tags=["users"])
+@user.put("/user/attendee_user", tags=["users"])
 def add_attendee_user(background_tasks: BackgroundTasks, user_data: UserAttendee, db: Session = Depends(get_db)):
 
     background_tasks.add_task(create_attendee_user, db=db, user_data = user_data)
@@ -495,7 +495,7 @@ def add_attendee_user(background_tasks: BackgroundTasks, user_data: UserAttendee
     
 
 
-@user.post("/user/investor_user", tags=["users"])
+@user.put("/user/investor_user", tags=["users"])
 def add_investor_user(background_tasks: BackgroundTasks,user_data: UserInvestor, db: Session = Depends(get_db)):
     background_tasks.add_task(create_investor_user, db=db, user_data = user_data)
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)

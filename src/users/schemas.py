@@ -141,10 +141,7 @@ class UserNormal(BaseModel):
 
 
 class UserAttendee(BaseModel):
-    nickname: str
     email: str
-    phone_number: str
-    location: str
     startup_name: str
     job_level: str
     ecosystem_role: str
@@ -154,15 +151,22 @@ class UserAttendee(BaseModel):
 
 
 class UserInvestor(BaseModel):
-    nickname: str
     email: str
-    phone_number: str
-    location: str
-    role: str
     investment_stage: str
     investment_geography: str
-    investment_industry: str
-    investment_check_size: str
+    industry_to_invest: str
+    check_size: str
+
+    class Config:
+        orm_mode = True
+
+
+class UserStartup(BaseModel):
+    email: str
+    startup_name: str
+    startup_url: str
+    role: str
+    main_industry: str
 
     class Config:
         orm_mode = True
