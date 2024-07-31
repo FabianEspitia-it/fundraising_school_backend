@@ -2,7 +2,9 @@
 .env.local
 .env
 
-alembic/versions/*
+alembic/
+
+alembic.ini
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
