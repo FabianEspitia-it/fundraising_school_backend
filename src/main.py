@@ -9,8 +9,9 @@ from src.vc_sheet.router import vc_sheet_router
 from src.startups.router import startup_router
 from fastapi.security import OAuth2PasswordBearer
 
-"""
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")  
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
 
 def api_key_auth(api_key: str = Depends(oauth2_scheme)):
     if api_key != os.getenv("API_KEY"):
@@ -19,13 +20,16 @@ def api_key_auth(api_key: str = Depends(oauth2_scheme)):
             detail="Forbidden"
         )
 
+
 app = FastAPI(dependencies=[Depends(api_key_auth)])
 
-"""
+app.title = "Dashboard CTW API"
 
-app = FastAPI()
 
-app.title = "Fundraising School API"
+@app.get("/")
+def read_root():
+    return {"Hello": "World Rey"}
+
 
 app.include_router(user)
 app.include_router(vc_sheet_router)
