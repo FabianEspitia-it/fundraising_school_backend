@@ -25,9 +25,6 @@ app = FastAPI(dependencies=[Depends(api_key_auth)])
 
 app.title = "Dashboard CTW API"
 
-
-
-
 @app.get("/")
 def read_root():
     return {"Hello": "World Rey"}
