@@ -3,12 +3,15 @@ from sqlalchemy import desc
 from sqlalchemy.orm import Session, joinedload
 
 from src.models import *
-from src.course.schemas import NewClass, UserEmail, NewCourse
+from src.course.schemas import NewClass
 
 
 def all_courses(db: Session, user_email: str):
     from src.users.crud import calculate_progress
     user = db.query(User).filter(User.email == user_email).first()
+
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
 
     courses = db.query(Course).options(joinedload(Course.modules)).join(UserCourse).filter(
         UserCourse.user_id == user.id).all()
@@ -47,7 +50,6 @@ def all_courses(db: Session, user_email: str):
         result.append(course_with_progress)
 
     return result
-
 
 
 def get_course_by_id(db: Session, course_id: int):
@@ -102,7 +104,8 @@ def get_course_by_name_method(db: Session, course_name: str):
 
 
 def add_class_as_seen(db: Session, class_id: int, user_email: str):
-    user_db = db.query(User).filter(User.email == user_email).options(joinedload(User.classes)).first()
+    user_db = db.query(User).filter(User.email == user_email).options(
+        joinedload(User.classes)).first()
     class_db = db.query(Class).filter(Class.id == class_id).first()
 
     if user_db is None:
@@ -111,7 +114,8 @@ def add_class_as_seen(db: Session, class_id: int, user_email: str):
     if class_db not in user_db.classes:
         user_db.classes.append(class_db)
     else:
-        raise HTTPException(status_code=400, detail='Class already seen by user')
+        raise HTTPException(
+            status_code=400, detail='Class already seen by user')
 
     db.commit()
     db.refresh(user_db)
@@ -119,42 +123,48 @@ def add_class_as_seen(db: Session, class_id: int, user_email: str):
 
 def get_next_class_course(db: Session, class_id: int, module_id: int):
     current_class = db.query(Class).filter(Class.id == class_id).first()
-    
+
     if current_class.next_id is None:
-        current_module = db.query(Module).filter(Module.id == module_id).first()
-        
+        current_module = db.query(Module).filter(
+            Module.id == module_id).first()
+
         if current_module.next_id is None:
             return None
         else:
-            next_module = db.query(Module).filter(Module.id == current_module.next_id).options(joinedload(Module.classes)).first()
-            
+            next_module = db.query(Module).filter(
+                Module.id == current_module.next_id).options(joinedload(Module.classes)).first()
+
             if next_module is None or len(next_module.classes) == 0:
                 return None
-            
+
             next_class = next_module.classes[0]
 
     else:
-        next_class = db.query(Class).filter(Class.id == current_class.next_id).first()
-    
+        next_class = db.query(Class).filter(
+            Class.id == current_class.next_id).first()
+
     return next_class
 
 
 def get_previous_class_course(db: Session, class_id: int, module_id: int):
     current_class = db.query(Class).filter(Class.id == class_id).first()
-    
+
     if current_class.previous_id is None:
-        current_module = db.query(Module).filter(Module.id == module_id).first()
-        
+        current_module = db.query(Module).filter(
+            Module.id == module_id).first()
+
         if current_module.previous_id is None:
             return None
         else:
-            previous_module = db.query(Module).filter(Module.id == current_module.previous_id).options(joinedload(Module.classes)).first()
-            
+            previous_module = db.query(Module).filter(
+                Module.id == current_module.previous_id).options(joinedload(Module.classes)).first()
+
             if previous_module is None or len(previous_module.classes) == 0:
                 return None
-            
+
             previous_class = previous_module.classes[0]
 
     else:
-        previous_class = db.query(Class).filter(Class.id == current_class.previous_id).first()
+        previous_class = db.query(Class).filter(
+            Class.id == current_class.previous_id).first()
     return previous_class
