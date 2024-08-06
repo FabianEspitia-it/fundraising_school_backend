@@ -47,3 +47,7 @@ dist/
 # Other
 .DS_Store
 thumbs.db
+
+# Credentials
+/gcs_credentials
+credentials.json
