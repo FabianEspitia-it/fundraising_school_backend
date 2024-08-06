@@ -1,7 +1,10 @@
 import os
-import boto3
+from uuid import uuid4
 
-from fastapi import UploadFile
+from fastapi import UploadFile, HTTPException
+
+from google.cloud import storage
+from google.oauth2 import service_account
 
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
@@ -250,30 +253,25 @@ def get_users_by_startup_name(db: Session, startup_name: str):
     return users_in_startup
 
 
-async def s3_upload(startup_photo_file: UploadFile, startup_id: int, file_type: str):
+async def gcs_upload(startup_photo_file: UploadFile, startup_id: int, file_type: str) -> str:
+    
+    bucket_name = os.getenv('GCS_BUCKET_NAME')
+    if not bucket_name:
+        raise HTTPException(status_code=500, detail="GCS_BUCKET_NAME environment variable is not set")
 
-    s3_client = boto3.client(
-        service_name = 's3',
-        region_name = os.getenv('AWS_REGION'),
-        aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID'),
-        aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
+    credentials = service_account.Credentials.from_service_account_file(
+        os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
     )
 
-    bucket = s3_client.list_objects_v2(Bucket=AWS_BUCKET)
-    
-    for item in bucket['Contents']:
-        item_id = item['Key'].split('/')[-1].split('.')[0]
-        if str(item_id) == str(startup_id):
-            s3_client.delete_object(
-                Bucket=AWS_BUCKET, 
-                Key=item['Key']
-                )
+    client = storage.Client(credentials=credentials)
+    bucket = client.bucket(bucket_name)
+    blob = bucket.blob(f'startups/{uuid4()}.{SUPPORTED_IMAGES_TYPES[file_type]}')
 
     startup_photo_file.file.seek(0)
-    s3_client.upload_fileobj(startup_photo_file.file, AWS_BUCKET, f'/startups/{startup_id}.{SUPPORTED_IMAGES_TYPES[file_type]}')
-    url = f"https://s3.{os.getenv('AWS_REGION')}.amazonaws.com/{AWS_BUCKET}/startups/{startup_id}.{SUPPORTED_IMAGES_TYPES[file_type]}"
+    blob.upload_from_file(startup_photo_file.file)
+    #blob.make_public()
 
-    return url
+    return blob.public_url
 
 
 def update_startup_photo(db: Session, startup_photo_link: str, startup_id: str) -> str:

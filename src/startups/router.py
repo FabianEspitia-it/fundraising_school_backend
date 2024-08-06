@@ -172,9 +172,9 @@ def get_startup_users(startup_name: str, db: Session = Depends(get_db)):
     return get_users_by_startup_name(db=db, startup_name=startup_name)
 
 
-@startup_router.patch("/startup/{startup_id}/startup_photo", tags=["startups"])
-async def upload_startup_photo(startup_id: int | None = None, startup_photo: UploadFile = File(...), db: Session = Depends(get_db)) -> JSONResponse:
-
+@startup_router.post("/startup/{startup_id}/startup_photo/", tags=["startups"])
+async def gcs_upload_file(startup_id: int | None = None, startup_photo: UploadFile = File(...), db: Session = Depends(get_db)):
+    
     content = await startup_photo.read()
     size = len(content)
 
@@ -185,7 +185,7 @@ async def upload_startup_photo(startup_id: int | None = None, startup_photo: Upl
             status_code=400,
             detail="Supported file sizes is 0 - 1 MB"
         )
-
+   
     supported_image_types = SUPPORTED_IMAGES_TYPES
 
     file_type = magic.from_buffer(buffer=content, mime=True)
@@ -195,8 +195,7 @@ async def upload_startup_photo(startup_id: int | None = None, startup_photo: Upl
             detail=f'Unsupported file type: {file_type}. Supported file types are: {supported_image_types.keys()}'
         )
     
-    bucket_link = await s3_upload(startup_photo, startup_id= startup_id, file_type= file_type)
-    update_startup_photo(db=db, startup_id=startup_id, startup_photo_link=bucket_link)
+    url = await gcs_upload(startup_photo, startup_id, file_type)
+    update_startup_photo(db=db, startup_id=startup_id, startup_photo_link=url)
 
-    return JSONResponse(content={"bucket_link": bucket_link}, status_code=status.HTTP_201_CREATED)
-
+    return JSONResponse(content={"bucket_link": url}, status_code=status.HTTP_201_CREATED)
