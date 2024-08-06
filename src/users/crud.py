@@ -342,7 +342,8 @@ def create_normal_user(db: Session, user_data: UserNormal):
         email=user_data.email,
         linkedin_url=search_linkedin_url(user_data.nickname),
         phone_number=user_data.phone_number,
-        location=user_data.location
+        location=user_data.location,
+        courses=db.query(models.Course).all()
     )
     db.add(user)
     db.commit()
