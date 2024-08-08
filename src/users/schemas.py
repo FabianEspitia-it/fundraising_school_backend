@@ -133,6 +133,7 @@ class UserStartupReq(BaseModel):
 class UserNormal(BaseModel):
     nickname: str
     email: str
+    country_code: str
     phone_number: str
     location: str
 

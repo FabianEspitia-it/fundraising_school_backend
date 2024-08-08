@@ -46,3 +46,4 @@ class CreateBulkStartupReq(BaseModel):
     sector: str
     traction: str
     fund_raised: str
+    round: str

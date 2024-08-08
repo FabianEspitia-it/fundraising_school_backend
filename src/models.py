@@ -343,6 +343,7 @@ class Startup(Base):
     name = Column(String(100), nullable=False)
     email = Column(String(255), nullable=True)
     description = Column(Text, nullable=True)
+    country_code = Column(String(10), nullable=True)
     phone_number = Column(String(20), nullable=True)
     website = Column(String(255), nullable=True)
     one_sentence_description = Column(String(115), nullable=True)

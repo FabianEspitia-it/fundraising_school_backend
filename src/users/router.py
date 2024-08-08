@@ -3,6 +3,7 @@ from fastapi import APIRouter, status, Depends, BackgroundTasks, HTTPException
 from fastapi.responses import JSONResponse, FileResponse
 from starlette.responses import StreamingResponse
 from openpyxl import Workbook
+from openpyxl.styles import Font, Border, Side
 
 
 import pandas as pd
@@ -281,12 +282,74 @@ def get_favorite_fund_csv(email: str, db: Session = Depends(get_db)):
     
     df = df[['name', 'contact', 'description', 'location', 'website', 'linkedin', 'twitter', 'crunchbase']]
             
-    # Using BytesIO to save the CSV in memory
+    team_row = pd.DataFrame([['Development Team', 'Linkedin'] + [''] * (len(df.columns) - 2)], columns=df.columns)
+
+    brian_row = pd.DataFrame([['Brian Ochoa', 'linkedin.com/in/brian-ochoa/'] + [''] * (len(df.columns) - 2)], columns=df.columns)
+    fabian_row = pd.DataFrame([['Fabián Espitia', 'linkedin.com/in/fabian-espitia-sotelo/'] + [''] * (len(df.columns) - 2)], columns=df.columns)
+    sergio_row = pd.DataFrame([['Sergio Rey', 'linkedin.com/in/rey-sergio/'] + [''] * (len(df.columns) - 2)], columns=df.columns)
+    julian_row = pd.DataFrame([['Julian Bolaños', 'linkedin.com/in/juliancbolanos/'] + [''] * (len(df.columns) - 2)], columns=df.columns)
+    manuel_row = pd.DataFrame([['Manuel Romero', 'linkedin.com/in/manuelsantiagoromero/'] + [''] * (len(df.columns) - 2)], columns=df.columns)
+    
+    empty_row = pd.DataFrame([[''] * len(df.columns)], columns=df.columns)
+
+    startups_title = pd.DataFrame([['Your_Favorite_Funds'] + [''] * (len(df.columns) - 1)], columns=df.columns)
+
+ 
+    df = pd.concat([team_row, brian_row, fabian_row, sergio_row, julian_row, manuel_row, empty_row, startups_title, pd.DataFrame([df.columns], columns=df.columns), df], ignore_index=True)
+
     buffer = io.BytesIO()
-    df.to_csv(buffer, index=False)
+
+    with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, header=False)
+        worksheet = writer.sheets['Sheet1']
+
+        for cell in worksheet["A9:H9"]:
+            for c in cell:
+                c.font = Font(bold=True)
+
+        worksheet['B1'].font = Font(bold=True)
+        worksheet['A1'].font = Font(bold=True)
+        worksheet['A8'].font = Font(bold=True)
+
+
+
+        thin_border = Border(left=Side(style='thin'), 
+                             right=Side(style='thin'), 
+                             top=Side(style='thin'), 
+                             bottom=Side(style='thin'))
+        
+        end_row = 9 + len(favorite_funds)
+        
+        #funds informarion border
+        for row in worksheet.iter_rows(min_row=9, max_row=end_row, min_col=1, max_col=worksheet.max_column):
+            for cell in row:
+                cell.border = thin_border
+
+        #Team border
+        for row in worksheet.iter_rows(min_row=1, max_row=6, min_col=1, max_col=2):
+            for cell in row:
+                cell.border = thin_border
+        
+
+
+        #Your Favorite Funds Border
+        worksheet['A8'].border = thin_border
+
+        for col in worksheet.columns:
+            max_length = 0
+            column = col[0].column_letter 
+            for cell in col:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(cell.value)
+                except:
+                    pass
+            adjusted_width = (max_length + 2)
+            worksheet.column_dimensions[column].width = adjusted_width
+
     buffer.seek(0)
 
-    return StreamingResponse(buffer, media_type="text/csv", headers={"Content-Disposition": "attachment;filename=favorite_funds.csv"})
+    return StreamingResponse(buffer, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers={"Content-Disposition": "attachment;filename=favorite_funds.xlsx"})
 
 
 @user.delete("/user/favorite_fund/{email}/{fund_id}", tags=["users"])
@@ -374,27 +437,73 @@ def get_favorite_startup_csv(email: str, db: Session = Depends(get_db)):
 
     df = df[['name', 'email', 'linkedin', 'description', 'fund_raised', 'website', 'phone_number', 'calendly', 'one_sentence_description', 'deck', 'country', 'sector', 'round', 'traction']]
 
-    team_row = pd.DataFrame([['Team'] + [''] * (len(df.columns) - 1)], columns=df.columns)
+    team_row = pd.DataFrame([['Development Team', 'Linkedin'] + [''] * (len(df.columns) - 2)], columns=df.columns)
 
-    
-    names_row = pd.DataFrame([['Fabián Espitia, Sergio Rey, Julian Bolaños'] + [''] * (len(df.columns) - 1)], columns=df.columns)
-
+    brian_row = pd.DataFrame([['Brian Ochoa', 'linkedin.com/in/brian-ochoa/'] + [''] * (len(df.columns) - 2)], columns=df.columns)
+    fabian_row = pd.DataFrame([['Fabián Espitia', 'linkedin.com/in/fabian-espitia-sotelo/'] + [''] * (len(df.columns) - 2)], columns=df.columns)
+    sergio_row = pd.DataFrame([['Sergio Rey', 'linkedin.com/in/rey-sergio/'] + [''] * (len(df.columns) - 2)], columns=df.columns)
+    julian_row = pd.DataFrame([['Julian Bolaños', 'linkedin.com/in/juliancbolanos/'] + [''] * (len(df.columns) - 2)], columns=df.columns)
+    manuel_row = pd.DataFrame([['Manuel Romero', 'linkedin.com/in/manuelsantiagoromero/'] + [''] * (len(df.columns) - 2)], columns=df.columns)
     
     empty_row = pd.DataFrame([[''] * len(df.columns)], columns=df.columns)
 
     startups_title = pd.DataFrame([['Your_Favorite_Startups'] + [''] * (len(df.columns) - 1)], columns=df.columns)
 
  
-    df = pd.concat([team_row, names_row, empty_row, startups_title, pd.DataFrame([df.columns], columns=df.columns), df], ignore_index=True)
+    df = pd.concat([team_row, brian_row, fabian_row, sergio_row, julian_row, manuel_row, empty_row, startups_title, pd.DataFrame([df.columns], columns=df.columns), df], ignore_index=True)
 
     buffer = io.BytesIO()
 
     with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, header=False)
+        worksheet = writer.sheets['Sheet1']
+
+        for cell in worksheet["A9:N9"]:
+            for c in cell:
+                c.font = Font(bold=True)
+
+        worksheet['B1'].font = Font(bold=True)
+        worksheet['A1'].font = Font(bold=True)
+        worksheet['A8'].font = Font(bold=True)
+
+
+
+        thin_border = Border(left=Side(style='thin'), 
+                             right=Side(style='thin'), 
+                             top=Side(style='thin'), 
+                             bottom=Side(style='thin'))
+        
+        end_row = 9 + len(favorite_startups)
+
+        #Startup informarion border
+        for row in worksheet.iter_rows(min_row=9, max_row=end_row, min_col=1, max_col=worksheet.max_column):
+            for cell in row:
+                cell.border = thin_border
+
+        #Team border
+        for row in worksheet.iter_rows(min_row=1, max_row=6, min_col=1, max_col=2):
+            for cell in row:
+                cell.border = thin_border
+        
+
+
+        #Your Favorite Startups Border
+        worksheet['A8'].border = thin_border
+
+        for col in worksheet.columns:
+            max_length = 0
+            column = col[0].column_letter 
+            for cell in col:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(cell.value)
+                except:
+                    pass
+            adjusted_width = (max_length + 2)
+            worksheet.column_dimensions[column].width = adjusted_width
 
     buffer.seek(0)
 
-    # Retornar el archivo XLSX
     return StreamingResponse(buffer, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers={"Content-Disposition": "attachment;filename=favorite_startups.xlsx"})
 
 @user.delete("/user/favorite_startup/{email}/{startup_id}", tags=["users"])

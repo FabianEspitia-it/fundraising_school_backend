@@ -1,4 +1,5 @@
 from typing import List
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 import pandas as pd
@@ -137,12 +138,21 @@ def get_favorite_startups_by_user_id(db: Session, id: int):
 
 
 def map_ids_to_names(db: Session, df: pd.DataFrame, column_name: str, model, attr_name: str):
-    ids = df[column_name].tolist()
+   
+    df_filtered = df[df[column_name].notna()]
+
+    ids = df_filtered[column_name].tolist()
+
     records = db.query(model).filter(model.id.in_(ids)).all()
+    
     record_dict = {record.id: getattr(record, attr_name) for record in records}
 
     new_column_name = column_name.replace('_id', '')
     df[new_column_name] = df[column_name].map(record_dict)
+
+    df[new_column_name] = df[new_column_name].fillna('')
+
+
     df = df.drop(columns=[column_name])
 
     return df
@@ -262,7 +272,7 @@ def get_user_fund_by_email(db: Session, email: str) -> bool:
         else:
             return {"response": "guest"}
     else:
-        raise Exception("User not found")
+        return JSONResponse(status_code=404, content={"response": "User not found"})
 
 
 def get_user_startup_by_email(db: Session, email: str) -> bool:
@@ -277,7 +287,7 @@ def get_user_startup_by_email(db: Session, email: str) -> bool:
         else:
             return get_user_fund_by_email(db, email)
     else:
-        raise Exception("User not found")
+        return JSONResponse(status_code=404, content={"response": "User not found"})
 
 
 def get_startup_by_user_email(db: Session, email: str) -> models.Startup:
@@ -340,6 +350,7 @@ def create_normal_user(db: Session, user_data: UserNormal):
     user = models.User(
         nickname=user_data.nickname,
         email=user_data.email,
+        country_code = user_data.country_code,
         linkedin_url=search_linkedin_url(user_data.nickname),
         phone_number=user_data.phone_number,
         location=user_data.location,
