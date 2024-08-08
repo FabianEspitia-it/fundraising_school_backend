@@ -2,6 +2,7 @@ from typing import List
 from fastapi import APIRouter, status, Depends, BackgroundTasks, HTTPException
 from fastapi.responses import JSONResponse, FileResponse
 from starlette.responses import StreamingResponse
+from openpyxl import Workbook
 
 
 import pandas as pd
@@ -370,13 +371,31 @@ def get_favorite_startup_csv(email: str, db: Session = Depends(get_db)):
     df = map_ids_to_names(db, df, 'round_id', Round, 'stage')
     df = map_ids_to_names(db, df, 'traction_id', Traction, 'name')
 
-    # Using BytesIO to save the CSV in memory
+
+    df = df[['name', 'email', 'linkedin', 'description', 'fund_raised', 'website', 'phone_number', 'calendly', 'one_sentence_description', 'deck', 'country', 'sector', 'round', 'traction']]
+
+    team_row = pd.DataFrame([['Team'] + [''] * (len(df.columns) - 1)], columns=df.columns)
+
+    
+    names_row = pd.DataFrame([['Fabián Espitia, Sergio Rey, Julian Bolaños'] + [''] * (len(df.columns) - 1)], columns=df.columns)
+
+    
+    empty_row = pd.DataFrame([[''] * len(df.columns)], columns=df.columns)
+
+    startups_title = pd.DataFrame([['Your_Favorite_Startups'] + [''] * (len(df.columns) - 1)], columns=df.columns)
+
+ 
+    df = pd.concat([team_row, names_row, empty_row, startups_title, pd.DataFrame([df.columns], columns=df.columns), df], ignore_index=True)
+
     buffer = io.BytesIO()
-    df.to_csv(buffer, index=False)
+
+    with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, header=False)
+
     buffer.seek(0)
 
-    return StreamingResponse(buffer, media_type="text/csv", headers={"Content-Disposition": "attachment;filename=favorite_startups.csv"})
-
+    # Retornar el archivo XLSX
+    return StreamingResponse(buffer, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers={"Content-Disposition": "attachment;filename=favorite_startups.xlsx"})
 
 @user.delete("/user/favorite_startup/{email}/{startup_id}", tags=["users"])
 def delete_favorite_startup(email: str, startup_id: int, db: Session = Depends(get_db)):

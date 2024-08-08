@@ -11,7 +11,8 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 
 
-def move_down(url: str, scroll_count: int) -> BeautifulSoup | None:
+def move_down(url:str, scroll_count: int) -> BeautifulSoup:
+
     """
     Scrolls down a webpage a specified number of times and returns the page source as a BeautifulSoup object.
 
@@ -23,34 +24,20 @@ def move_down(url: str, scroll_count: int) -> BeautifulSoup | None:
         BeautifulSoup: A BeautifulSoup object containing the HTML of the scrolled page.
     """
 
-    webdriver_url = os.getenv("WEBDRIVER_URL")
+    driver = webdriver.Chrome()  
 
-    if not webdriver_url:
-        raise ValueError("WEBDRIVER_URL environment variable is not set")
+    driver.get(url)
 
-    options = webdriver.ChromeOptions()
+    for _ in range(scroll_count):
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(4)  
 
-    options.add_argument("--no-sandbox")
+    
+    html = driver.page_source
 
-    try:
-        driver = webdriver.Remote(command_executor=webdriver_url, options=options)
+    driver.quit()
 
-        driver.get(url)
-
-        time.sleep(4)
-        for _ in range(scroll_count):
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(4)
-
-        html = driver.page_source
-
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        html = ""
-    finally:
-        driver.quit()
-
-    return BeautifulSoup(html, "html.parser") if html else None
+    return BeautifulSoup(html, "html.parser")
 
 
 
