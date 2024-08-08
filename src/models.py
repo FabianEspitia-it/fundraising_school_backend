@@ -511,7 +511,7 @@ class Event(Base):
 
 Base.metadata.create_all(bind=engine)
 
-"""
+
 def create_concurrent_index():
     connection = engine.connect()
     connection.execution_options(isolation_level="AUTOCOMMIT")
@@ -525,4 +525,3 @@ def create_concurrent_index():
 
 create_concurrent_index()
 
-"""
