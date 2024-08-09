@@ -335,7 +335,7 @@ class Fund(Base):
                             back_populates='funds_in', overlaps="user")
 
 
-#Index('trgm_index_vc_funds_name', Fund.name, postgresql_concurrently=True, postgresql_using='gin')
+# Index('trgm_index_vc_funds_name', Fund.name, postgresql_concurrently=True, postgresql_using='gin')
 
 
 class Startup(Base):
@@ -512,7 +512,7 @@ class Event(Base):
 
 Base.metadata.create_all(bind=engine)
 
-"""
+
 def create_concurrent_index():
     connection = engine.connect()
     connection.execution_options(isolation_level="AUTOCOMMIT")
@@ -524,6 +524,6 @@ def create_concurrent_index():
     finally:
         connection.close()
 
+
 create_concurrent_index()
 
-"""
