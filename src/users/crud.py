@@ -12,7 +12,6 @@ from src.course.crud import get_modules_by_course_id
 import src.models as models
 
 
-
 def get_user_by_email(db: Session, email: str) -> models.User:
     return db.query(models.User).filter(models.User.email == email).first()
 
@@ -139,20 +138,19 @@ def get_favorite_startups_by_user_id(db: Session, id: int):
 
 
 def map_ids_to_names(db: Session, df: pd.DataFrame, column_name: str, model, attr_name: str):
-   
+
     df_filtered = df[df[column_name].notna()]
 
     ids = df_filtered[column_name].tolist()
 
     records = db.query(model).filter(model.id.in_(ids)).all()
-    
+
     record_dict = {record.id: getattr(record, attr_name) for record in records}
 
     new_column_name = column_name.replace('_id', '')
     df[new_column_name] = df[column_name].map(record_dict)
 
     df[new_column_name] = df[new_column_name].fillna('')
-
 
     df = df.drop(columns=[column_name])
 
@@ -217,7 +215,8 @@ def create_user_startup(db: Session, user_data: UserStartupReq) -> None:
 
 def create_user_startup_new(db: Session, user_data: UserStartup) -> None:
 
-    user = db.query(models.User).filter(user_data.email == models.User.email).first()
+    user = db.query(models.User).filter(
+        user_data.email == models.User.email).first()
 
     update_data = user_data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
@@ -237,7 +236,7 @@ def create_user_startup_new(db: Session, user_data: UserStartup) -> None:
         db.add(user_startup)
         db.commit()
     else:
-         startup = models.Startup(
+        startup = models.Startup(
             name=user_data.startup_name,
         )
     db.add(startup)
@@ -246,19 +245,16 @@ def create_user_startup_new(db: Session, user_data: UserStartup) -> None:
 
     relationship = db.query(models.StartupUser).filter(
         models.StartupUser.user_id == user.id).first()
-    
+
     if not relationship:
         user_startup = models.StartupUser(
-                user_id=user.id,
-                startup_id=startup.id
-            )
+            user_id=user.id,
+            startup_id=startup.id
+        )
         db.add(user_startup)
         db.commit()
 
-    
-
     return user
-
 
 
 def get_user_fund_by_email(db: Session, email: str) -> bool:
@@ -268,7 +264,7 @@ def get_user_fund_by_email(db: Session, email: str) -> bool:
     if user:
         connection = db.query(models.FundUsers).filter(
             models.FundUsers.user_id == user.id).first()
-        if connection or user.investment_stage is not None:
+        if connection or user.investment_geography is not None:
             return {"response": "fund"}
         else:
             return {"response": "guest"}
@@ -351,7 +347,7 @@ def create_normal_user(db: Session, user_data: UserNormal):
     user = models.User(
         nickname=user_data.nickname,
         email=user_data.email,
-        country_code = user_data.country_code,
+        country_code=user_data.country_code,
         linkedin_url=search_linkedin_url(user_data.nickname),
         phone_number=user_data.phone_number,
         location=user_data.location,
@@ -364,13 +360,13 @@ def create_normal_user(db: Session, user_data: UserNormal):
     user_public_identifier = linkedin_public_identifier(user.linkedin_url)
     scraper_linkedin_profile(db, user_public_identifier, user.id)
 
-
     return user
 
 
 def create_attendee_user(db: Session, user_data: UserAttendee):
 
-    user = db.query(models.User).filter(user_data.email == models.User.email).first()
+    user = db.query(models.User).filter(
+        user_data.email == models.User.email).first()
 
     update_data = user_data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
@@ -379,38 +375,38 @@ def create_attendee_user(db: Session, user_data: UserAttendee):
     db.commit()
     db.refresh(user)
 
-
     startup = db.query(models.Startup).filter(
-            models.Startup.name == user_data.startup_name).first()
+        models.Startup.name == user_data.startup_name).first()
 
     if startup:
-            user_startup = models.StartupUser(
-                user_id=user.id,
-                startup_id=startup.id
-            )
-            db.add(user_startup)
-            db.commit()
+        user_startup = models.StartupUser(
+            user_id=user.id,
+            startup_id=startup.id
+        )
+        db.add(user_startup)
+        db.commit()
     else:
-            new_startup = models.Startup(
-                name=user_data.startup_name,
-            )
-            db.add(new_startup)
-            db.commit()
-            db.refresh(new_startup)
+        new_startup = models.Startup(
+            name=user_data.startup_name,
+        )
+        db.add(new_startup)
+        db.commit()
+        db.refresh(new_startup)
 
-            user_startup = models.StartupUser(
-                user_id=user.id,
-                startup_id=new_startup.id
-            )
-            db.add(user_startup)
-            db.commit()
+        user_startup = models.StartupUser(
+            user_id=user.id,
+            startup_id=new_startup.id
+        )
+        db.add(user_startup)
+        db.commit()
 
     return user
 
 
 def create_investor_user(db: Session, user_data: UserInvestor):
 
-    stage = db.query(models.Round).filter(models.Round.stage == user_data.investment_stage).first()
+    stage = db.query(models.Round).filter(
+        models.Round.stage == user_data.investment_stage).first()
 
     if not stage:
         stage = models.Round(
@@ -420,17 +416,16 @@ def create_investor_user(db: Session, user_data: UserInvestor):
         db.commit()
         db.refresh(stage)
 
-    user = db.query(models.User).filter(user_data.email == models.User.email).first()
+    user = db.query(models.User).filter(
+        user_data.email == models.User.email).first()
 
     update_data = user_data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(user, key, value)
 
-
     user.round_id = stage.id
 
     db.commit()
     db.refresh(user)
-
 
     return user
