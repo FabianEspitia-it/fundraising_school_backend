@@ -236,8 +236,10 @@ class User(Base):
     startups_favorites = relationship(
         "Startup", secondary="user_startup_favorites", back_populates="users_favorites", overlaps="startup")
 
-    courses = relationship('UserCourse', back_populates='user')
-    classes = relationship("UserClass", back_populates="user")
+    courses = relationship(
+        "Course", secondary="user_courses", back_populates="users")
+    classes = relationship(
+        "Class", secondary="user_classes", back_populates="users")
 
 
 class Education(Base):
@@ -333,7 +335,7 @@ class Fund(Base):
                             back_populates='funds_in', overlaps="user")
 
 
-# Index('trgm_index_vc_funds_name', Fund.name, postgresql_concurrently=True, postgresql_using='gin')
+#Index('trgm_index_vc_funds_name', Fund.name, postgresql_concurrently=True, postgresql_using='gin')
 
 
 class Startup(Base):
@@ -453,9 +455,8 @@ class UserCourse(Base):
     user_id = Column(Integer, ForeignKey("user.id"), primary_key=True)
     course_id = Column(Integer, ForeignKey("course.id"), primary_key=True)
     created_at = Column(DateTime, server_default=func.now())
-
-    user = relationship('User', back_populates='courses')
-    course = relationship('Course', back_populates='users')
+    user = relationship("User", foreign_keys=[user_id], overlaps="courses")
+    course = relationship("Course", foreign_keys=[course_id], overlaps="users")
 
 
 class Course(Base):
@@ -465,7 +466,8 @@ class Course(Base):
     photo = Column(String(255))
     description = Column(Text)
     created_at = Column(DateTime, server_default=func.now())
-    users = relationship('UserCourse', back_populates='course')
+    users = relationship("User", secondary="user_courses",
+                         back_populates="courses")
     modules = relationship("Module", back_populates="course")
     events = relationship("Event", back_populates="course")
 
@@ -493,7 +495,8 @@ class Class(Base):
     created_at = Column(DateTime, server_default=func.now())
     module_id = Column(Integer, ForeignKey("module.id"))
     module = relationship("Module", back_populates="classes")
-    users = relationship("UserClass", back_populates="class_")
+    users = relationship("User", secondary="user_classes",
+                         back_populates="classes")
 
 
 class Event(Base):
@@ -521,6 +524,4 @@ def create_concurrent_index():
     finally:
         connection.close()
 
-
 create_concurrent_index()
-
