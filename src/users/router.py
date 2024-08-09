@@ -277,19 +277,18 @@ def get_favorite_fund_csv(email: str, db: Session = Depends(get_db)):
     df = df.drop(columns=['_sa_instance_state'])
     df = df.drop(columns=['id'])
     df = df.drop(columns=['photo'])
-    df = df.rename(columns={"crunch_base": "crunchbase",})
+    df = df.rename(columns={"crunch_base": "crunchbase", })
 
-    
-    df = df[['name', 'contact', 'description', 'location', 'website', 'linkedin', 'twitter', 'crunchbase']]
-            
-    
-    
+    df = df[['name', 'contact', 'description', 'location',
+             'website', 'linkedin', 'twitter', 'crunchbase']]
+
     empty_row = pd.DataFrame([[''] * len(df.columns)], columns=df.columns)
 
-    startups_title = pd.DataFrame([['Your_Favorite_Funds'] + [''] * (len(df.columns) - 1)], columns=df.columns)
+    startups_title = pd.DataFrame(
+        [['Your_Favorite_Funds'] + [''] * (len(df.columns) - 1)], columns=df.columns)
 
- 
-    df = pd.concat([empty_row, startups_title, pd.DataFrame([df.columns], columns=df.columns), df], ignore_index=True)
+    df = pd.concat([empty_row, startups_title, pd.DataFrame(
+        [df.columns], columns=df.columns), df], ignore_index=True)
 
     buffer = io.BytesIO()
 
@@ -301,27 +300,26 @@ def get_favorite_fund_csv(email: str, db: Session = Depends(get_db)):
             for c in cell:
                 c.font = Font(bold=True)
 
-        thin_border = Border(left=Side(style='thin'), 
-                             right=Side(style='thin'), 
-                             top=Side(style='thin'), 
+        thin_border = Border(left=Side(style='thin'),
+                             right=Side(style='thin'),
+                             top=Side(style='thin'),
                              bottom=Side(style='thin'))
-        
+
         worksheet['A2'].font = Font(bold=True)
 
-        #Your Favorite Funds Border
+        # Your Favorite Funds Border
         worksheet['A2'].border = thin_border
-        
+
         end_row = 3 + len(favorite_funds)
-        
-        #funds informarion border
+
+        # funds informarion border
         for row in worksheet.iter_rows(min_row=3, max_row=end_row, min_col=1, max_col=worksheet.max_column):
             for cell in row:
                 cell.border = thin_border
 
-
         for col in worksheet.columns:
             max_length = 0
-            column = col[0].column_letter 
+            column = col[0].column_letter
             for cell in col:
                 try:
                     if len(str(cell.value)) > max_length:
@@ -332,9 +330,9 @@ def get_favorite_fund_csv(email: str, db: Session = Depends(get_db)):
             worksheet.column_dimensions[column].width = adjusted_width
 
         team_info = pd.DataFrame([
+            ['Sergio Rey', 'linkedin.com/in/rey-sergio/'],
             ['Brian Ochoa', 'linkedin.com/in/brian-ochoa/'],
             ['Fabián Espitia', 'linkedin.com/in/fabian-espitia-sotelo/'],
-            ['Sergio Rey', 'linkedin.com/in/rey-sergio/'],
             ['Julian Bolaños', 'linkedin.com/in/juliancbolanos/'],
             ['Manuel Romero', 'linkedin.com/in/manuelsantiagoromero/']
         ], columns=['Development Team', 'LinkedIn'])
@@ -343,12 +341,11 @@ def get_favorite_fund_csv(email: str, db: Session = Depends(get_db)):
 
         team_sheet = writer.sheets['Development Team']
 
-        #Team border
+        # Team border
         for row in team_sheet.iter_rows(min_row=1, max_row=6, min_col=1, max_col=2):
             for cell in row:
                 cell.border = thin_border
 
-        
         for col in team_sheet.columns:
             max_length = 0
             column = col[0].column_letter
@@ -448,16 +445,16 @@ def get_favorite_startup_csv(email: str, db: Session = Depends(get_db)):
     df = map_ids_to_names(db, df, 'round_id', Round, 'stage')
     df = map_ids_to_names(db, df, 'traction_id', Traction, 'name')
 
+    df = df[['name', 'email', 'linkedin', 'description', 'fund_raised', 'website', 'phone_number',
+             'calendly', 'one_sentence_description', 'deck', 'country', 'sector', 'round', 'traction']]
 
-    df = df[['name', 'email', 'linkedin', 'description', 'fund_raised', 'website', 'phone_number', 'calendly', 'one_sentence_description', 'deck', 'country', 'sector', 'round', 'traction']]
-
-    
     empty_row = pd.DataFrame([[''] * len(df.columns)], columns=df.columns)
 
-    startups_title = pd.DataFrame([['Your_Favorite_Startups'] + [''] * (len(df.columns) - 1)], columns=df.columns)
+    startups_title = pd.DataFrame(
+        [['Your_Favorite_Startups'] + [''] * (len(df.columns) - 1)], columns=df.columns)
 
- 
-    df = pd.concat([empty_row, startups_title, pd.DataFrame([df.columns], columns=df.columns), df], ignore_index=True)
+    df = pd.concat([empty_row, startups_title, pd.DataFrame(
+        [df.columns], columns=df.columns), df], ignore_index=True)
 
     buffer = io.BytesIO()
 
@@ -469,33 +466,30 @@ def get_favorite_startup_csv(email: str, db: Session = Depends(get_db)):
             for c in cell:
                 c.font = Font(bold=True)
 
-        thin_border = Border(left=Side(style='thin'), 
-                             right=Side(style='thin'), 
-                             top=Side(style='thin'), 
+        thin_border = Border(left=Side(style='thin'),
+                             right=Side(style='thin'),
+                             top=Side(style='thin'),
                              bottom=Side(style='thin'))
 
         worksheet['A2'].font = Font(bold=True)
 
-        #Your Favorite Startups Border
+        # Your Favorite Startups Border
         worksheet['A2'].border = thin_border
 
         for cell in worksheet["A3:N3"]:
             for c in cell:
                 c.font = Font(bold=True)
-        
-        
+
         end_row = 3 + len(favorite_startups)
 
-        #Startup informarion border
+        # Startup informarion border
         for row in worksheet.iter_rows(min_row=3, max_row=end_row, min_col=1, max_col=worksheet.max_column):
             for cell in row:
                 cell.border = thin_border
-    
-        
 
         for col in worksheet.columns:
             max_length = 0
-            column = col[0].column_letter 
+            column = col[0].column_letter
             for cell in col:
                 try:
                     if len(str(cell.value)) > max_length:
@@ -504,11 +498,11 @@ def get_favorite_startup_csv(email: str, db: Session = Depends(get_db)):
                     pass
             adjusted_width = (max_length + 2)
             worksheet.column_dimensions[column].width = adjusted_width
-        
+
         team_info = pd.DataFrame([
+            ['Sergio Rey', 'linkedin.com/in/rey-sergio/'],
             ['Brian Ochoa', 'linkedin.com/in/brian-ochoa/'],
             ['Fabián Espitia', 'linkedin.com/in/fabian-espitia-sotelo/'],
-            ['Sergio Rey', 'linkedin.com/in/rey-sergio/'],
             ['Julian Bolaños', 'linkedin.com/in/juliancbolanos/'],
             ['Manuel Romero', 'linkedin.com/in/manuelsantiagoromero/']
         ], columns=['Development Team', 'LinkedIn'])
@@ -517,12 +511,11 @@ def get_favorite_startup_csv(email: str, db: Session = Depends(get_db)):
 
         team_sheet = writer.sheets['Development Team']
 
-        #Team border
+        # Team border
         for row in team_sheet.iter_rows(min_row=1, max_row=6, min_col=1, max_col=2):
             for cell in row:
                 cell.border = thin_border
 
-        
         for col in team_sheet.columns:
             max_length = 0
             column = col[0].column_letter
@@ -538,6 +531,7 @@ def get_favorite_startup_csv(email: str, db: Session = Depends(get_db)):
     buffer.seek(0)
 
     return StreamingResponse(buffer, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers={"Content-Disposition": "attachment;filename=favorite_startups.xlsx"})
+
 
 @user.delete("/user/favorite_startup/{email}/{startup_id}", tags=["users"])
 def delete_favorite_startup(email: str, startup_id: int, db: Session = Depends(get_db)):
@@ -598,7 +592,8 @@ def add_user_startup(db: Session = Depends(get_db), user_data: UserStartupReq = 
 
 @user.put("/user/startup/bulk", tags=["users"])
 def add_user_startups_bulk(background_tasks: BackgroundTasks, db: Session = Depends(get_db), user_data: UserStartup = None) -> JSONResponse:
-    background_tasks.add_task(create_user_startup_new, db=db, user_data=user_data)
+    background_tasks.add_task(create_user_startup_new,
+                              db=db, user_data=user_data)
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
 
 
@@ -636,28 +631,24 @@ def get_course_progress(user_email: str, course_id: int, db: Session = Depends(g
     return JSONResponse(
         content={"progress": calculate_progress(user_email, course_id, db)},
         status_code=200
-        )
+    )
 
 
 @user.post("/user/add_normal_user", tags=["users"])
 def add_normal_user(background_tasks: BackgroundTasks, user_data: UserNormal, db: Session = Depends(get_db)):
 
-    background_tasks.add_task(create_normal_user, db=db, user_data = user_data)
+    background_tasks.add_task(create_normal_user, db=db, user_data=user_data)
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
 
-
-    
 
 @user.put("/user/attendee_user", tags=["users"])
 def add_attendee_user(background_tasks: BackgroundTasks, user_data: UserAttendee, db: Session = Depends(get_db)):
 
-    background_tasks.add_task(create_attendee_user, db=db, user_data = user_data)
+    background_tasks.add_task(create_attendee_user, db=db, user_data=user_data)
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
-    
 
 
 @user.put("/user/investor_user", tags=["users"])
-def add_investor_user(background_tasks: BackgroundTasks,user_data: UserInvestor, db: Session = Depends(get_db)):
-    background_tasks.add_task(create_investor_user, db=db, user_data = user_data)
+def add_investor_user(background_tasks: BackgroundTasks, user_data: UserInvestor, db: Session = Depends(get_db)):
+    background_tasks.add_task(create_investor_user, db=db, user_data=user_data)
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
-
