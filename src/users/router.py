@@ -282,20 +282,14 @@ def get_favorite_fund_csv(email: str, db: Session = Depends(get_db)):
     
     df = df[['name', 'contact', 'description', 'location', 'website', 'linkedin', 'twitter', 'crunchbase']]
             
-    team_row = pd.DataFrame([['Development Team', 'Linkedin'] + [''] * (len(df.columns) - 2)], columns=df.columns)
-
-    brian_row = pd.DataFrame([['Brian Ochoa', 'linkedin.com/in/brian-ochoa/'] + [''] * (len(df.columns) - 2)], columns=df.columns)
-    fabian_row = pd.DataFrame([['Fabián Espitia', 'linkedin.com/in/fabian-espitia-sotelo/'] + [''] * (len(df.columns) - 2)], columns=df.columns)
-    sergio_row = pd.DataFrame([['Sergio Rey', 'linkedin.com/in/rey-sergio/'] + [''] * (len(df.columns) - 2)], columns=df.columns)
-    julian_row = pd.DataFrame([['Julian Bolaños', 'linkedin.com/in/juliancbolanos/'] + [''] * (len(df.columns) - 2)], columns=df.columns)
-    manuel_row = pd.DataFrame([['Manuel Romero', 'linkedin.com/in/manuelsantiagoromero/'] + [''] * (len(df.columns) - 2)], columns=df.columns)
+    
     
     empty_row = pd.DataFrame([[''] * len(df.columns)], columns=df.columns)
 
     startups_title = pd.DataFrame([['Your_Favorite_Funds'] + [''] * (len(df.columns) - 1)], columns=df.columns)
 
  
-    df = pd.concat([team_row, brian_row, fabian_row, sergio_row, julian_row, manuel_row, empty_row, startups_title, pd.DataFrame([df.columns], columns=df.columns), df], ignore_index=True)
+    df = pd.concat([empty_row, startups_title, pd.DataFrame([df.columns], columns=df.columns), df], ignore_index=True)
 
     buffer = io.BytesIO()
 
@@ -303,37 +297,27 @@ def get_favorite_fund_csv(email: str, db: Session = Depends(get_db)):
         df.to_excel(writer, index=False, header=False)
         worksheet = writer.sheets['Sheet1']
 
-        for cell in worksheet["A9:H9"]:
+        for cell in worksheet["A3:H3"]:
             for c in cell:
                 c.font = Font(bold=True)
-
-        worksheet['B1'].font = Font(bold=True)
-        worksheet['A1'].font = Font(bold=True)
-        worksheet['A8'].font = Font(bold=True)
-
-
 
         thin_border = Border(left=Side(style='thin'), 
                              right=Side(style='thin'), 
                              top=Side(style='thin'), 
                              bottom=Side(style='thin'))
         
-        end_row = 9 + len(favorite_funds)
-        
-        #funds informarion border
-        for row in worksheet.iter_rows(min_row=9, max_row=end_row, min_col=1, max_col=worksheet.max_column):
-            for cell in row:
-                cell.border = thin_border
-
-        #Team border
-        for row in worksheet.iter_rows(min_row=1, max_row=6, min_col=1, max_col=2):
-            for cell in row:
-                cell.border = thin_border
-        
-
+        worksheet['A2'].font = Font(bold=True)
 
         #Your Favorite Funds Border
-        worksheet['A8'].border = thin_border
+        worksheet['A2'].border = thin_border
+        
+        end_row = 3 + len(favorite_funds)
+        
+        #funds informarion border
+        for row in worksheet.iter_rows(min_row=3, max_row=end_row, min_col=1, max_col=worksheet.max_column):
+            for cell in row:
+                cell.border = thin_border
+
 
         for col in worksheet.columns:
             max_length = 0
@@ -346,6 +330,36 @@ def get_favorite_fund_csv(email: str, db: Session = Depends(get_db)):
                     pass
             adjusted_width = (max_length + 2)
             worksheet.column_dimensions[column].width = adjusted_width
+
+        team_info = pd.DataFrame([
+            ['Brian Ochoa', 'linkedin.com/in/brian-ochoa/'],
+            ['Fabián Espitia', 'linkedin.com/in/fabian-espitia-sotelo/'],
+            ['Sergio Rey', 'linkedin.com/in/rey-sergio/'],
+            ['Julian Bolaños', 'linkedin.com/in/juliancbolanos/'],
+            ['Manuel Romero', 'linkedin.com/in/manuelsantiagoromero/']
+        ], columns=['Development Team', 'LinkedIn'])
+
+        team_info.to_excel(writer, index=False, sheet_name='Development Team')
+
+        team_sheet = writer.sheets['Development Team']
+
+        #Team border
+        for row in team_sheet.iter_rows(min_row=1, max_row=6, min_col=1, max_col=2):
+            for cell in row:
+                cell.border = thin_border
+
+        
+        for col in team_sheet.columns:
+            max_length = 0
+            column = col[0].column_letter
+            for cell in col:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(cell.value)
+                except:
+                    pass
+            adjusted_width = (max_length + 2)
+            team_sheet.column_dimensions[column].width = adjusted_width
 
     buffer.seek(0)
 
@@ -437,20 +451,13 @@ def get_favorite_startup_csv(email: str, db: Session = Depends(get_db)):
 
     df = df[['name', 'email', 'linkedin', 'description', 'fund_raised', 'website', 'phone_number', 'calendly', 'one_sentence_description', 'deck', 'country', 'sector', 'round', 'traction']]
 
-    team_row = pd.DataFrame([['Development Team', 'Linkedin'] + [''] * (len(df.columns) - 2)], columns=df.columns)
-
-    brian_row = pd.DataFrame([['Brian Ochoa', 'linkedin.com/in/brian-ochoa/'] + [''] * (len(df.columns) - 2)], columns=df.columns)
-    fabian_row = pd.DataFrame([['Fabián Espitia', 'linkedin.com/in/fabian-espitia-sotelo/'] + [''] * (len(df.columns) - 2)], columns=df.columns)
-    sergio_row = pd.DataFrame([['Sergio Rey', 'linkedin.com/in/rey-sergio/'] + [''] * (len(df.columns) - 2)], columns=df.columns)
-    julian_row = pd.DataFrame([['Julian Bolaños', 'linkedin.com/in/juliancbolanos/'] + [''] * (len(df.columns) - 2)], columns=df.columns)
-    manuel_row = pd.DataFrame([['Manuel Romero', 'linkedin.com/in/manuelsantiagoromero/'] + [''] * (len(df.columns) - 2)], columns=df.columns)
     
     empty_row = pd.DataFrame([[''] * len(df.columns)], columns=df.columns)
 
     startups_title = pd.DataFrame([['Your_Favorite_Startups'] + [''] * (len(df.columns) - 1)], columns=df.columns)
 
  
-    df = pd.concat([team_row, brian_row, fabian_row, sergio_row, julian_row, manuel_row, empty_row, startups_title, pd.DataFrame([df.columns], columns=df.columns), df], ignore_index=True)
+    df = pd.concat([empty_row, startups_title, pd.DataFrame([df.columns], columns=df.columns), df], ignore_index=True)
 
     buffer = io.BytesIO()
 
@@ -458,37 +465,33 @@ def get_favorite_startup_csv(email: str, db: Session = Depends(get_db)):
         df.to_excel(writer, index=False, header=False)
         worksheet = writer.sheets['Sheet1']
 
-        for cell in worksheet["A9:N9"]:
+        for cell in worksheet["A2:N2"]:
             for c in cell:
                 c.font = Font(bold=True)
-
-        worksheet['B1'].font = Font(bold=True)
-        worksheet['A1'].font = Font(bold=True)
-        worksheet['A8'].font = Font(bold=True)
-
-
 
         thin_border = Border(left=Side(style='thin'), 
                              right=Side(style='thin'), 
                              top=Side(style='thin'), 
                              bottom=Side(style='thin'))
-        
-        end_row = 9 + len(favorite_startups)
 
-        #Startup informarion border
-        for row in worksheet.iter_rows(min_row=9, max_row=end_row, min_col=1, max_col=worksheet.max_column):
-            for cell in row:
-                cell.border = thin_border
-
-        #Team border
-        for row in worksheet.iter_rows(min_row=1, max_row=6, min_col=1, max_col=2):
-            for cell in row:
-                cell.border = thin_border
-        
-
+        worksheet['A2'].font = Font(bold=True)
 
         #Your Favorite Startups Border
-        worksheet['A8'].border = thin_border
+        worksheet['A2'].border = thin_border
+
+        for cell in worksheet["A3:N3"]:
+            for c in cell:
+                c.font = Font(bold=True)
+        
+        
+        end_row = 3 + len(favorite_startups)
+
+        #Startup informarion border
+        for row in worksheet.iter_rows(min_row=3, max_row=end_row, min_col=1, max_col=worksheet.max_column):
+            for cell in row:
+                cell.border = thin_border
+    
+        
 
         for col in worksheet.columns:
             max_length = 0
@@ -502,12 +505,35 @@ def get_favorite_startup_csv(email: str, db: Session = Depends(get_db)):
             adjusted_width = (max_length + 2)
             worksheet.column_dimensions[column].width = adjusted_width
         
-        additional_info = pd.DataFrame({
-            "Info": ["Some additional information", "Another line of info"],
-            "Details": ["Details about the additional info", "More details"]
-        })
+        team_info = pd.DataFrame([
+            ['Brian Ochoa', 'linkedin.com/in/brian-ochoa/'],
+            ['Fabián Espitia', 'linkedin.com/in/fabian-espitia-sotelo/'],
+            ['Sergio Rey', 'linkedin.com/in/rey-sergio/'],
+            ['Julian Bolaños', 'linkedin.com/in/juliancbolanos/'],
+            ['Manuel Romero', 'linkedin.com/in/manuelsantiagoromero/']
+        ], columns=['Development Team', 'LinkedIn'])
 
-        additional_info.to_excel(writer, index=False, sheet_name='Development Team')
+        team_info.to_excel(writer, index=False, sheet_name='Development Team')
+
+        team_sheet = writer.sheets['Development Team']
+
+        #Team border
+        for row in team_sheet.iter_rows(min_row=1, max_row=6, min_col=1, max_col=2):
+            for cell in row:
+                cell.border = thin_border
+
+        
+        for col in team_sheet.columns:
+            max_length = 0
+            column = col[0].column_letter
+            for cell in col:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(cell.value)
+                except:
+                    pass
+            adjusted_width = (max_length + 2)
+            team_sheet.column_dimensions[column].width = adjusted_width
 
     buffer.seek(0)
 

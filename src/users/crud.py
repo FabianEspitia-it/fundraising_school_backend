@@ -268,7 +268,7 @@ def get_user_fund_by_email(db: Session, email: str) -> bool:
     if user:
         connection = db.query(models.FundUsers).filter(
             models.FundUsers.user_id == user.id).first()
-        if connection:
+        if connection or user.investment_stage is not None:
             return {"response": "fund"}
         else:
             return {"response": "guest"}
