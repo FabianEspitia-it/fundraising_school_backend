@@ -339,7 +339,7 @@ def get_favorite_fund_csv(email: str, db: Session = Depends(get_db)):
 
         team_info.to_excel(writer, index=False, sheet_name='Development Team')
 
-        team_sheet = writer.sheets['Development Team']
+        team_sheet = writer.sheets['Team']
 
         # Team border
         for row in team_sheet.iter_rows(min_row=1, max_row=6, min_col=1, max_col=2):
@@ -509,7 +509,7 @@ def get_favorite_startup_csv(email: str, db: Session = Depends(get_db)):
 
         team_info.to_excel(writer, index=False, sheet_name='Development Team')
 
-        team_sheet = writer.sheets['Development Team']
+        team_sheet = writer.sheets['Team']
 
         # Team border
         for row in team_sheet.iter_rows(min_row=1, max_row=6, min_col=1, max_col=2):
