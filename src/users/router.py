@@ -330,9 +330,9 @@ def get_favorite_fund_csv(email: str, db: Session = Depends(get_db)):
             worksheet.column_dimensions[column].width = adjusted_width
 
         team_info = pd.DataFrame([
-            ['Sergio Rey', 'linkedin.com/in/rey-sergio/'],
             ['Brian Ochoa', 'linkedin.com/in/brian-ochoa/'],
             ['Fabián Espitia', 'linkedin.com/in/fabian-espitia-sotelo/'],
+            ['Sergio Rey', 'linkedin.com/in/rey-sergio/'],
             ['Julian Bolaños', 'linkedin.com/in/juliancbolanos/'],
             ['Manuel Romero', 'linkedin.com/in/manuelsantiagoromero/']
         ], columns=['Development Team', 'LinkedIn'])
@@ -500,9 +500,9 @@ def get_favorite_startup_csv(email: str, db: Session = Depends(get_db)):
             worksheet.column_dimensions[column].width = adjusted_width
 
         team_info = pd.DataFrame([
-            ['Sergio Rey', 'linkedin.com/in/rey-sergio/'],
             ['Brian Ochoa', 'linkedin.com/in/brian-ochoa/'],
             ['Fabián Espitia', 'linkedin.com/in/fabian-espitia-sotelo/'],
+            ['Sergio Rey', 'linkedin.com/in/rey-sergio/'],
             ['Julian Bolaños', 'linkedin.com/in/juliancbolanos/'],
             ['Manuel Romero', 'linkedin.com/in/manuelsantiagoromero/']
         ], columns=['Development Team', 'LinkedIn'])

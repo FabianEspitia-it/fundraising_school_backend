@@ -171,7 +171,7 @@ def get_countries_startups(db: Session = Depends(get_db)):
 def get_startup_users(startup_name: str, db: Session = Depends(get_db)):
     return get_users_by_startup_name(db=db, startup_name=startup_name)
 
-"""
+
 @startup_router.post("/startup/{startup_id}/startup_photo/", tags=["startups"])
 async def gcs_upload_file(startup_id: int | None = None, startup_photo: UploadFile = File(...), db: Session = Depends(get_db)):
 
@@ -199,4 +199,3 @@ async def gcs_upload_file(startup_id: int | None = None, startup_photo: UploadFi
     update_startup_photo(db=db, startup_id=startup_id, startup_photo_link=url)
 
     return JSONResponse(content={"bucket_link": url}, status_code=status.HTTP_201_CREATED)
-"""
