@@ -343,7 +343,7 @@ def get_all_users(db: Session):
 
 
 def create_normal_user(db: Session, user_data: UserNormal):
-    from src.users.linkedin_scraper import search_linkedin_url, linkedin_public_identifier, scraper_linkedin_profile
+    from src.users.linkedin_scraper import search_linkedin_url
     user = models.User(
         nickname=user_data.nickname,
         email=user_data.email,
@@ -357,10 +357,20 @@ def create_normal_user(db: Session, user_data: UserNormal):
     db.commit()
     db.refresh(user)
 
+    
+
+    return user
+
+
+def add_linkedin_information(user_email: str, db: Session):
+    user = db.query(models.User).filter(
+        models.User.email == user_email).first()
+    
+    from src.users.linkedin_scraper import linkedin_public_identifier, scraper_linkedin_profile
     user_public_identifier = linkedin_public_identifier(user.linkedin_url)
     scraper_linkedin_profile(db, user_public_identifier, user.id)
 
-    return user
+    
 
 
 def create_attendee_user(db: Session, user_data: UserAttendee):

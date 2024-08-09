@@ -636,8 +636,12 @@ def get_course_progress(user_email: str, course_id: int, db: Session = Depends(g
 
 @user.post("/user/add_normal_user", tags=["users"])
 def add_normal_user(background_tasks: BackgroundTasks, user_data: UserNormal, db: Session = Depends(get_db)):
-
-    background_tasks.add_task(create_normal_user, db=db, user_data=user_data)
+    try:
+        create_normal_user(db=db, user_data=user_data)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Invalid data request")
+    
+    background_tasks.add_task(add_linkedin_information, db=db, user_email=user_data.email)
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
 
 
