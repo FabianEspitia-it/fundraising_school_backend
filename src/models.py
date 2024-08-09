@@ -195,6 +195,7 @@ class User(Base):
     last_name = Column(String(255), nullable=True)
     nickname = Column(String(255), nullable=True)
     contact_email = Column(String(255), nullable=True)
+    country_code = Column(String(10), nullable=True)
     phone_number = Column(String(20), nullable=True)
     followers_amount = Column(Integer, nullable=False, default=0)
     industry = Column(String(255), nullable=True, unique=False)
@@ -511,7 +512,7 @@ class Event(Base):
 
 Base.metadata.create_all(bind=engine)
 
-
+"""
 def create_concurrent_index():
     connection = engine.connect()
     connection.execution_options(isolation_level="AUTOCOMMIT")
@@ -525,3 +526,4 @@ def create_concurrent_index():
 
 create_concurrent_index()
 
+"""

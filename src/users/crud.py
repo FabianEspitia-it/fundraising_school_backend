@@ -1,4 +1,5 @@
 from typing import List
+from fastapi import HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
@@ -89,7 +90,7 @@ def add_favorite_fund_to_user(db: Session, email: str, fund_id: int) -> None:
         db.commit()
         db.refresh(user_fund)
     else:
-        raise Exception("User not found")
+        raise HTTPException(status_code=404, detail="User not found")
 
 
 def get_favorite_fund_by_user_id(db: Session, email: str, fund_id: int) -> models.UserFundFavorite:
@@ -97,7 +98,7 @@ def get_favorite_fund_by_user_id(db: Session, email: str, fund_id: int) -> model
     if user:
         return db.query(models.UserFundFavorite).filter(models.UserFundFavorite.user_id == user.id, models.UserFundFavorite.fund_id == fund_id).first()
     else:
-        raise Exception("User not found")
+        raise HTTPException(status_code=404, detail="User not found")
 
 
 def get_favorite_funds_by_user_id(db: Session, email: str) -> list[models.Fund]:
@@ -115,7 +116,7 @@ def delete_favorite_fund_by_user_id(db: Session, email: str, fund_id: int) -> No
                                                  user.id, models.UserFundFavorite.fund_id == fund_id).delete()
         db.commit()
     else:
-        raise Exception("User not found")
+        raise HTTPException(status_code=404, detail="User not found")
 
 
 def add_favorite_startup_to_user(db: Session, email: str, startup_id: int) -> None:
@@ -127,7 +128,7 @@ def add_favorite_startup_to_user(db: Session, email: str, startup_id: int) -> No
         db.commit()
         db.refresh(user_startup)
     else:
-        raise Exception("User not found")
+        raise HTTPException(status_code=404, detail="User not found")
 
 
 def get_favorite_startups_by_user_id(db: Session, id: int):
@@ -165,7 +166,7 @@ def delete_favorite_startup_by_user_email(db: Session, email: str, startup_id: i
                                                     user.id, models.UserStartupFavorite.startup_id == startup_id).delete()
         db.commit()
     else:
-        raise Exception("User not found")
+        raise HTTPException(status_code=404, detail="User not found")
 
 
 def update_user_by_email(db: Session, email: str, user_data: UpdateUserReq) -> models.User:
@@ -174,7 +175,7 @@ def update_user_by_email(db: Session, email: str, user_data: UpdateUserReq) -> m
         models.User.email == email).first()
 
     if not user:
-        raise ValueError("User not found")
+        raise HTTPException(status_code=404, detail="User not found")
 
     update_data = user_data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
@@ -272,7 +273,7 @@ def get_user_fund_by_email(db: Session, email: str) -> bool:
         else:
             return {"response": "guest"}
     else:
-        return JSONResponse(status_code=404, content={"response": "User not found"})
+        raise HTTPException(status_code=404, detail="User not found")
 
 
 def get_user_startup_by_email(db: Session, email: str) -> bool:
@@ -287,7 +288,7 @@ def get_user_startup_by_email(db: Session, email: str) -> bool:
         else:
             return get_user_fund_by_email(db, email)
     else:
-        return JSONResponse(status_code=404, content={"response": "User not found"})
+        raise HTTPException(status_code=404, detail="User not found")
 
 
 def get_startup_by_user_email(db: Session, email: str) -> models.Startup:
@@ -297,7 +298,7 @@ def get_startup_by_user_email(db: Session, email: str) -> models.Startup:
             models.StartupUser.user_id == user.id).first()
         return startup
     else:
-        raise Exception("User not found")
+        raise HTTPException(status_code=404, detail="User not found")
 
 
 def mark_class_unseen_user(user_email: str, class_id: int, db: Session):

@@ -501,6 +501,13 @@ def get_favorite_startup_csv(email: str, db: Session = Depends(get_db)):
                     pass
             adjusted_width = (max_length + 2)
             worksheet.column_dimensions[column].width = adjusted_width
+        
+        additional_info = pd.DataFrame({
+            "Info": ["Some additional information", "Another line of info"],
+            "Details": ["Details about the additional info", "More details"]
+        })
+
+        additional_info.to_excel(writer, index=False, sheet_name='Development Team')
 
     buffer.seek(0)
 
