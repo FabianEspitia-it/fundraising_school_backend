@@ -195,6 +195,7 @@ class User(Base):
     last_name = Column(String(255), nullable=True)
     nickname = Column(String(255), nullable=True)
     contact_email = Column(String(255), nullable=True)
+    country_code = Column(String(10), nullable=True)
     phone_number = Column(String(20), nullable=True)
     followers_amount = Column(Integer, nullable=False, default=0)
     industry = Column(String(255), nullable=True, unique=False)
@@ -334,7 +335,7 @@ class Fund(Base):
                             back_populates='funds_in', overlaps="user")
 
 
-#Index('trgm_index_vc_funds_name', Fund.name, postgresql_concurrently=True, postgresql_using='gin')
+# Index('trgm_index_vc_funds_name', Fund.name, postgresql_concurrently=True, postgresql_using='gin')
 
 
 class Startup(Base):
@@ -523,5 +524,5 @@ def create_concurrent_index():
     finally:
         connection.close()
 
-create_concurrent_index()
 
+create_concurrent_index()
