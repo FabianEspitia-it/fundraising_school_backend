@@ -451,6 +451,7 @@ def create_users_fund_ctw(db: Session, users_data: list[UserFundCtw]) -> None:
             email=user_data.email,
             linkedin_url=user_data.linkedin_url,
             role=user_data.role,
+            photo_url=user_data.photo,
             courses=db.query(models.Course).all()
         )
         db.add(user)
