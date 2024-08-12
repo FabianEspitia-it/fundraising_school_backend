@@ -47,7 +47,6 @@ class Sector(BaseModel):
 
 
 class FundBase(BaseModel):
-    id: int
     name: str 
     website: str
     description: str
@@ -59,13 +58,17 @@ class FundBase(BaseModel):
     contact: str
 
 
-class Fund(FundBase):
-    rounds: List[Round] = []
-    partners: List[Partner] = []
-    check_size: List[CheckSize] = []
-    countries: List[Country] = []
-    sectors: List[Sector] = []
+class FundCtw(FundBase):
+    rounds: List[str] = []
+    #partners: List[str] = []
+    check_size: List[str] = []
+    countries: List[str] = []
+    sectors: List[str] = []
     
 
     class Config:
         orm_mode = True
+
+
+
+

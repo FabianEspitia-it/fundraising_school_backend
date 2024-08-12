@@ -8,6 +8,8 @@ from src.users.crud import get_user_by_email, get_favorite_funds_by_user_id
 
 from sqlalchemy.sql import text
 
+from src.vc_sheet.schemas import FundCtw
+
 import time
 
 
@@ -618,3 +620,73 @@ def search_vc_by_term(db: Session, vc_term: str):
     else:
         return "No results found"
 
+
+def get_or_create(db: Session, model, value: str):
+
+    if model == Round:
+        instance = db.query(model).filter_by(stage=value).first()
+
+        if not instance:
+            instance = model(stage=value)
+            db.add(instance)
+            db.commit()
+            db.refresh(instance)
+
+    elif model == CheckSize:
+        instance = db.query(model).filter_by(size=value).first()
+        if not instance:
+            instance = model(size=value)
+            db.add(instance)
+            db.commit()
+            db.refresh(instance)
+    else:
+        instance = db.query(model).filter_by(name=value).first()
+
+        if not instance:
+            instance = model(name=value)
+            db.add(instance)
+            db.commit()
+            db.refresh(instance)
+    return instance
+
+def create_ctw_bulk_funds(db: Session, funds: list[FundCtw]) -> None:
+
+    for fund_data in funds:
+        
+        fund = Fund(
+            name=fund_data.name,
+            website=fund_data.website,
+            description=fund_data.description,
+            location=fund_data.location,
+            photo=fund_data.photo,
+            twitter=fund_data.twitter,
+            linkedin=fund_data.linkedin,
+            crunch_base=fund_data.crunch_base,
+            contact=fund_data.contact
+        )
+
+        
+        db.add(fund)
+        db.flush()  
+
+        for country_name in fund_data.countries:
+            country = get_or_create(db, Country, country_name)
+            fund.countries.append(country)
+        
+        for sector_name in fund_data.sectors:
+            sector = get_or_create(db, Sector, sector_name)
+            fund.sectors.append(sector)
+
+        for round_stage in fund_data.rounds:
+            round = get_or_create(db, Round, round_stage)
+            fund.rounds.append(round)
+        """
+        for partner_name in fund_data.partners:
+            partner = get_or_create(db, Partner, partner_name)
+            fund.partners.append(partner)
+        """
+        for check_size in fund_data.check_size:
+            check = get_or_create(db, CheckSize, check_size)
+            fund.check_size.append(check)
+    
+    db.commit()

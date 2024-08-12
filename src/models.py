@@ -308,12 +308,12 @@ class Investor(Base):
 class Fund(Base):
     __tablename__ = "vc_fund"
     id = Column(Integer, primary_key=True)
-    name = Column(String(200), nullable=False)
+    name = Column(String(200), nullable=False, unique=True)
     description = Column(Text, nullable=True)
     photo = Column(String(255), nullable=True)
-    website = Column(String(255), nullable=True)
+    website = Column(String(255), nullable=True, unique=True)
     twitter = Column(String(255), nullable=True)
-    linkedin = Column(String(255), nullable=True)
+    linkedin = Column(String(255), nullable=True, unique=True)
     crunch_base = Column(String(255), nullable=True)
     contact = Column(String(255), nullable=True)
     location = Column(String(50), nullable=True)
@@ -342,13 +342,13 @@ class Startup(Base):
     __tablename__ = "startup"
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False)
-    email = Column(String(255), nullable=True)
+    email = Column(String(255), nullable=True, unique=True)
     description = Column(Text, nullable=True)
     country_code = Column(String(10), nullable=True)
     phone_number = Column(String(20), nullable=True)
     website = Column(String(255), nullable=True)
     one_sentence_description = Column(String(115), nullable=True)
-    linkedin = Column(String(255), nullable=True)
+    linkedin = Column(String(255), nullable=True, unique=True)
     photo = Column(String(255), nullable=True)
     calendly = Column(String(255), nullable=True)
     deck = Column(String(255), nullable=True)
@@ -525,3 +525,4 @@ def create_concurrent_index():
         connection.close()
 
 create_concurrent_index()
+

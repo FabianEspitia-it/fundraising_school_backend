@@ -6,6 +6,8 @@ from src.vc_sheet.crud import *
 from src.vc_sheet.test import get_investor_info
 from src.vc_sheet.vc_scraper import *
 
+from src.vc_sheet.schemas import FundCtw
+
 
 vc_sheet_router = APIRouter()
 
@@ -163,6 +165,11 @@ def new_investor(db: Session = Depends(get_db)) -> JSONResponse:
 def fts_search_vc(db: Session = Depends(get_db), vc_term: str = '') -> JSONResponse:
     return search_vc_by_term(db, vc_term)
 
+
+@vc_sheet_router.post("/vc_sheet/ctw/add_funds", tags=["vc_sheet"])
+def add_ctw_bulk_funds(funds: list[FundCtw], db: Session = Depends(get_db) ):
+    create_ctw_bulk_funds(db=db, funds=funds)
+    return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
 
 """
 ROUTES THAT WE DONT NEED AT THE MOMENT

@@ -173,5 +173,18 @@ class UserStartup(BaseModel):
         orm_mode = True
 
 
+class UserFundCtw(BaseModel):
+    nickname: str
+    email: str
+    photo: str
+    role: str
+    linkedin_url: str
+    fund_name: str
+
+    class Config:
+        orm_mode = True
+
+
+
 
 

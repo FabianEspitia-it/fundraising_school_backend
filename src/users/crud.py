@@ -199,7 +199,7 @@ def create_user_startup(db: Session, user_data: UserStartupReq) -> None:
     db.refresh(user)
 
     startup = db.query(models.Startup).filter(
-        models.Startup.name == user_data.startup_name).first()
+        models.Startup.name == user_data.startup_name.title()).first()
 
     if startup:
         user_startup = models.StartupUser(
@@ -210,7 +210,8 @@ def create_user_startup(db: Session, user_data: UserStartupReq) -> None:
         db.commit()
 
     else:
-        raise Exception("Startup not found")
+        raise HTTPException(status_code=404, detail="Startup not found")
+
 
 
 def create_user_startup_new(db: Session, user_data: UserStartup) -> None:
@@ -226,7 +227,7 @@ def create_user_startup_new(db: Session, user_data: UserStartup) -> None:
     db.refresh(user)
 
     startup = db.query(models.Startup).filter(
-        models.Startup.name == user_data.startup_name).first()
+        models.Startup.name == user_data.startup_name.title()).first()
 
     if startup:
         user_startup = models.StartupUser(
@@ -237,7 +238,7 @@ def create_user_startup_new(db: Session, user_data: UserStartup) -> None:
         db.commit()
     else:
         startup = models.Startup(
-            name=user_data.startup_name,
+            name=user_data.startup_name.title(),
         )
     db.add(startup)
     db.commit()
@@ -439,3 +440,34 @@ def create_investor_user(db: Session, user_data: UserInvestor):
     db.refresh(user)
 
     return user
+
+
+def create_users_fund_ctw(db: Session, users_data: list[UserFundCtw]) -> None:
+
+
+    for user_data in users_data:
+        user = models.User(
+            nickname=user_data.nickname,
+            email=user_data.email,
+            linkedin_url=user_data.linkedin_url,
+            role=user_data.role,
+            courses=db.query(models.Course).all()
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+        fund = db.query(models.Fund).filter(
+            models.Fund.name == user_data.fund_name.title()).first()
+
+        if fund:
+            user_fund = models.FundUsers(
+                user_id=user.id,
+                fund_id=fund.id
+            )
+            db.add(user_fund)
+            db.commit()
+
+        else:
+            raise HTTPException(status_code=404, detail="User not found")
+    

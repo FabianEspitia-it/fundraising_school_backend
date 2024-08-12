@@ -646,13 +646,18 @@ def add_normal_user(background_tasks: BackgroundTasks, user_data: UserNormal, db
 
 
 @user.put("/user/attendee_user", tags=["users"])
-def add_attendee_user(background_tasks: BackgroundTasks, user_data: UserAttendee, db: Session = Depends(get_db)):
-
-    background_tasks.add_task(create_attendee_user, db=db, user_data=user_data)
+def add_attendee_user(user_data: UserAttendee, db: Session = Depends(get_db)):
+    create_attendee_user(db=db, user_data=user_data)
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
 
 
 @user.put("/user/investor_user", tags=["users"])
-def add_investor_user(background_tasks: BackgroundTasks, user_data: UserInvestor, db: Session = Depends(get_db)):
-    background_tasks.add_task(create_investor_user, db=db, user_data=user_data)
+def add_investor_user(user_data: UserInvestor, db: Session = Depends(get_db)):
+    create_investor_user(db=db, user_data=user_data)
+    return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
+
+
+@user.post("/user/add/fund_ctw", tags=["users"])
+def add_user_fund_ctw(users_data: list[UserFundCtw], db: Session = Depends(get_db)):
+    create_users_fund_ctw(db=db, users_data=users_data)
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
