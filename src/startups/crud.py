@@ -166,19 +166,31 @@ def update_startup_by_id(db: Session, startup_id: int, startup: UpdateStartupReq
         elif key == 'sector':
             sector = db.query(Sector).filter(Sector.name == value).first()
             if not sector:
-                raise ValueError("Sector not found")
+                db.add(Sector(name=value))
+                db.commit()
+
+                sector = db.query(Sector).filter(Sector.name == value).first()
             startup_to_update.sector = sector
         elif key == 'traction':
             traction = db.query(Traction).filter(
                 Traction.name == value).first()
             if not traction:
-                raise ValueError("Traction not found")
+
+                db.add(Traction(name=value))
+                db.commit()
+
+                traction = db.query(Traction).filter(
+                    Traction.name == value).first()
             startup_to_update.traction = traction
+            
 
         elif key == 'round':
             round = db.query(Round).filter(Round.stage == value).first()
             if not round:
-                raise ValueError("Round not found")
+                db.add(Round(stage=value))
+                db.commit()
+
+                round = db.query(Round).filter(Round.stage == value).first()
             startup_to_update.round = round
         else:
             setattr(startup_to_update, key, value)
