@@ -174,6 +174,12 @@ def update_startup_by_id(db: Session, startup_id: int, startup: UpdateStartupReq
             if not traction:
                 raise ValueError("Traction not found")
             startup_to_update.traction = traction
+
+        elif key == 'round':
+            round = db.query(Round).filter(Round.stage == value).first()
+            if not round:
+                raise ValueError("Round not found")
+            startup_to_update.round = round
         else:
             setattr(startup_to_update, key, value)
 
