@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import HTTPException
-from fastapi.responses import JSONResponse
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
+
 
 import pandas as pd
 
@@ -213,7 +213,6 @@ def create_user_startup(db: Session, user_data: UserStartupReq) -> None:
         raise HTTPException(status_code=404, detail="Startup not found")
 
 
-
 def create_user_startup_new(db: Session, user_data: UserStartup) -> None:
 
     user = db.query(models.User).filter(
@@ -292,7 +291,9 @@ def get_startup_by_user_email(db: Session, email: str) -> models.Startup:
     user = db.query(models.User).filter(models.User.email == email).first()
     if user:
         startup = db.query(models.Startup).join(models.StartupUser).filter(
-            models.StartupUser.user_id == user.id).first()
+            models.StartupUser.user_id == user.id).options(
+            joinedload(models.Startup.country)
+        ).first()
         return startup
     else:
         raise HTTPException(status_code=404, detail="User not found")
@@ -358,20 +359,16 @@ def create_normal_user(db: Session, user_data: UserNormal):
     db.commit()
     db.refresh(user)
 
-    
-
     return user
 
 
 def add_linkedin_information(user_email: str, db: Session):
     user = db.query(models.User).filter(
         models.User.email == user_email).first()
-    
+
     from src.users.linkedin_scraper import linkedin_public_identifier, scraper_linkedin_profile
     user_public_identifier = linkedin_public_identifier(user.linkedin_url)
     scraper_linkedin_profile(db, user_public_identifier, user.id)
-
-    
 
 
 def create_attendee_user(db: Session, user_data: UserAttendee):
@@ -444,7 +441,6 @@ def create_investor_user(db: Session, user_data: UserInvestor):
 
 def create_users_fund_ctw(db: Session, users_data: list[UserFundCtw]) -> None:
 
-
     for user_data in users_data:
         user = models.User(
             nickname=user_data.nickname,
@@ -471,4 +467,3 @@ def create_users_fund_ctw(db: Session, users_data: list[UserFundCtw]) -> None:
 
         else:
             raise HTTPException(status_code=404, detail="User not found")
-    
