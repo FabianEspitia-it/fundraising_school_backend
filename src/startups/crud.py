@@ -289,12 +289,13 @@ async def gcs_upload(startup_photo_file: UploadFile, startup_id: int, file_type:
 
     if os.getenv('ENVIROMENT') == 'production':
         credentials = None
+        client = storage.Client()
     else:
         credentials = service_account.Credentials.from_service_account_file(
             os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
         )
+        client = storage.Client(credentials=credentials)
 
-    client = storage.Client(credentials=credentials)
     bucket = client.bucket(bucket_name)
     blob = bucket.blob(
         f'startups/{uuid4()}.{SUPPORTED_IMAGES_TYPES[file_type]}')
