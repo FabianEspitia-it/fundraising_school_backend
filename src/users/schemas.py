@@ -185,6 +185,20 @@ class UserFundCtw(BaseModel):
         orm_mode = True
 
 
+class NormalUserBulk(BaseModel):
+
+    first_name: str
+    last_name: str
+    email: str
+    country_code: str
+    phone_number: str
+    location: str
+    linkedin_url: str
+
+
+    class Config:
+        orm_mode = True
+
 
 
 

@@ -3,7 +3,6 @@ from fastapi.responses import JSONResponse
 
 from src.database import get_db
 from src.vc_sheet.crud import *
-from src.vc_sheet.test import get_investor_info
 from src.vc_sheet.vc_scraper import *
 
 from src.vc_sheet.schemas import FundCtw
@@ -143,24 +142,6 @@ def get_partner(partner_id: int, db: Session = Depends(get_db)):
     return partner
 
 
-@vc_sheet_router.post("/vc_sheet/crm_investors", tags=["vc_sheet"])
-def new_investor(db: Session = Depends(get_db)) -> JSONResponse:
-    """
-    Scrape and add new investors to the database.
-
-    Args:
-        db (Session, optional): Database session dependency.
-
-    Returns:
-        JSONResponse: A JSON response indicating the creation status.
-    """
-    investors = get_investor_info()
-
-    create_bulk_crm_investors(db=db, crm_investors=investors)
-
-    return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
-
-
 @vc_sheet_router.get("/vc_sheet/search_term", tags=["vc_sheet"])
 def fts_search_vc(db: Session = Depends(get_db), vc_term: str = '') -> JSONResponse:
     return search_vc_by_term(db, vc_term)
@@ -181,6 +162,24 @@ def new_reporter(db: Session = Depends(get_db)) -> JSONResponse:
     create_bulk_reporters(db=db, reporters=reporters)
 
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
+
+
+@vc_sheet_router.post("/vc_sheet/crm_investors", tags=["vc_sheet"])
+def new_investor(db: Session = Depends(get_db)) -> JSONResponse:
+    
+    Scrape and add new investors to the database.
+
+    Args:
+        db (Session, optional): Database session dependency.
+
+    Returns:
+        JSONResponse: A JSON response indicating the creation status.
+
+    investors = get_investor_info()
+
+    create_bulk_crm_investors(db=db, crm_investors=investors)
+
+    return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)    
 
 
 @vc_sheet_router.get("/vc_sheet/reporters", tags=["vc_sheet"])

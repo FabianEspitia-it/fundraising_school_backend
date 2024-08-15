@@ -214,6 +214,7 @@ class User(Base):
     check_size = Column(String(255), nullable=True)
     job_level = Column(String(255), nullable=True)
     terms_conditions = Column(Boolean, nullable=True)
+    investment_stage = Column(String(255), nullable=True)
     created_at = Column(DateTime, nullable=False, default=func.now())
     updated_at = Column(DateTime, nullable=False,
                         default=func.now(), onupdate=func.now())

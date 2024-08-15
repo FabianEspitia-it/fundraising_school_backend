@@ -1,6 +1,5 @@
 from typing import List
 from fastapi import HTTPException
-from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 import pandas as pd
@@ -472,3 +471,5 @@ def create_users_fund_ctw(db: Session, users_data: list[UserFundCtw]) -> None:
         else:
             raise HTTPException(status_code=404, detail="User not found")
     
+
+
