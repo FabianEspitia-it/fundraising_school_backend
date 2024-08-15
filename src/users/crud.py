@@ -1,11 +1,7 @@
 from typing import List
 from fastapi import HTTPException
-<<<<<<< HEAD
-from sqlalchemy.orm import Session
-=======
 from sqlalchemy.orm import Session, joinedload
 
->>>>>>> ddd8c2885504ea2cd3fa578179ecc1412c6160d3
 
 import pandas as pd
 
