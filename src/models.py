@@ -313,6 +313,7 @@ class Fund(Base):
     description = Column(Text, nullable=True)
     photo = Column(String(255), nullable=True)
     website = Column(String(255), nullable=True, unique=True)
+    is_visible = Column(Boolean, nullable=False, default=True)
     twitter = Column(String(255), nullable=True)
     linkedin = Column(String(255), nullable=True, unique=True)
     crunch_base = Column(String(255), nullable=True)
@@ -526,4 +527,3 @@ def create_concurrent_index():
         connection.close()
 
 create_concurrent_index()
-

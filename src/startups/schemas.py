@@ -32,9 +32,9 @@ class UpdateStartupReq(BaseModel):
     photo: Union[str, None] = None
     deck: Union[str, None] = None
     calendly: Union[str, None] = None
-    sector: Union[str, None] = None
+    sector: Union[list[str], None] = None
     round: Union[str, None] = None
-    traction: Union[str, None] = None
+    traction: Union[list[str], None] = None
 
 
 class CreateBulkStartupReq(BaseModel):

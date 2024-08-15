@@ -11,6 +11,7 @@ def process_excel(file_path: str, db: Session):
 
     ctw_fund = Fund(
         name="CTW Fund",
+        is_visible = False
 
     )
 
@@ -105,45 +106,46 @@ def process_excel(file_path: str, db: Session):
                 print("User already exists")
 
             else:
-                
-                user_data = User(
-                    first_name=row["Nombre"] if pd.notna(row["Nombre"]) else None,
-                    last_name=row["Apellido"] if pd.notna(row["Apellido"]) else None,
-                    email=row["Email"] if pd.notna(row["Email"]) else "",
-                    country_code=row["Código País"] if pd.notna(row["Código País"]) else None,
-                    phone_number=str(row["Whatsapp ( solo el numero)"]).replace(" ", "").replace("-", "") if pd.notna(row["Whatsapp ( solo el numero)"]) else None,
-                    location=row["País de residencia"] if pd.notna(row["País de residencia"]) else None,
-                    linkedin_url=row["LinkedIn"] if pd.notna(row["LinkedIn"]) and len(str(row["LinkedIn"])) <= 255 else None,
-                    startup_url=row["Startup URL"] if pd.notna(row["Startup URL"]) else None,
-                    main_industry=row["Main Industry (con opciones desplegables)"] if pd.notna(row["Main Industry (con opciones desplegables)"]) else None,
-                    role=row["Job Title"] if pd.notna(row["Job Title"]) else None,
-                    courses=db.query(Course).all()
-                )
-                db.add(user_data)
-                db.commit()
-                db.refresh(user_data)
-
-                startup = db.query(Startup).filter(Startup.name == str(row["Company/Fund Name"]).title()).first()
-                if not startup:
-                    startup = Startup(name=str(row["Company/Fund Name"]).title())
-                    db.add(startup)
-                    db.commit()
-                    db.refresh(startup)
-
-                    startup_user = StartupUser(
-                        user_id=user_data.id,
-                        startup_id=startup.id
+                if str(row["Company/Fund Name"]).title() != "Nan":
+                    user_data = User(
+                        first_name=row["Nombre"] if pd.notna(row["Nombre"]) else None,
+                        last_name=row["Apellido"] if pd.notna(row["Apellido"]) else None,
+                        email=row["Email"] if pd.notna(row["Email"]) else "",
+                        country_code=row["Código País"] if pd.notna(row["Código País"]) else None,
+                        phone_number=str(row["Whatsapp ( solo el numero)"]).replace(" ", "").replace("-", "") if pd.notna(row["Whatsapp ( solo el numero)"]) else None,
+                        location=row["País de residencia"] if pd.notna(row["País de residencia"]) else None,
+                        linkedin_url=row["LinkedIn"] if pd.notna(row["LinkedIn"]) and len(str(row["LinkedIn"])) <= 255 else None,
+                        startup_url=row["Startup URL"] if pd.notna(row["Startup URL"]) else None,
+                        main_industry=row["Main Industry (con opciones desplegables)"] if pd.notna(row["Main Industry (con opciones desplegables)"]) else None,
+                        role=row["Job Title"] if pd.notna(row["Job Title"]) else None,
+                        courses=db.query(Course).all()
                     )
-                    db.add(startup_user)
+                    db.add(user_data)
                     db.commit()
-                else:
-                    startup_user = StartupUser(
-                        user_id=user_data.id,
-                        startup_id=startup.id
-                    )
-                    db.add(startup_user)
-                    db.commit()
-                    db.refresh(startup_user)
+                    db.refresh(user_data)
+
+                    startup = db.query(Startup).filter(Startup.name == str(row["Company/Fund Name"]).title()).first()
+
+                    if not startup:
+                        startup = Startup(name=str(row["Company/Fund Name"]))
+                        db.add(startup)
+                        db.commit()
+                        db.refresh(startup)
+
+                        startup_user = StartupUser(
+                            user_id=user_data.id,
+                            startup_id=startup.id
+                        )
+                        db.add(startup_user)
+                        db.commit()
+                    else:
+                        startup_user = StartupUser(
+                            user_id=user_data.id,
+                            startup_id=startup.id
+                        )
+                        db.add(startup_user)
+                        db.commit()
+                        db.refresh(startup_user)
            
 
         print("User Added")

@@ -181,7 +181,7 @@ def total_funds(db: Session, country: str | None = None, sector: str | None = No
     if term:
         fund = db.query(Fund).filter(func.lower(Fund.name).like(f"%{term.lower()}%"))
     else:
-        fund = db.query(Fund)
+        fund = db.query(Fund).filter(Fund.is_visible == True)
 
     if country:
         fund = fund.join(Fund.countries).filter(Country.name == country)
@@ -315,9 +315,10 @@ def get_all_funds(db: Session, page: int, limit: int, user_email: str, country: 
 
     funds_with_favorite = []
     for fund in funds:
-        fund_dict = fund.__dict__.copy()
-        fund_dict['favorite'] = fund.id in favorite_fund_ids
-        funds_with_favorite.append(fund_dict)
+        if fund.is_visible: 
+            fund_dict = fund.__dict__.copy()
+            fund_dict['favorite'] = fund.id in favorite_fund_ids
+            funds_with_favorite.append(fund_dict)
 
     return funds_with_favorite
 
