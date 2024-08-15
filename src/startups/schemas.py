@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, List
 
 from pydantic import BaseModel
 
@@ -18,6 +18,7 @@ class NewStartupReq(BaseModel):
     sector: str
     round: str
     traction: str
+
 
 class UpdateStartupReq(BaseModel):
     name: Union[str, None] = None

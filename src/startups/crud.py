@@ -23,13 +23,13 @@ import src.models as models
 
 AWS_BUCKET = os.getenv("AWS_BUCKET")
 SUPPORTED_IMAGES_TYPES = {
-        'image/jpeg': 'jpg',
-        'image/png': 'png',
-        'image/svg': 'svg'
-    }
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/svg': 'svg'
+}
 
 
-def get_all_startups(db: Session, page: int, limit: int, user_email: str, sector: str = None, country: str = None, traction: str = None, term: str = None ):
+def get_all_startups(db: Session, page: int, limit: int, user_email: str, sector: str = None, country: str = None, traction: str = None, term: str = None):
     # Get the user from the database
     user = get_user_by_email(db, user_email)
 
@@ -94,12 +94,13 @@ def total_startups(db: Session, sector: str = None, country: str = None, tractio
     Returns:
         int: Total number of startups.
     """
-    
+
     query = db.query(Startup)
 
     if term:
-        query = query.filter(func.lower(Startup.name).like(f"%{term.lower()}%"))
-    
+        query = query.filter(func.lower(
+            Startup.name).like(f"%{term.lower()}%"))
+
     if country:
         query = query.filter(Startup.country.has(name=country))
 
@@ -109,13 +110,13 @@ def total_startups(db: Session, sector: str = None, country: str = None, tractio
     if traction:
         query = query.filter(Startup.traction.has(name=traction))
 
-    
-
     return query.count()
 
 
 def get_startup_by_id(db: Session, startup_id: int) -> Startup:
-    return db.query(Startup).filter(Startup.id == startup_id).first()
+    return db.query(Startup).filter(Startup.id == startup_id).options(
+        joinedload(Startup.country)
+    ).first()
 
 
 def create_startup(db: Session, startup: NewStartupReq) -> Startup:
@@ -144,7 +145,8 @@ def create_startup(db: Session, startup: NewStartupReq) -> Startup:
 
 
 def update_startup_by_id(db: Session, startup_id: int, startup: UpdateStartupReq) -> Startup:
-    startup_to_update = db.query(Startup).filter(Startup.id == startup_id).first()
+    startup_to_update = db.query(Startup).filter(
+        Startup.id == startup_id).first()
 
     if not startup_to_update:
         raise ValueError("Startup not found")
@@ -154,15 +156,21 @@ def update_startup_by_id(db: Session, startup_id: int, startup: UpdateStartupReq
         if key == 'country':
             country = db.query(Country).filter(Country.name == value).first()
             if not country:
-                raise ValueError("Country not found")
-            startup_to_update.country = country
+                db.add(Country(name=value))
+                db.commit()
+
+                country = db.query(Country).filter(
+                    Country.name == value).first()
+
+            startup_to_update.country_id = country.id
         elif key == 'sector':
             sector = db.query(Sector).filter(Sector.name == value).first()
             if not sector:
                 raise ValueError("Sector not found")
             startup_to_update.sector = sector
         elif key == 'traction':
-            traction = db.query(Traction).filter(Traction.name == value).first()
+            traction = db.query(Traction).filter(
+                Traction.name == value).first()
             if not traction:
                 raise ValueError("Traction not found")
             startup_to_update.traction = traction
@@ -173,7 +181,6 @@ def update_startup_by_id(db: Session, startup_id: int, startup: UpdateStartupReq
     db.refresh(startup_to_update)
 
     return startup_to_update
-
 
 
 def get_or_create(db: Session, model, **kwargs):
@@ -216,7 +223,7 @@ def create_bulk_startup(db: Session, startup_data_list: list[CreateBulkStartupRe
     except SQLAlchemyError as e:
         db.rollback()
         raise e
-    
+
 
 def get_countries(db: Session):
     return db.query(Country).all()
@@ -247,17 +254,19 @@ def get_users_by_startup_name(db: Session, startup_name: str):
 
     if not startup:
         raise ValueError("Startup not found")
-    
-    users_in_startup = db.query(User).join(StartupUser).filter(StartupUser.startup_id == startup.id).all()
+
+    users_in_startup = db.query(User).join(StartupUser).filter(
+        StartupUser.startup_id == startup.id).all()
 
     return users_in_startup
 
 
 async def gcs_upload(startup_photo_file: UploadFile, startup_id: int, file_type: str) -> str:
-    
+
     bucket_name = os.getenv('GCS_BUCKET_NAME')
     if not bucket_name:
-        raise HTTPException(status_code=500, detail="GCS_BUCKET_NAME environment variable is not set")
+        raise HTTPException(
+            status_code=500, detail="GCS_BUCKET_NAME environment variable is not set")
 
     credentials = service_account.Credentials.from_service_account_file(
         os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
@@ -265,15 +274,17 @@ async def gcs_upload(startup_photo_file: UploadFile, startup_id: int, file_type:
 
     client = storage.Client(credentials=credentials)
     bucket = client.bucket(bucket_name)
-    blob = bucket.blob(f'startups/{uuid4()}.{SUPPORTED_IMAGES_TYPES[file_type]}')
+    blob = bucket.blob(
+        f'startups/{uuid4()}.{SUPPORTED_IMAGES_TYPES[file_type]}')
 
     startup_photo_file.file.seek(0)
     blob.upload_from_file(startup_photo_file.file)
-    #blob.make_public()
+    # blob.make_public()
 
     return blob.public_url
 
 
 def update_startup_photo(db: Session, startup_photo_link: str, startup_id: str) -> str:
-    db.query(models.Startup).filter(models.Startup.id == startup_id).update({'photo': startup_photo_link})
+    db.query(models.Startup).filter(models.Startup.id ==
+                                    startup_id).update({'photo': startup_photo_link})
     db.commit()

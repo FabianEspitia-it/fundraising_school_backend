@@ -2,6 +2,7 @@ import os
 import uvicorn
 
 from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
 
 from src.course.router import course
 from src.users.router import user
@@ -25,6 +26,16 @@ from fastapi.security import OAuth2PasswordBearer
 app = FastAPI()
 
 app.title = "Dashboard CTW API"
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")
