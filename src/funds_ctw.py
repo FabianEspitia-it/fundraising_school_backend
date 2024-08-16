@@ -5,6 +5,31 @@ from src.database import get_db
 from src.models import CheckSize, Country, Fund, FundCheckSize, FundCountry, FundRound, FundSector, FundUsers, Round, Sector, Startup, StartupUser, User, Course
 
 
+
+def checker(db: Session, model, model_two, fund_id: int, model_id_attr: str, **kwargs):
+
+    instance = db.query(model).filter_by(**kwargs).first()
+
+    if not instance:
+      
+        instance = model(**kwargs)
+        db.add(instance)
+        db.commit()
+        db.refresh(instance)
+
+    
+    instance_two = model_two(
+        fund_id=fund_id,
+        **{model_id_attr: instance.id}
+    )
+
+    
+    db.add(instance_two)
+    db.commit()
+    db.refresh(instance_two)
+
+   
+
 def process_excel(file_path: str, db: Session):
     df = pd.read_excel(file_path, header=0)
     print(df.columns)
@@ -27,124 +52,24 @@ def process_excel(file_path: str, db: Session):
         db.refresh(fund)
         
         rounds = [r.strip() for r in str(row["Rondas en las que invierten"]).split(",")]
-        for round in rounds: 
-            round_checker = db.query(Round).filter(Round.stage == round).first()
+        for round in rounds:
 
-            if not round_checker:
-                round_data = Round(
-                    stage = round
-                )
-                db.add(round_data)
-                db.commit()
-                db.refresh(round_data)
-
-                fund_round = FundRound(
-                    fund_id = fund.id,
-                    round_id = round_data.id
-                )
-
-                db.add(fund_round)
-                db.commit()
-                db.refresh(fund_round)
-            else:
-                fund_round = FundRound(
-                    fund_id = fund.id,
-                    round_id = round_checker.id
-                )
-
-                db.add(fund_round)
-                db.commit()
-                db.refresh(fund_round)
+            checker(db=db, model=Round, model_two=FundRound, fund_id=fund.id, model_id_attr='round_id', stage=round)
 
         countries = [c.strip() for c in str(row["Geografías en las que invierten"]).split(",")]
         for country in countries:
-            country_checker = db.query(Country).filter(Country.name == country).first()
-
-            if not country_checker:
-                country_data = Country(
-                    name = country
-                )
-                db.add(country_data)
-                db.commit()
-                db.refresh(country_data)
-
-                fund_country = FundCountry(
-                    fund_id = fund.id,
-                    country_id = country_data.id
-                )
-
-                db.add(fund_country)
-                db.commit()
-                db.refresh(fund_country)
-            else:
-                fund_country = FundCountry(
-                    fund_id = fund.id,
-                    country_id = country_checker.id
-                )
-
-                db.add(fund_country)
-                db.commit()
-                db.refresh(fund_country)
+            checker(db=db, model=Country, model_two=FundCountry, fund_id=fund.id, model_id_attr='country_id', name=country[:255])
+            
 
         sectors = [s.strip() for s in str(row["Sectores en los que invierten"]).split(",")]
         for sector in sectors:
-            sector_checker = db.query(Sector).filter(Sector.name == sector).first()
-
-            if not sector_checker:
-                sector_data = Sector(
-                    name = sector
-                )
-                db.add(sector_data)
-                db.commit()
-                db.refresh(sector_data)
-
-                fund_sector = FundSector(
-                    fund_id = fund.id,
-                    sector_id = sector_data.id
-                )
-
-                db.add(fund_sector)
-                db.commit()
-                db.refresh(fund_sector)
-            else:
-                fund_sector = FundSector(
-                    fund_id = fund.id,
-                    sector_id = sector_checker.id
-                )
-
-                db.add(fund_sector)
-                db.commit()
-                db.refresh(fund_sector)
+            checker(db=db, model=Sector, model_two=FundSector, fund_id=fund.id, model_id_attr='sector_id', name=sector)
 
         check_sizes = [s.strip() for s in str(row["Rango de tamaño del cheque"]).split(",")]
         for check_size in check_sizes:
-            check_size_check = db.query(CheckSize).filter(CheckSize.size == check_size).first()
-            if not check_size_check:
-                check_size = CheckSize(
-                    size = check_size
-                )
 
-                db.add(check_size)
-                db.commit()
-                db.refresh(check_size)
-
-                fund_check_size = FundCheckSize(
-                    fund_id = fund.id,
-                    check_size_id = check_size.id
-                )
-
-                db.add(fund_check_size)
-                db.commit()
-                db.refresh(fund_check_size)
-            else:
-                fund_check_size = FundCheckSize(
-                    fund_id = fund.id,
-                    check_size_id = check_size_check.id
-                )
-
-                db.add(fund_check_size)
-                db.commit()
-                db.refresh(fund_check_size)
+            checker(db=db, model=CheckSize, model_two=FundCheckSize, fund_id=fund.id, model_id_attr='check_size_id', size=check_size)
+            
 
         print("Fund added")  
         

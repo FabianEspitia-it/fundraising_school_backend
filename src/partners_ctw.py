@@ -2,7 +2,7 @@ import pandas as pd
 from requests import Session
 
 from src.database import get_db
-from src.models import CheckSize, Country, Fund, FundCheckSize, FundCountry, FundPartner, FundRound, FundSector, FundUsers, Partner, Round, Sector, Startup, StartupUser, User, Course
+from src.models import  Fund,  FundPartner,  Partner
 
 
 def process_excel(file_path: str, db: Session):
