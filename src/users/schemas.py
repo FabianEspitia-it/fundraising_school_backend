@@ -200,5 +200,11 @@ class NormalUserBulk(BaseModel):
         orm_mode = True
 
 
+class UpdateLinkedinAndPhotoUrl(BaseModel):
+    email: str
+    linkedin_url: Union[str, None] = None
+    photo_url: Union[str, None] = None
+
+
 
 

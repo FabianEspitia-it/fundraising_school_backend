@@ -661,3 +661,9 @@ def add_investor_user(user_data: UserInvestor, db: Session = Depends(get_db)):
 def add_user_fund_ctw(users_data: list[UserFundCtw], db: Session = Depends(get_db)):
     create_users_fund_ctw(db=db, users_data=users_data)
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
+
+
+@user.patch("/user/update/linkedin_and_photo_url", tags=["users"])
+def update_linkedin_and_photo_url(user_data: UpdateLinkedinAndPhotoUrl, db: Session = Depends(get_db)):
+    update_user_photo_and_linkedin(db=db, user_data=user_data)
+    return JSONResponse(content={"response": "updated"}, status_code=status.HTTP_200_OK)
