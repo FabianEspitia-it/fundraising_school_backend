@@ -146,12 +146,6 @@ def get_partner(partner_id: int, db: Session = Depends(get_db)):
 def fts_search_vc(db: Session = Depends(get_db), vc_term: str = '') -> JSONResponse:
     return search_vc_by_term(db, vc_term)
 
-
-@vc_sheet_router.post("/vc_sheet/ctw/add_funds", tags=["vc_sheet"])
-def add_ctw_bulk_funds(funds: list[FundCtw], db: Session = Depends(get_db) ):
-    create_ctw_bulk_funds(db=db, funds=funds)
-    return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
-
 """
 ROUTES THAT WE DONT NEED AT THE MOMENT
 

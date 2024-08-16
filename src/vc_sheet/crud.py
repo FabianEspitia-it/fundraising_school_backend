@@ -650,44 +650,4 @@ def get_or_create(db: Session, model, value: str):
             db.refresh(instance)
     return instance
 
-def create_ctw_bulk_funds(db: Session, funds: list[FundCtw]) -> None:
 
-    for fund_data in funds:
-        
-        fund = Fund(
-            name=fund_data.name,
-            website=fund_data.website,
-            description=fund_data.description,
-            location=fund_data.location,
-            photo=fund_data.photo,
-            twitter=fund_data.twitter,
-            linkedin=fund_data.linkedin,
-            crunch_base=fund_data.crunch_base,
-            contact=fund_data.contact
-        )
-
-        
-        db.add(fund)
-        db.flush()  
-
-        for country_name in fund_data.countries:
-            country = get_or_create(db, Country, country_name)
-            fund.countries.append(country)
-        
-        for sector_name in fund_data.sectors:
-            sector = get_or_create(db, Sector, sector_name)
-            fund.sectors.append(sector)
-
-        for round_stage in fund_data.rounds:
-            round = get_or_create(db, Round, round_stage)
-            fund.rounds.append(round)
-        """
-        for partner_name in fund_data.partners:
-            partner = get_or_create(db, Partner, partner_name)
-            fund.partners.append(partner)
-        """
-        for check_size in fund_data.check_size:
-            check = get_or_create(db, CheckSize, check_size)
-            fund.check_size.append(check)
-    
-    db.commit()
