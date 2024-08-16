@@ -348,12 +348,12 @@ def get_all_users(db: Session):
 
 
 def create_normal_user(db: Session, user_data: UserNormal):
-    from src.users.linkedin_scraper import search_linkedin_url
+    #from src.users.linkedin_scraper import search_linkedin_url
     user = models.User(
         nickname=user_data.nickname,
         email=user_data.email,
         country_code=user_data.country_code,
-        linkedin_url=search_linkedin_url(user_data.nickname),
+        linkedin_url="linkedin.com/your-name",
         phone_number=user_data.phone_number,
         location=user_data.location,
         courses=db.query(models.Course).all()
