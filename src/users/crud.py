@@ -292,7 +292,10 @@ def get_startup_by_user_email(db: Session, email: str) -> models.Startup:
     if user:
         startup = db.query(models.Startup).join(models.StartupUser).filter(
             models.StartupUser.user_id == user.id).options(
-            joinedload(models.Startup.country)
+            joinedload(models.Startup.country),
+            joinedload(models.Startup.traction),
+            joinedload(models.Startup.sector),
+            joinedload(models.Startup.round)
         ).first()
         return startup
     else:
