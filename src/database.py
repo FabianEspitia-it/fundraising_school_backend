@@ -10,7 +10,7 @@ engine = create_engine(os.getenv("DB_SOURCE"),
                        pool_timeout=30,
                        pool_pre_ping=True)
 
-"""
+
 def create_extension_concurrently():
     with engine.begin() as conn:
         conn.execute(text("COMMIT"))
@@ -18,7 +18,7 @@ def create_extension_concurrently():
 
 
 create_extension_concurrently()
-"""
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
