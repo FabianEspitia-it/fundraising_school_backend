@@ -353,7 +353,7 @@ def create_normal_user(db: Session, user_data: UserNormal):
         nickname=user_data.nickname,
         email=user_data.email,
         country_code=user_data.country_code,
-        linkedin_url="linkedin.com/your-name",
+        linkedin_url=None,
         phone_number=user_data.phone_number,
         location=user_data.location,
         courses=db.query(models.Course).all()
