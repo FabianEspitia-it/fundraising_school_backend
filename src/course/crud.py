@@ -8,46 +8,43 @@ from src.course.schemas import NewClass
 
 def all_courses(db: Session, user_email: str):
     from src.users.crud import calculate_progress
-    user = db.query(User).filter(User.email == user_email).first()
 
-    if user is None:
+    # Obtener el usuario por correo electrónico
+    user = db.query(User).filter_by(email=user_email).first()
+
+    if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    courses = db.query(Course).options(joinedload(Course.modules)).join(UserCourse).filter(
-        UserCourse.user_id == user.id).all()
+    # Obtener los cursos y las clases tomadas por el usuario en una sola consulta
+    user_courses = db.query(Course).options(joinedload(Course.modules).joinedload(Module.classes)).join(
+        UserCourse, UserCourse.course_id == Course.id).filter(UserCourse.user_id == user.id).all()
+
+    user_classes = db.query(UserClass).filter_by(
+        user_id=user.id).order_by(desc(UserClass.id)).all()
+    user_class_ids = {uc.class_id: uc.id for uc in user_classes}
 
     result = []
 
-    for course in courses:
+    for course in user_courses:
         progress = calculate_progress(
             db=db, user_email=user_email, course_id=course.id)
 
-        last_user_class = db.query(UserClass).filter(
-            UserClass.user_id == user.id).order_by(desc(UserClass.id)).first()
+        last_user_class_id = None
+        last_class_name = None
 
         for module in course.modules:
             for classObj in module.classes:
-                take_class = db.query(UserClass).filter(
-                    UserClass.user_id == user.id, UserClass.class_id == classObj.id).first()
+                classObj.taken = classObj.id in user_class_ids
 
-                if take_class:
-                    classObj.taken = True
-                else:
-                    classObj.taken = False
+                if classObj.taken and (last_user_class_id is None or user_class_ids[classObj.id] > last_user_class_id):
+                    last_user_class_id = user_class_ids[classObj.id]
+                    last_class_name = classObj.title
 
-        course_with_progress = {
+        result.append({
             'course': course,
             'progress': progress,
-            'last_class_name': None,
-        }
-
-        if last_user_class:
-            last_class_name = db.query(Class).filter(
-                Class.id == last_user_class.class_id).first().title
-
-            course_with_progress['last_class_name'] = last_class_name
-
-        result.append(course_with_progress)
+            'last_class_name': last_class_name,
+        })
 
     return result
 
@@ -161,7 +158,7 @@ def get_previous_class_course(db: Session, class_id: int, module_id: int):
 
             if previous_module is None or len(previous_module.classes) == 0:
                 return None
-            
+
             previous_class = previous_module.classes[-1]
 
     else:
