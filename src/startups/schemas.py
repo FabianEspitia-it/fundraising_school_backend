@@ -35,6 +35,7 @@ class UpdateStartupReq(BaseModel):
     sector: Union[str, None] = None
     round: Union[str, None] = None
     traction: Union[str, None] = None
+    country_code: Union[str, None] = None
 
 
 class CreateBulkStartupReq(BaseModel):
