@@ -335,10 +335,13 @@ def calculate_progress(user_email: str, course_id: int, db: Session):
     for module in modules:
         total_classes = total_classes + module.classes
 
+    seen_classes_into_course: list[models.Class] = list(
+        filter(lambda c: c in total_classes, seen_classes))
+
     percentage_progress: int = 0
     if int(len(total_classes)) != 0:
         percentage_progress: int = int(
-            len(seen_classes)) / int(len(total_classes))
+            len(seen_classes_into_course)) / int(len(total_classes))
 
     return f"{int(percentage_progress * 100)}%"
 
@@ -348,7 +351,7 @@ def get_all_users(db: Session):
 
 
 def create_normal_user(db: Session, user_data: UserNormal):
-    #from src.users.linkedin_scraper import search_linkedin_url
+    # from src.users.linkedin_scraper import search_linkedin_url
     user = models.User(
         nickname=user_data.nickname,
         email=user_data.email,
@@ -470,25 +473,18 @@ def create_users_fund_ctw(db: Session, users_data: list[UserFundCtw]) -> None:
 
         else:
             raise HTTPException(status_code=404, detail="User not found")
-        
+
 
 def update_user_photo_and_linkedin(db: Session, user_data: UpdateLinkedinAndPhotoUrl):
     user_to_update = db.query(models.User).filter(
         models.User.email == user_data.email).first()
-    
 
     if not user_to_update:
         raise HTTPException(status_code=404, detail="User not found")
-    
+
     update_data = user_data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(user_to_update, key, value)
 
     db.commit()
     db.refresh(user_to_update)
-    
-
-
-    
-
-

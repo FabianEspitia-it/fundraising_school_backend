@@ -158,7 +158,7 @@ def get_previous_class_course(db: Session, class_id: int, module_id: int):
 
             if previous_module is None or len(previous_module.classes) == 0:
                 return None
-            
+
             previous_class = previous_module.classes[-1]
 
     else:
