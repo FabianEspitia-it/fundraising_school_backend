@@ -10,8 +10,8 @@ from src.users.schemas import *
 from src.course.crud import get_modules_by_course_id
 
 import src.models as models
-from src.utils.send_information import send_information
-from src.utils.truora_method import send_outbound_message
+#from src.utils.send_information import send_information
+#from src.utils.truora_method import send_outbound_message
 
 
 def get_user_by_email(db: Session, email: str) -> models.User:
