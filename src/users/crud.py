@@ -10,6 +10,7 @@ from src.users.schemas import *
 from src.course.crud import get_modules_by_course_id
 
 import src.models as models
+from src.utils.send_information import send_information
 from src.utils.truora_method import send_outbound_message
 
 
@@ -255,6 +256,20 @@ def create_user_startup_new(db: Session, user_data: UserStartup) -> None:
         db.add(user_startup)
         db.commit()
 
+
+    """
+    user_dict ={
+        "name": user.nickname,
+        "email": user.email,
+        "linkedin": user.linkedin_url,
+        "country_code": user.country_code,
+        "phone_number": user.phone_number,
+        "location": user.location,
+        "role": "Entrepreneur"
+    }
+
+    send_information(user_data=user_dict, startup_name=user_data.startup_name, startup_url= user_data.startup_url, main_industry=user_data.main_industry, job_level=user_data.role )
+    """
     #send_outbound_message(phone_number=user.phone_number, country_code=user.country_code)
 
     return user
@@ -444,7 +459,19 @@ def create_investor_user(db: Session, user_data: UserInvestor):
 
     db.commit()
     db.refresh(user)
+    """
+    user_dict ={
+        "name": user.nickname,
+        "email": user.email,
+        "linkedin": user.linkedin_url,
+        "country_code": user.country_code,
+        "phone_number": user.phone_number,
+        "location": user.location,
+        "role": "Investor"
+    }
 
+    send_information(user_data=user_dict, fund_name="", )
+    """
     return user
 
 

@@ -1,8 +1,8 @@
 import requests
 import os
-
+"""
 def send_outbound_message(phone_number, country_code):
-    url = f"https://api.connect.truora.com/v1/whatsapp/outbounds/send"
+    URL = f"{os.getenv('TRUORA_END_POINT')}"
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
         "Truora-API-Key": os.getenv("TRUORA_API_KEY")}
@@ -13,7 +13,7 @@ def send_outbound_message(phone_number, country_code):
         "flow_id": os.getenv("FLOW_ID"),
         "user_authorized": "true"
     }
-    response = requests.post(url, headers=headers, data=data)
+    response = requests.post(URL, headers=headers, data=data)
     if response.status_code == 200:
         return {"status": "success", "details": response.json()}
     else:
@@ -21,3 +21,5 @@ def send_outbound_message(phone_number, country_code):
 
 
 print(send_outbound_message("3202377112", "57"))
+
+"""

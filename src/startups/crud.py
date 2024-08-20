@@ -54,14 +54,15 @@ def get_all_startups(db: Session, page: int, limit: int, user_email: str, sector
             joinedload(Startup.country)
         )
 
-    query = query.filter(
-        Startup.name.isnot(None),
-        Startup.description.isnot(None),
-        Startup.photo.isnot(None),
-        Startup.email.isnot(None),
-        Startup.one_sentence_description.isnot(None),
-        Startup.deck.isnot(None),
-    )
+    if (user_email != "mariromero2709@gmail.com") and (user_email != "alexa00rivera@gmail.com"):
+        query = query.filter(
+            Startup.name.isnot(None),
+            Startup.description.isnot(None),
+            Startup.photo.isnot(None),
+            Startup.email.isnot(None),
+            Startup.one_sentence_description.isnot(None),
+            Startup.deck.isnot(None),
+        )
 
     if sector:
         print("Sector filter applied", sector)
@@ -106,6 +107,7 @@ def total_startups(db: Session, sector: str = None, country: str = None, tractio
 
     query = db.query(Startup)
 
+    
     query = query.filter(
         Startup.name.isnot(None),
         Startup.description.isnot(None),
