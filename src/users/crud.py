@@ -10,6 +10,7 @@ from src.users.schemas import *
 from src.course.crud import get_modules_by_course_id
 
 import src.models as models
+from src.utils.truora_method import send_outbound_message
 
 
 def get_user_by_email(db: Session, email: str) -> models.User:
@@ -254,6 +255,8 @@ def create_user_startup_new(db: Session, user_data: UserStartup) -> None:
         db.add(user_startup)
         db.commit()
 
+    #send_outbound_message(phone_number=user.phone_number, country_code=user.country_code)
+
     return user
 
 
@@ -345,10 +348,10 @@ def calculate_progress(user_email: str, course_id: int, db: Session):
 
     return f"{int(percentage_progress * 100)}%"
 
-
+"""
 def get_all_users(db: Session):
     return db.query(models.User).all()
-
+"""
 
 def create_normal_user(db: Session, user_data: UserNormal):
     # from src.users.linkedin_scraper import search_linkedin_url
@@ -488,3 +491,27 @@ def update_user_photo_and_linkedin(db: Session, user_data: UpdateLinkedinAndPhot
 
     db.commit()
     db.refresh(user_to_update)
+
+
+def get_all_users(db: Session) -> list[dict]:
+    users = db.query(
+        models.User.first_name,
+        models.User.email,
+        models.User.country_code,
+        models.User.phone_number
+    ).all()
+
+    final_users: list[dict] = []
+
+    for user in users:
+        user_dict = {
+            'first_name': user.first_name,
+            'email': user.email,
+            'country_code': user.country_code,
+            'phone_number': user.phone_number,
+            'kind': get_user_startup_by_email(db, user.email)
+        }
+        final_users.append(user_dict)
+
+    return final_users
+

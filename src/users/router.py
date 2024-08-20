@@ -667,3 +667,8 @@ def add_user_fund_ctw(users_data: list[UserFundCtw], db: Session = Depends(get_d
 def update_linkedin_and_photo_url(user_data: UpdateLinkedinAndPhotoUrl, db: Session = Depends(get_db)):
     update_user_photo_and_linkedin(db=db, user_data=user_data)
     return JSONResponse(content={"response": "updated"}, status_code=status.HTTP_200_OK)
+
+
+@user.get("/users/all", tags=["manu"])
+def get_all_users_manu(db: Session = Depends(get_db)):
+    return get_all_users(db)
