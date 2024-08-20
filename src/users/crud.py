@@ -495,7 +495,7 @@ def update_user_photo_and_linkedin(db: Session, user_data: UpdateLinkedinAndPhot
 
 def get_all_users(db: Session) -> list[dict]:
     users = db.query(
-        models.User.first_name,
+        models.User.nickname,
         models.User.email,
         models.User.country_code,
         models.User.phone_number
@@ -505,7 +505,7 @@ def get_all_users(db: Session) -> list[dict]:
 
     for user in users:
         user_dict = {
-            'first_name': user.first_name,
+            'full_name': user.nickname,
             'email': user.email,
             'country_code': user.country_code,
             'phone_number': user.phone_number,
@@ -514,4 +514,14 @@ def get_all_users(db: Session) -> list[dict]:
         final_users.append(user_dict)
 
     return final_users
+
+
+def delete_startup_user_conn(user_email: str, db: Session):
+    user = db.query(models.User).filter(
+        models.User.email == user_email).first()
+    startup_user = db.query(models.StartupUser).filter(
+        models.StartupUser.user_id == user.id).first()
+    db.delete(startup_user)
+    db.commit()
+    return startup_user
 

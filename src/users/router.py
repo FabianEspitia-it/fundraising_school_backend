@@ -672,3 +672,9 @@ def update_linkedin_and_photo_url(user_data: UpdateLinkedinAndPhotoUrl, db: Sess
 @user.get("/users/all", tags=["manu"])
 def get_all_users_manu(db: Session = Depends(get_db)):
     return get_all_users(db)
+
+
+@user.delete("/user/delete/startup", tags=["users"])
+def delete_user_startup(user_email: str, db: Session = Depends(get_db)):
+    delete_startup_user_conn(user_email=user_email, db=db)
+    return JSONResponse(content={"response": "deleted"}, status_code=status.HTTP_200_OK)
