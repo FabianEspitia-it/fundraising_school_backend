@@ -678,3 +678,9 @@ def get_all_users_manu(db: Session = Depends(get_db)):
 def delete_user_startup(user_email: str, db: Session = Depends(get_db)):
     delete_startup_user_conn(user_email=user_email, db=db)
     return JSONResponse(content={"response": "deleted"}, status_code=status.HTTP_200_OK)
+
+
+@user.patch("/user/update_info", tags=["users"])
+def update_user_info(founder_data: UpdateFounderData, db: Session = Depends(get_db)):
+    update_founder_info(db=db, founder_data=founder_data)
+    return JSONResponse(content={"response": "updated"}, status_code=status.HTTP_200_OK)

@@ -525,3 +525,19 @@ def delete_startup_user_conn(user_email: str, db: Session):
     db.commit()
     return startup_user
 
+
+def update_founder_info(founder_data: UpdateFounderData, db: Session):
+    user = db.query(models.User).filter(
+        models.User.email == founder_data.email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    update_data = founder_data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(user, key, value)
+
+    db.commit()
+    db.refresh(user)
+
+    return user
+

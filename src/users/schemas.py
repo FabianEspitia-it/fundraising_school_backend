@@ -206,5 +206,13 @@ class UpdateLinkedinAndPhotoUrl(BaseModel):
     photo_url: Union[str, None] = None
 
 
+class UpdateFounderData(BaseModel):
+    email: str
+    contact_email: Union[str, None] = None
+    linkedin_url: Union[str, None] = None
+    role: Union[str, None] = None
+    phone_number: Union[str, None] = None
+    country_code: Union[str, None] = None
+
 
 
