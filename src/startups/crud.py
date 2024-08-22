@@ -57,7 +57,7 @@ def get_all_startups(db: Session, page: int, limit: int, user_email: str, sector
         )
 
     emails = ["mariromero2709@gmail.com", "alexa00rivera@gmail.com",
-              "reysergio383@gmail.com", "ivancamiloperez@hotmail.com"]
+              "ivancamiloperez@hotmail.com"]
 
     if user_email not in emails:
         query = query.filter(
