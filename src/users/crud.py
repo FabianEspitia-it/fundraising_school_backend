@@ -568,3 +568,7 @@ def update_founder_info(founder_data: UpdateFounderData, db: Session):
 
     return user
 
+
+def get_all_startups(db: Session):
+    return db.query(models.Startup).all()
+

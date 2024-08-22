@@ -684,3 +684,55 @@ def delete_user_startup(user_email: str, db: Session = Depends(get_db)):
 def update_user_info(founder_data: UpdateFounderData, db: Session = Depends(get_db)):
     update_founder_info(db=db, founder_data=founder_data)
     return JSONResponse(content={"response": "updated"}, status_code=status.HTTP_200_OK)
+
+
+@user.get("/user/get_all_startups/csv", tags=["users"])
+def get_all_startups_csv(db: Session = Depends(get_db)):
+
+    startups = get_all_startups(db)
+    startups_dicts = [startup.__dict__ for startup in startups]
+
+    for startup_dict in startups_dicts:
+        startup_dict.pop('_sa_instance_state', None)
+
+    df = pd.DataFrame(startups_dicts)
+    df.drop(columns=['id', 'photo'], inplace=True)
+
+    df = map_ids_to_names(db, df, 'country_id', Country, 'name')
+    df = map_ids_to_names(db, df, 'sector_id', Sector, 'name')
+    df = map_ids_to_names(db, df, 'round_id', Round, 'stage')
+    df = map_ids_to_names(db, df, 'traction_id', Traction, 'name')
+
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Startups')
+
+        thin_border = Border(left=Side(style='thin'),
+                             right=Side(style='thin'),
+                             top=Side(style='thin'),
+                             bottom=Side(style='thin'))
+
+        worksheet = writer.sheets['Startups']
+
+        for row in worksheet.iter_rows(min_row=1, max_row=worksheet.max_row, min_col=1, max_col=worksheet.max_column):
+            for cell in row:
+                cell.border = thin_border
+
+        for col in worksheet.columns:
+            max_length = 0
+            column = col[0].column_letter
+            for cell in col:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(cell.value)
+                except:
+                    pass
+            adjusted_width = (max_length + 2)
+            worksheet.column_dimensions[column].width = adjusted_width
+
+    output.seek(0)
+
+    return StreamingResponse(output, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                             headers={"Content-Disposition": "attachment; filename=startups.xlsx"})
+
+    
