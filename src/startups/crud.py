@@ -45,16 +45,19 @@ def get_all_startups(db: Session, page: int, limit: int, user_email: str, sector
         query = db.query(Startup).filter(func.lower(Startup.name).like(f"%{term.lower()}%")).options(
             joinedload(Startup.sector),
             joinedload(Startup.traction),
-            joinedload(Startup.country)
+            joinedload(Startup.country),
+            joinedload(Startup.round)
         )
     else:
         query = db.query(Startup).options(
             joinedload(Startup.sector),
             joinedload(Startup.traction),
-            joinedload(Startup.country)
+            joinedload(Startup.country),
+            joinedload(Startup.round)
         )
 
-    emails = ["mariromero2709@gmail.com", "alexa00rivera@gmail.com", "reysergio383@gmail.com", "ivancamiloperez@hotmail.com"]
+    emails = ["mariromero2709@gmail.com", "alexa00rivera@gmail.com",
+              "reysergio383@gmail.com", "ivancamiloperez@hotmail.com"]
 
     if user_email not in emails:
         query = query.filter(
@@ -94,16 +97,14 @@ def get_all_startups(db: Session, page: int, limit: int, user_email: str, sector
 
 
 def get_favorite_startups(db: Session, user_email: str, page: int, limit: int):
-    
+
     user = get_user_by_email(db, user_email)
 
     if not user:
         raise ValueError("User not found")
 
-   
     favorite_startups = get_favorite_startups_by_user_id(db, user.id)
 
-    
     favorite_startups = favorite_startups[(page - 1) * limit: page * limit]
 
     return favorite_startups
@@ -125,7 +126,6 @@ def total_startups(db: Session, sector: str = None, country: str = None, tractio
 
     query = db.query(Startup)
 
-    
     query = query.filter(
         Startup.name.isnot(None),
         Startup.description.isnot(None),
@@ -220,7 +220,6 @@ def update_startup_by_id(db: Session, startup_id: int, startup: UpdateStartupReq
                 traction = db.query(Traction).filter(
                     Traction.name == value).first()
             startup_to_update.traction = traction
-            
 
         elif key == 'round':
             round = db.query(Round).filter(Round.stage == value).first()
@@ -323,7 +322,6 @@ async def gcs_upload(startup_photo_file: UploadFile, startup_id: int, file_type:
     if not bucket_name:
         raise HTTPException(
             status_code=500, detail="GCS_BUCKET_NAME environment variable is not set")
-
 
     if os.getenv('ENVIROMENT') == 'production':
         credentials = None
