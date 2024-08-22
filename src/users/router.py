@@ -703,6 +703,9 @@ def get_all_startups_csv(db: Session = Depends(get_db)):
     df = map_ids_to_names(db, df, 'round_id', Round, 'stage')
     df = map_ids_to_names(db, df, 'traction_id', Traction, 'name')
 
+    df = df[['name', 'email', 'linkedin', 'description', 'fund_raised', 'website', 'phone_number',
+             'calendly', 'one_sentence_description', 'deck', 'country', 'sector', 'round', 'traction']]
+
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name='Startups')
