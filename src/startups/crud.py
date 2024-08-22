@@ -93,6 +93,22 @@ def get_all_startups(db: Session, page: int, limit: int, user_email: str, sector
     return startups_with_favorite
 
 
+def get_favorite_startups(db: Session, user_email: str, page: int, limit: int):
+    # Get the user from the database
+    user = get_user_by_email(db, user_email)
+
+    if not user:
+        raise ValueError("User not found")
+
+    # Retrieve favorite startups
+    favorite_startups = get_favorite_startups_by_user_id(db, user.id)
+
+    # Apply pagination after filters and sorting
+    favorite_startups = favorite_startups[(page - 1) * limit: page * limit]
+
+    return favorite_startups
+
+
 def total_startups(db: Session, sector: str = None, country: str = None, traction: str = None, term: str = None) -> int:
     """
     Retrieves the total number of startups in the database.

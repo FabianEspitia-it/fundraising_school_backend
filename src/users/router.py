@@ -736,3 +736,7 @@ def get_all_startups_csv(db: Session = Depends(get_db)):
                              headers={"Content-Disposition": "attachment; filename=startups.xlsx"})
 
     
+@user.post("/user/add_new_founder", tags=["users"])
+def add_new_founder(user_data: NewFounderUser, db: Session = Depends(get_db)):
+    create_user_founder(db=db, user_data=user_data)
+    return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)

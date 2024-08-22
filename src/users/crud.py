@@ -572,3 +572,33 @@ def update_founder_info(founder_data: UpdateFounderData, db: Session):
 def get_all_startups(db: Session):
     return db.query(models.Startup).all()
 
+
+def create_user_founder(user_data: NewFounderUser ,db: Session):
+    user = models.User(
+        nickname=user_data.nickname,
+        email=user_data.email,
+        country_code=user_data.country_code,
+        phone_number=user_data.phone_number,
+        location=user_data.location,
+        role= user_data.role,
+        courses=db.query(models.Course).all()
+    )
+
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    startup = db.query(models.Startup).filter(
+        models.Startup.name == user_data.startup).first()
+
+    if startup:
+        user_startup = models.StartupUser(
+            user_id=user.id,
+            startup_id=startup.id
+        )
+        db.add(user_startup)
+        db.commit()
+
+    else:
+        raise HTTPException(status_code=404, detail="Startup not found")
+

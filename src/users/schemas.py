@@ -215,4 +215,6 @@ class UpdateFounderData(BaseModel):
     country_code: Union[str, None] = None
 
 
-
+class NewFounderUser(UserNormal):
+    startup: str 
+    role: str

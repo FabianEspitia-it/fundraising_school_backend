@@ -199,3 +199,8 @@ async def gcs_upload_file(startup_id: int | None = None, startup_photo: UploadFi
     update_startup_photo(db=db, startup_id=startup_id, startup_photo_link=url)
 
     return JSONResponse(content={"bucket_link": url}, status_code=status.HTTP_201_CREATED)
+
+
+@startup_router.get("/startup/user/favorites", tags=["startups"])
+def get_user_favorites(user_email: str, page: int = 1, limit: int =10, db: Session = Depends(get_db)):
+    return get_favorite_startups(db=db, user_email=user_email, page=page, limit=limit)
