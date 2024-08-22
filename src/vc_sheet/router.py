@@ -146,6 +146,11 @@ def get_partner(partner_id: int, db: Session = Depends(get_db)):
 def fts_search_vc(db: Session = Depends(get_db), vc_term: str = '') -> JSONResponse:
     return search_vc_by_term(db, vc_term)
 
+
+@vc_sheet_router.get("/vc_sheet/user/favorites", tags=["vc_sheet"])
+def get_favorite_funds_by_user(user_email: str, page: int = 1, limit: int =10, db: Session = Depends(get_db) ) -> JSONResponse:
+    return get_favorite_funds(db=db, user_email=user_email, page=page, limit=limit)
+
 """
 ROUTES THAT WE DONT NEED AT THE MOMENT
 

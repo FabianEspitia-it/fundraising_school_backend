@@ -323,6 +323,20 @@ def get_all_funds(db: Session, page: int, limit: int, user_email: str, country: 
     return funds_with_favorite
 
 
+def get_favorite_funds(db: Session, user_email: str, page: int, limit: int):
+    
+    user = get_user_by_email(db, user_email)
+
+    if not user:
+        raise ValueError("User not found")
+
+    favorite_funds = get_favorite_funds_by_user_id(db, user_email)
+
+    favorite_funds = favorite_funds[(page - 1) * limit: page * limit]
+
+    return favorite_funds
+
+
 def get_fund_countries_invest(db: Session, fund_id: int) -> list[str]:
     """
     Retrieves the names of the countries where a specific fund has invested.
