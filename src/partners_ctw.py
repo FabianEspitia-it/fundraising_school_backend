@@ -1,5 +1,6 @@
 import pandas as pd
 from requests import Session
+from sqlalchemy import func
 
 from src.database import get_db
 from src.models import  Fund,  FundPartner,  Partner
@@ -24,7 +25,11 @@ def process_excel(file_path: str, db: Session):
                 db.commit()
                 db.refresh(partner)
 
-                fund = db.query(Fund).filter(Fund.name == row["Nombre Fondo"]).first()
+                fund = db.query(Fund).filter(func.lower(Fund.name) == func.lower(row["Nombre Fondo"].strip())).first()
+
+                if fund is None:
+                    print(f"Fondo no encontrado: {row['Nombre Fondo']}")
+                    continue
 
                 user_fund = FundPartner(
                     fund_id=fund.id,
@@ -35,7 +40,6 @@ def process_excel(file_path: str, db: Session):
                 db.commit()
                 db.refresh(user_fund)
 
-            
             if pd.notna(row["Representante 2"]):
                 partner_2 = Partner(
                     name=row["Representante 2"],
@@ -48,6 +52,10 @@ def process_excel(file_path: str, db: Session):
                 db.add(partner_2)
                 db.commit()
                 db.refresh(partner_2)
+
+                if fund is None:
+                    print(f"Fondo no encontrado: {row['Nombre Fondo']}")
+                    continue
 
                 user_fund_two = FundPartner(
                     fund_id=fund.id,
