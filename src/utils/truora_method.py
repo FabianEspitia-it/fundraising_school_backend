@@ -1,6 +1,6 @@
 import requests
 import os
-"""
+
 def send_outbound_message(phone_number, country_code):
     URL = f"{os.getenv('TRUORA_END_POINT')}"
     headers = {
@@ -19,7 +19,3 @@ def send_outbound_message(phone_number, country_code):
     else:
         return {"status": "error", "details": response.text}
 
-
-print(send_outbound_message("3202377112", "57"))
-
-"""

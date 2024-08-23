@@ -11,7 +11,7 @@ from src.course.crud import get_modules_by_course_id
 
 import src.models as models
 #from src.utils.send_information import send_information
-#from src.utils.truora_method import send_outbound_message
+from src.utils.truora_method import send_outbound_message
 
 
 def get_user_by_email(db: Session, email: str) -> models.User:
@@ -270,7 +270,7 @@ def create_user_startup_new(db: Session, user_data: UserStartup) -> None:
 
     send_information(user_data=user_dict, startup_name=user_data.startup_name, startup_url= user_data.startup_url, main_industry=user_data.main_industry, job_level=user_data.role )
     """
-    #send_outbound_message(phone_number=user.phone_number, country_code=user.country_code)
+    send_outbound_message(phone_number=user.phone_number, country_code=user.country_code)
 
     return user
 
@@ -581,6 +581,7 @@ def create_user_founder(user_data: NewFounderUser ,db: Session):
         phone_number=user_data.phone_number,
         location=user_data.location,
         role= user_data.role,
+        linkedin_url = user_data.linkedin_url, 
         courses=db.query(models.Course).all()
     )
 

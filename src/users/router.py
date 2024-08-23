@@ -594,6 +594,7 @@ def add_user_startup(db: Session = Depends(get_db), user_data: UserStartupReq = 
 def add_user_startups_bulk(background_tasks: BackgroundTasks, db: Session = Depends(get_db), user_data: UserStartup = None) -> JSONResponse:
     background_tasks.add_task(create_user_startup_new,
                               db=db, user_data=user_data)
+    
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
 
 

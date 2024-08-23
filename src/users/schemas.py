@@ -218,3 +218,4 @@ class UpdateFounderData(BaseModel):
 class NewFounderUser(UserNormal):
     startup: str 
     role: str
+    linkedin_url: str
