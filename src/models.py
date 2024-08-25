@@ -514,16 +514,15 @@ class Event(Base):
 
 Base.metadata.create_all(bind=engine)
 
+# def create_concurrent_index():
+#     connection = engine.connect()
+#     connection.execution_options(isolation_level="AUTOCOMMIT")
 
-def create_concurrent_index():
-    connection = engine.connect()
-    connection.execution_options(isolation_level="AUTOCOMMIT")
+#     try:
+#         connection.execute(text(
+#             "CREATE INDEX CONCURRENTLY IF NOT EXISTS trgm_index_vc_funds_name ON vc_fund USING gin (lower(name) gin_trgm_ops);"
+#         ))
+#     finally:
+#         connection.close()
 
-    try:
-        connection.execute(text(
-            "CREATE INDEX CONCURRENTLY IF NOT EXISTS trgm_index_vc_funds_name ON vc_fund USING gin (lower(name) gin_trgm_ops);"
-        ))
-    finally:
-        connection.close()
-
-create_concurrent_index()
+# create_concurrent_index()
