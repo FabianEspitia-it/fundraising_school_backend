@@ -137,9 +137,12 @@ class Partner(Base):
     crunch_base = Column(String(255), nullable=True)
     website = Column(String(255), nullable=True)
     vc_link = Column(String(255), nullable=True)
+    partner_identifier = Column(Text, nullable=True)
 
     funds = relationship("Fund", secondary="fund_partners",
                          back_populates='partners', overlaps="fund")
+    
+
 
 
 class CheckSize(Base):
@@ -220,7 +223,13 @@ class User(Base):
                         default=func.now(), onupdate=func.now())
     deleted_at = Column(DateTime, nullable=True)
 
+
     round_id = Column(Integer, ForeignKey("round.id"))
+
+    fund_id = Column(Integer, ForeignKey("vc_fund.id"))
+
+
+    fund = relationship("Fund", back_populates="user_partner")
     stage_round = relationship("Round", back_populates="user")
 
     education = relationship("Education", back_populates="user")
@@ -335,6 +344,10 @@ class Fund(Base):
 
     users_in = relationship("User", secondary="fund_users",
                             back_populates='funds_in', overlaps="user")
+    
+    user_partner = relationship("User", back_populates="fund")
+
+
 
 
 #Index('trgm_index_vc_funds_name', Fund.name, postgresql_concurrently=True, postgresql_using='gin')

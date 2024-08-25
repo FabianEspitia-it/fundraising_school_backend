@@ -133,9 +133,10 @@ class UserStartupReq(BaseModel):
 class UserNormal(BaseModel):
     nickname: str
     email: str
-    country_code: str
-    phone_number: str
-    location: str
+    country_code: Union[str, None] = None
+    phone_number: Union[str, None] = None
+    location: Union[str, None] = None
+    partner_identifier: Union[str, None] = None
 
     class Config:
         orm_mode = True

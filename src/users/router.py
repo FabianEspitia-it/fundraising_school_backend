@@ -744,3 +744,8 @@ def get_all_startups_csv(db: Session = Depends(get_db)):
 def add_new_founder(user_data: NewFounderUser, db: Session = Depends(get_db)):
     create_user_founder(db=db, user_data=user_data)
     return JSONResponse(content={"response": "created"}, status_code=status.HTTP_201_CREATED)
+
+
+@user.get("/user/register/{partner_identifier}", tags=["users"])
+def get_user_by_partner_identifier(partner_identifier: str, db: Session = Depends(get_db)):
+    return check_partner_identifier(db = db, identifier= partner_identifier)

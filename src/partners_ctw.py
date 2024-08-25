@@ -6,65 +6,118 @@ from src.database import get_db
 from src.models import  Fund,  FundPartner,  Partner
 
 
+
+
 def process_excel(file_path: str, db: Session):
+
+    
+
     df = pd.read_excel(file_path, header=0)
     print(df.columns)
 
     for _, row in df.iterrows():
-        if row["Batch"] == "S1":
+
+        partner = None
+        partner_2 = None
+        partner_3 = None
+
+
+        fund = db.query(Fund).filter(func.lower(func.trim(Fund.name)) == func.lower(row["Nombre Fondo"].strip())).first()
+
+        if fund:
+
             if pd.notna(row["Representante 1 "]):
-                partner = Partner(
-                    name=row["Representante 1 "],
-                    photo=row["Foto"] if pd.notna(row["Foto"]) else None,
-                    role=row["Cargo"] if pd.notna(row["Cargo"]) else None,
-                    email=row["Correo"] if pd.notna(row["Correo"]) else None,
-                    linkedin=row["LinkedIn"] if pd.notna(row["LinkedIn"]) else None,
-                )
+                partner = db.query(Partner).filter(func.lower(func.trim(Partner.name)) == func.lower(row["Representante 1 "].strip())).first()
 
-                db.add(partner)
-                db.commit()
-                db.refresh(partner)
+            if not partner:
+                if pd.notna(row["Representante 1 "]):
+                    partner = Partner(
+                        name=row["Representante 1 "].strip(),
+                        photo=row["Foto"] if pd.notna(row["Foto"]) else None,
+                        role=row["Cargo"] if pd.notna(row["Cargo"]) else None,
+                        email=row["Correo"] if pd.notna(row["Correo"]) else None,
+                        linkedin=row["LinkedIn"] if pd.notna(row["LinkedIn"]) else None,
+                    )
 
-                fund = db.query(Fund).filter(func.lower(Fund.name) == func.lower(row["Nombre Fondo"].strip())).first()
+                    db.add(partner)
+                    db.commit()
+                    db.refresh(partner)
 
-                if fund is None:
-                    print(f"Fondo no encontrado: {row['Nombre Fondo']}")
-                    continue
+                    user_fund = FundPartner(
+                        fund_id=fund.id,
+                        partner_id=partner.id
+                    )
 
-                user_fund = FundPartner(
-                    fund_id=fund.id,
-                    partner_id=partner.id
-                )
+                    db.add(user_fund)
+                    db.commit()
+                    db.refresh(user_fund)
 
-                db.add(user_fund)
-                db.commit()
-                db.refresh(user_fund)
-
+            else:
+                print("Partner already exists")
+            
             if pd.notna(row["Representante 2"]):
-                partner_2 = Partner(
-                    name=row["Representante 2"],
-                    photo=row["Foto 2"] if pd.notna(row["Foto 2"]) else None,
-                    role=row["Cargo 2"] if pd.notna(row["Cargo 2"]) else None,
-                    email=row["Correo 2"] if pd.notna(row["Correo 2"]) else None,
-                    linkedin=row["LinkedIn 2"] if pd.notna(row["LinkedIn 2"]) else None,
-                )
+                partner_2 = db.query(Partner).filter(func.lower(func.trim(Partner.name)) == func.lower(row["Representante 2"])).first()
 
-                db.add(partner_2)
-                db.commit()
-                db.refresh(partner_2)
+            if not partner_2:
+                if pd.notna(row["Representante 2"]):
+                    partner_2 = Partner(
+                        name=row["Representante 2"].strip(),
+                        photo=row["Foto 2"] if pd.notna(row["Foto 2"]) else None,
+                        role=row["Cargo 2"] if pd.notna(row["Cargo 2"]) else None,
+                        email=row["Correo 2"] if pd.notna(row["Correo 2"]) else None,
+                        linkedin=row["LinkedIn 2"] if pd.notna(row["LinkedIn 2"]) else None,
+                    )
 
-                if fund is None:
-                    print(f"Fondo no encontrado: {row['Nombre Fondo']}")
-                    continue
+                    db.add(partner_2)
+                    db.commit()
+                    db.refresh(partner_2)
 
-                user_fund_two = FundPartner(
-                    fund_id=fund.id,
-                    partner_id=partner_2.id
-                )
 
-                db.add(user_fund_two)
-                db.commit()
-                db.refresh(user_fund_two)
+                    user_fund_two = FundPartner(
+                        fund_id=fund.id,
+                        partner_id=partner_2.id
+                    )
+
+                    db.add(user_fund_two)
+                    db.commit()
+                    db.refresh(user_fund_two)
+
+            else:
+                print("Partner 2 already exists")
+
+            if pd.notna(row["Representante 3"]):
+
+                partner_3 = db.query(Partner).filter(func.lower(func.trim(Partner.name)) == func.lower(row["Representante 3"])).first()
+
+            if not partner_3:
+                if pd.notna(row["Representante 3"]):
+                    partner_3 = Partner(
+                        name=row["Representante 3"].strip(),
+                        photo=row["Foto 3"] if pd.notna(row["Foto 3"]) else None,
+                        role=row["Cargo 3"] if pd.notna(row["Cargo 3"]) else None,
+                        email=row["Correo 3"] if pd.notna(row["Correo 3"]) else None,
+                        linkedin=row["LinkedIn 3"] if pd.notna(row["LinkedIn 3"]) else None,
+                    )
+
+                    db.add(partner_3)
+                    db.commit()
+                    db.refresh(partner_3)
+
+                    user_fund_three = FundPartner(
+                        fund_id=fund.id,
+                        partner_id=partner_3.id
+                    )
+
+                    db.add(user_fund_three)
+                    db.commit()
+                    db.refresh(user_fund_three)
+
+            else: 
+                print("Partner 3 already exists")
+
+
+        else:
+            print(f"Fund {row['Nombre Fondo']} not found")
         
 
 db_session = next(get_db())  

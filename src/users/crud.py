@@ -1,5 +1,6 @@
 from typing import List
 from fastapi import HTTPException
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session, joinedload
 
 
@@ -280,9 +281,7 @@ def get_user_fund_by_email(db: Session, email: str) -> bool:
     user = db.query(models.User).filter(models.User.email == email).first()
 
     if user:
-        connection = db.query(models.FundUsers).filter(
-            models.FundUsers.user_id == user.id).first()
-        if connection or user.investment_geography is not None:
+        if user.fund is not None:
             return {"response": "fund"}
         else:
             return {"response": "guest"}
@@ -383,6 +382,17 @@ def create_normal_user(db: Session, user_data: UserNormal):
     db.commit()
     db.refresh(user)
 
+    if user_data.partner_identifier:
+        partner = db.query(models.Partner).filter(
+            models.Partner.partner_identifier == user_data.partner_identifier).first()
+        if partner:
+            user.fund = db.query(models.Fund).join(models.FundPartner).filter(
+                models.FundPartner.partner_id == partner.id).first() 
+
+
+            db.commit()
+       
+            
     return user
 
 
@@ -603,3 +613,17 @@ def create_user_founder(user_data: NewFounderUser ,db: Session):
     else:
         raise HTTPException(status_code=404, detail="Startup not found")
 
+
+def check_partner_identifier(db: Session, identifier: str) -> bool:
+    partner = db.query(models.Partner).filter(
+        models.Partner.partner_identifier == identifier).first()
+    if partner:
+
+        fund = db.query(models.Fund).join(models.FundPartner).filter(
+            models.FundPartner.partner_id == partner.id).first()
+        
+        return JSONResponse(content={"response": {"partner_name": partner.name,
+                                                  "partner_fund": fund.name, 
+                                                  }}, status_code=200)
+    else:
+        return HTTPException(status_code=404, detail="Partner not found")

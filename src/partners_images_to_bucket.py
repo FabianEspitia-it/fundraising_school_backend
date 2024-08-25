@@ -1,6 +1,6 @@
 import os
 import requests
-import sqlalchemy
+from sqlalchemy import func
 import pandas as pd
 from requests import Session
 import warnings
@@ -52,13 +52,14 @@ def download_image(drive_url: str, partner_id: int):
 
 def execute_image_load(db: Session):
     df = pd.read_excel(PARTNERS_FILE)
-    df = df[df['Batch'] == 'S1']
     
     df_parternsA = df[['Representante 1 ', 'Foto']]
     df_parternsB = df[['Representante 2', 'Foto 2']]
+    df_partnersC = df[['Representante 3', 'Foto 3']]
 
     df_parternsA.rename(columns={'Representante 1 ': 'Representante'}, inplace=True)
     df_parternsB.rename(columns={'Representante 2': 'Representante', 'Foto 2': 'Foto'}, inplace=True)
+    df_partnersC.rename(columns={'Representante 3': 'Representante', 'Foto 3': 'Foto'}, inplace=True)
 
     df = pd.concat([df_parternsA, df_parternsB])
     df.dropna(inplace=True)
@@ -66,7 +67,7 @@ def execute_image_load(db: Session):
 
     for _, row in df.iterrows():
 
-        partner = db.query(Partner).filter(Partner.name == row["Representante"]).first()
+        partner = db.query(Partner).filter(func.lower(func.trim(Partner.name)) == func.lower(row["Representante"].strip())).first()
         if partner:
             partner_id = partner.id
             image_path = download_image(
@@ -75,7 +76,7 @@ def execute_image_load(db: Session):
                 )
             partner_image_url = upload_image_to_gcs(image_path)
             
-            db.query(Partner).filter(Partner.name == row["Representante"]
+            db.query(Partner).filter(func.lower(func.trim(Partner.name)) == func.lower(row["Representante"].strip())
                                 ).update({'photo': partner_image_url})
             db.commit()
             print(f'Partner {partner_id} image uploaded.')

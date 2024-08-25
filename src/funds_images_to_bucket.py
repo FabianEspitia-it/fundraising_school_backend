@@ -52,20 +52,24 @@ def download_image(drive_url: str, fund_id: int):
 
 def execute_image_load(db: Session):
     df = pd.read_excel(FUNDS_FILE)
-    df = df[df['Batch'] == 'S1']
     df = df[['Investors', 'Logo (de me lleve a la imagen)']]
-    df = df[df['Logo (de me lleve a la imagen)'].str.contains(r'\bhttps\b')]
+    df = df[df['Logo (de me lleve a la imagen)'].str.contains(r'\bhttps\b', na=False)]
 
     for _, row in df.iterrows():
-        image_path = download_image(
-            row['Logo (de me lleve a la imagen)'], 
-            db.query(Fund).filter(Fund.name == row["Investors"]).first().id
+        try:
+            image_path = download_image(
+                row['Logo (de me lleve a la imagen)'], 
+                db.query(Fund).filter(Fund.name == row["Investors"]).first().id
             )
-        fund_image_url = upload_image_to_gcs(image_path)
-        
-        db.query(Fund).filter(Fund.name == row["Investors"]
-                              ).update({'photo': fund_image_url})
-        db.commit()
+            fund_image_url = upload_image_to_gcs(image_path)
+            
+            db.query(Fund).filter(Fund.name == row["Investors"]
+                                ).update({'photo': fund_image_url})
+            db.commit()
+        except:
+            print(f"Error loading image for fund {row['Investors']}")
+            continue
+
 
 
 if __name__ == '__main__':
