@@ -11,6 +11,8 @@ from sqlalchemy.orm import Session, joinedload
 
 from src.models import *
 
+import requests
+
 from src.startups.schemas import NewStartupReq, UpdateStartupReq, CreateBulkStartupReq
 from src.users.crud import get_user_by_email, get_favorite_startups_by_user_id
 
@@ -28,6 +30,37 @@ SUPPORTED_IMAGES_TYPES = {
     'image/svg': 'svg'
 }
 
+def get_user_fund_id_by_email(db: Session, email: str) -> int:
+    user = db.query(models.User).filter(models.User.email == email).first()
+
+    if user:
+        connection = db.query(models.FundUsers).filter(
+            models.FundUsers.user_id == user.id).first()
+        if connection is not None:
+            return connection.fund_id
+
+    raise HTTPException(status_code=404, detail="FundId from user not found: " +email)
+
+def get_startups_recommendations_for_user(db: Session, email: str):
+    """
+    Will make a call to https://api.onde-vamos.com/colombiatechweek/vc/recommendations?email={email}&fundId={fundId}
+    Where fundId is the id of the fund that the user is associated to. We have to find that first before making the call
+    """
+    # Find the fund associated with the user
+    fund_id = get_user_fund_id_by_email(db, email)
+
+    # Prepare the API call
+    api_url = f"https://api.onde-vamos.com/colombiatechweek/vc/recommendations?email={email}&fundId={fund_id}"
+
+    try:
+        response = requests.get(api_url)
+        response.raise_for_status()  # Raises an HTTPError for bad responses
+        res = response.json()
+        return res.get("recommendations", [])
+    except requests.RequestException as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching recommendations: {str(e)}")
+
+
 
 def get_all_startups(db: Session, page: int, limit: int, user_email: str, sector: str = None, country: str = None, traction: str = None, term: str = None):
     # Get the user from the database
@@ -39,6 +72,7 @@ def get_all_startups(db: Session, page: int, limit: int, user_email: str, sector
     # Retrieve favorite startups
     favorite_startups = get_favorite_startups_by_user_id(db, user.id)
     favorite_startups_ids = {startup.id for startup in favorite_startups}
+
 
     # Create the initial query with joinedload options
     if term:
@@ -92,6 +126,23 @@ def get_all_startups(db: Session, page: int, limit: int, user_email: str, sector
         startup_dict = startup.__dict__.copy()
         startup_dict['favorite'] = startup.id in favorite_startups_ids
         startups_with_favorite.append(startup_dict)
+
+    # Get Recommendations from startups but if there is an error, just return the normal startups with favorites
+    # Making recommendations non critical for the user experience
+    try:
+        recommendations = get_startups_recommendations_for_user(db, user_email)
+        startups_with_favorite_and_recommendations = []
+        for startup in startups_with_favorite:
+            # Not all startups have a recommendation due to lag in the recommendation system
+            # If we want more complete recommendations  we should implement a notification system 
+            # for new startups added to the db. 
+            recommendation = recommendations.find(lambda x: x['startup_id'] == startup['id'])
+            if recommendation:
+                startup['recommendation'] = recommendation
+            startups_with_favorite_and_recommendations.append(startup)
+        return startups_with_favorite_and_recommendations
+    except Exception as e:
+        print(e)
 
     return startups_with_favorite
 
