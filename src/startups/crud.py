@@ -127,6 +127,7 @@ def get_all_startups(db: Session, page: int, limit: int, user_email: str, sector
 
     # Get Recommendations from startups but if there is an error, just return the normal startups with favorites
     # Making recommendations non critical for the user experience
+    """
     try:
         recommendations = get_startups_recommendations_for_user(db, user_email)
         startups_with_favorite_and_recommendations = []
@@ -141,7 +142,7 @@ def get_all_startups(db: Session, page: int, limit: int, user_email: str, sector
         return startups_with_favorite_and_recommendations
     except Exception as e:
         print(e)
-
+    """
     return startups_with_favorite
 
 
