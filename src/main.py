@@ -40,7 +40,7 @@ app.add_middleware(
 
 @app.get("/")
 def read_root():
-    return {"Hello": "World My Sergio Rey"}
+    return {"Hello": "Fabian Espitia"}
 
 
 app.include_router(user)
