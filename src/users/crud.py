@@ -622,13 +622,20 @@ def create_user_founder(user_data: NewFounderUser ,db: Session):
 def check_partner_identifier(db: Session, identifier: str) -> bool:
     partner = db.query(models.Partner).filter(
         models.Partner.partner_identifier == identifier).first()
-    if partner:
+    
+    user = db.query(models.User).filter( 
+        models.User.partner_id == partner.id).first()
+    
+    if not user:
+        if partner:
 
-        fund = db.query(models.Fund).join(models.FundPartner).filter(
-            models.FundPartner.partner_id == partner.id).first()
-        
-        return JSONResponse(content={"response": {"partner_name": partner.name,
-                                                  "partner_fund": fund.name, 
-                                                  }}, status_code=200)
+            fund = db.query(models.Fund).join(models.FundPartner).filter(
+                models.FundPartner.partner_id == partner.id).first()
+            
+            return JSONResponse(content={"response": {"partner_name": partner.name,
+                                                    "partner_fund": fund.name, 
+                                                    }}, status_code=200)
+        else:
+            return HTTPException(status_code=404, detail="Partner not found")
     else:
-        return HTTPException(status_code=404, detail="Partner not found")
+        return HTTPException(status_code=404, detail="Partner already has a user")
