@@ -39,7 +39,6 @@ def process_excel(file_path: str, db: Session):
     
     for _, row in df.iterrows():
         try:
-            if pd.notna(row["Limpieza"]):
                 fund = db.query(Fund).filter(func.lower(Fund.name) == func.lower(row["Investors"].strip())).first()
                 if not fund:
                     fund = Fund(
@@ -75,9 +74,8 @@ def process_excel(file_path: str, db: Session):
 
                     print("Fund added")
                 else:
+                    print("Fund already exists")
                     continue
-            else:
-                print(f"Fund not done: {row['Investors']}")
 
         except sqlalchemy.exc.DataError as e:
                 db.rollback()  

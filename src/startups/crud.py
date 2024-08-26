@@ -34,10 +34,8 @@ def get_user_fund_id_by_email(db: Session, email: str) -> int:
     user = db.query(models.User).filter(models.User.email == email).first()
 
     if user:
-        connection = db.query(models.FundUsers).filter(
-            models.FundUsers.user_id == user.id).first()
-        if connection is not None:
-            return connection.fund_id
+        if user.fund_id:
+            return user.fund_id
 
     raise HTTPException(status_code=404, detail="FundId from user not found: " +email)
 
