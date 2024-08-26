@@ -386,11 +386,16 @@ def create_normal_user(db: Session, user_data: UserNormal):
         partner = db.query(models.Partner).filter(
             models.Partner.partner_identifier == user_data.partner_identifier).first()
         if partner:
-            user.fund = db.query(models.Fund).join(models.FundPartner).filter(
-                models.FundPartner.partner_id == partner.id).first() 
-
-
-            db.commit()
+            if user.partner_id is None and user.fund is None:
+                user.fund = db.query(models.Fund).join(models.FundPartner).filter(
+                models.FundPartner.partner_id == partner.id).first()
+                user.partner_id = partner.id
+                db.commit()
+            else:
+                return HTTPException(status_code=404, detail="User already has a partner")
+            
+        else:
+            return HTTPException(status_code=404, detail="Partner not found")
        
             
     return user

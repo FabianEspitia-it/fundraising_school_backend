@@ -139,8 +139,12 @@ class Partner(Base):
     vc_link = Column(String(255), nullable=True)
     partner_identifier = Column(Text, nullable=True)
 
+
+    user = relationship("User", back_populates="partner")
     funds = relationship("Fund", secondary="fund_partners",
                          back_populates='partners', overlaps="fund")
+    
+    
     
 
 
@@ -225,6 +229,11 @@ class User(Base):
 
 
     round_id = Column(Integer, ForeignKey("round.id"))
+
+
+    partner_id = Column(Integer, ForeignKey("vc_partner.id"))
+    partner = relationship("Partner", back_populates="user")
+
 
     fund_id = Column(Integer, ForeignKey("vc_fund.id"))
 
