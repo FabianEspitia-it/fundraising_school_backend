@@ -279,6 +279,22 @@ def get_favorite_fund_csv(email: str, db: Session = Depends(get_db)):
     df = df.drop(columns=['photo'])
     df = df.rename(columns={"crunch_base": "crunchbase", })
 
+    def clean_text(text):
+        if isinstance(text, str):
+        
+            text = text.replace('&', 'and')
+            text = text.replace('“', '"').replace('”', '"')
+            text = text.replace('‘', "'").replace('’', "'")
+        
+            text = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', text)
+            
+            return text[:32000]  
+        return text
+
+    
+    for col in df.select_dtypes(include='object').columns:
+        df[col] = df[col].apply(clean_text)
+
     df = df[['name', 'contact', 'description', 'location',
              'website', 'linkedin', 'twitter', 'crunchbase']]
 
@@ -444,6 +460,22 @@ def get_favorite_startup_csv(email: str, db: Session = Depends(get_db)):
     df = map_ids_to_names(db, df, 'sector_id', Sector, 'name')
     df = map_ids_to_names(db, df, 'round_id', Round, 'stage')
     df = map_ids_to_names(db, df, 'traction_id', Traction, 'name')
+
+    def clean_text(text):
+        if isinstance(text, str):
+        
+            text = text.replace('&', 'and')
+            text = text.replace('“', '"').replace('”', '"')
+            text = text.replace('‘', "'").replace('’', "'")
+        
+            text = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', text)
+            
+            return text[:32000]  
+        return text
+
+    
+    for col in df.select_dtypes(include='object').columns:
+        df[col] = df[col].apply(clean_text)
 
     df = df[['name', 'email', 'linkedin', 'description', 'fund_raised', 'website','country_code', 'phone_number',
              'calendly', 'one_sentence_description', 'deck', 'country', 'sector', 'round', 'traction']]
@@ -687,16 +719,19 @@ def update_user_info(founder_data: UpdateFounderData, db: Session = Depends(get_
     return JSONResponse(content={"response": "updated"}, status_code=status.HTTP_200_OK)
 
 
+import re
+
 @user.get("/user/get_all_startups/csv", tags=["users"])
 def get_all_startups_csv(db: Session = Depends(get_db)):
 
-    startups = get_all_startups(db)
+    startups = get_all_startups(db=db)
     startups_dicts = [startup.__dict__ for startup in startups]
 
     for startup_dict in startups_dicts:
         startup_dict.pop('_sa_instance_state', None)
 
     df = pd.DataFrame(startups_dicts)
+
     df.drop(columns=['id', 'photo'], inplace=True)
 
     df = map_ids_to_names(db, df, 'country_id', Country, 'name')
@@ -704,7 +739,24 @@ def get_all_startups_csv(db: Session = Depends(get_db)):
     df = map_ids_to_names(db, df, 'round_id', Round, 'stage')
     df = map_ids_to_names(db, df, 'traction_id', Traction, 'name')
 
-    df = df[['name', 'email', 'linkedin', 'description', 'fund_raised', 'website','country_code', 'phone_number',
+    
+    def clean_text(text):
+        if isinstance(text, str):
+        
+            text = text.replace('&', 'and')
+            text = text.replace('“', '"').replace('”', '"')
+            text = text.replace('‘', "'").replace('’', "'")
+        
+            text = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', text)
+            
+            return text[:32000]  
+        return text
+
+    
+    for col in df.select_dtypes(include='object').columns:
+        df[col] = df[col].apply(clean_text)
+
+    df = df[['name', 'email', 'linkedin', 'description', 'fund_raised', 'website', 'country_code', 'phone_number',
              'calendly', 'one_sentence_description', 'deck', 'country', 'sector', 'round', 'traction']]
 
     output = io.BytesIO()
@@ -738,6 +790,8 @@ def get_all_startups_csv(db: Session = Depends(get_db)):
 
     return StreamingResponse(output, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                              headers={"Content-Disposition": "attachment; filename=startups.xlsx"})
+
+
 
     
 @user.post("/user/add_new_founder", tags=["users"])
