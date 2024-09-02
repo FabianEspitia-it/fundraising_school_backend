@@ -143,7 +143,7 @@ def get_all_startups(db: Session, page: int, limit: int, user_email: str, sector
     except Exception as e:
         print(e)
     """
-    return startups_with_favorite
+    return startups_with_favorite[::-1]
 
 
 def get_favorite_startups(db: Session, user_email: str, page: int, limit: int):
